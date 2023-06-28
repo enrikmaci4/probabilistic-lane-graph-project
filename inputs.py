@@ -217,6 +217,12 @@ DO_KMEANS = True
 #                                map to an exit. The path is generated using  #
 #                                using our data driven path planning          #
 #                                algorithm.                                   #
+#          PLOT_RANDOM_GENERATED_PATH_TREE                                    #
+#                              - Boolean value. Set to True if you would to   #
+#                                plot a tree of random paths from an entry    #
+#                                point in map to an exit. The path is         #
+#                                generated using using our data driven path   #
+#                                planning algorithm.                          #
 #          PLOT_START_AND_END_NODES                                           #
 #                              - Boolean value. Set to True if you would to   #
 #                                plot all of the start and end nodes in the   #
@@ -246,6 +252,7 @@ PLOT_DISCRETE_PATH = True
 PLOT_AVERAGE_DISCRETE_PATH = True
 
 PLOT_RANDOM_GENERATED_PATH = False
-PLOT_START_AND_TARGET_CLUSTERS = False
+PLOT_RANDOM_GENERATED_PATH_TREE = True
+PLOT_START_AND_TARGET_CLUSTERS = True
 
                                                                             

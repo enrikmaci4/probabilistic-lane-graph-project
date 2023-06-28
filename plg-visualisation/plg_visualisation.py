@@ -37,6 +37,7 @@ class PLGVisualisationParams:
         # Generated path params
         self.plot_start_and_target_clusters = PLOT_START_AND_TARGET_CLUSTERS
         self.plot_random_generated_path = PLOT_RANDOM_GENERATED_PATH
+        self.plot_random_generated_path_tree = PLOT_RANDOM_GENERATED_PATH_TREE
         # Conditional params
         if self.colour_code_lanes_in_background_data:
             self.colour_of_background_data = self.generate_lane_colours_for_background_data(data)
@@ -105,7 +106,7 @@ def main():
         y_avg_disc, _ = g.moving_average(y_disc, n=moving_avg_window)
 
     # Print time take
-    print(f"Time taken to load data = {round(time.time() - t_start, 3)} s")
+    print(f"{date_time.get_current_time()} Time taken to load data = {round(time.time() - t_start, 3)} s")
 
     # PLOTS
     if vis_params.plot_background_data:
@@ -146,8 +147,16 @@ def main():
         z_ord = 11
         plt.scatter(PLG.start_cluster_centres[:,0], PLG.start_cluster_centres[:,1], color="blue", marker="x", s=s_size, zorder=z_ord, label="Entry points")
         plt.scatter(PLG.target_cluster_centres[:,0], PLG.target_cluster_centres[:,1], color="magenta", marker="x", s=s_size, zorder=z_ord, label="Exit points")
+        
+        # Annotate each of the clusters
+        dx = 0.5
+        dy = 0.5
+        fontsize = 10
+        for ii in range(len(PLG.start_cluster_centres[:,0])):
+            plt.text(PLG.start_cluster_centres[ii,0] + dx, PLG.start_cluster_centres[ii,1] + dy, str(ii), color="blue", fontsize=fontsize, fontweight="bold", zorder=25)
+        for ii in range(len(PLG.target_cluster_centres[:,0])):
+            plt.text(PLG.target_cluster_centres[ii,0] + dx, PLG.target_cluster_centres[ii,1] + dy, str(ii), color="magenta", fontsize=fontsize, fontweight="bold", zorder=25)
         plt.legend()
-
 
     if vis_params.plot_random_generated_path:
         # Generate a random path using our path planning algorithm and plot it.
@@ -156,13 +165,66 @@ def main():
         start_cluster = np.random.choice(list(PLG.start_clusters.keys()))
         start_node = np.random.choice(PLG.start_clusters[start_cluster])
         target_cluster = np.random.choice(list(PLG.target_clusters.keys()))
+        print(date_time.get_current_time(), "Start cluster =", start_cluster)
+        print(date_time.get_current_time(), "Target cluster =", target_cluster)
         
         # Now generate the path
         path = graph.path_generation(PLG, start_node, target_cluster)
 
+        # Check the final element of "path"
+        if not path[-1]:
+            path.pop(-1)
+
         # Plot the path
         plt.plot(PLG.nodes[path,0], PLG.nodes[path,1], color="orange", linestyle="-", linewidth=1.5, zorder=12, label="Randomly generated path")
         plt.legend()
+
+    if vis_params.plot_random_generated_path_tree:
+        print(date_time.get_current_time(), "Generating path tree")
+        # Generate a random path using our path planning algorithm and plot it.
+        # First generate a random starting cluster, then choose a random start
+        # node from that cluster, then generate a random target cluster
+        start_cluster = np.random.choice(list(PLG.start_clusters.keys()))
+        start_node = np.random.choice(PLG.start_clusters[start_cluster])
+        target_cluster = np.random.choice(list(PLG.target_clusters.keys()))
+        print(date_time.get_current_time(), "start_cluster =", start_cluster)
+        print(date_time.get_current_time(), "start_node =", start_node)
+        print(date_time.get_current_time(), "target_cluster =", target_cluster)
+        
+        # Now generate the path tree
+        path = [start_node]
+        paths = {}
+        rc = graph.path_tree_generation(PLG, target_cluster, path, paths)
+        num_paths_generated = len(paths)
+        print(date_time.get_current_time(), "Number of generated paths =", num_paths_generated)
+
+        # Now generate the most likely path
+        path_most_likely = graph.path_generation(PLG, start_node, target_cluster)
+
+        # Remove "None" nodes
+        for ii in paths:
+            if paths[ii][-1] == None:
+                paths[ii].pop(-1)
+
+        if path_most_likely[-1] == None:
+            path_most_likely.pop(-1)
+
+        # Plot the path tree
+        for ii in paths:
+            path = paths[ii]
+            plt.plot(PLG.nodes[path,0], PLG.nodes[path,1], color="orange", linestyle="-", linewidth=1.5, zorder=12)
+
+        # Select a random path and highlight it
+        ii_path_plot = None
+        #ii_path_plot = random.randint(0, num_paths_generated-1)
+        print(date_time.get_current_time(), "ii_path_plot =", ii_path_plot)
+        #ii_path_plot = 
+        if ii_path_plot:
+            path_to_highlight = paths[ii_path_plot]
+            plt.plot(PLG.nodes[path_to_highlight,0], PLG.nodes[path_to_highlight,1], color="yellow", linestyle="-", linewidth=1.5, zorder=12)
+
+        # Plot the most likely path
+        plt.plot(PLG.nodes[path_most_likely,0], PLG.nodes[path_most_likely,1], color="red", linestyle="-", linewidth=1.5, zorder=12)
 
     # Set the aspect ratio to be equal
     plt.gca().set_aspect("equal", adjustable="box")

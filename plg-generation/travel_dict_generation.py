@@ -18,6 +18,7 @@ from inputs import *
 ###############################################################################
 def travel_dict_generation(PLG):
     p_next_node_given_target = {ii:np.zeros((PLG.num_nodes, PLG.num_nodes)) for ii in range(NUM_TARGET_CLUSTERS)}
+    p_next_node = np.zeros((PLG.num_nodes, PLG.num_nodes))
 
     # Cycle through each vehicle path and update the matrices in the
     # p_next_node_given_target dict
@@ -35,14 +36,23 @@ def travel_dict_generation(PLG):
             next_node = path[ii+1]
             p_next_node_given_target[target_cluster][current_node, next_node] += 1
 
+    # Create p_next_node by summing every matrix in p_next_node_given_target
+    for ii in p_next_node_given_target:
+        # Normalise this matrix
+        p_next_node = np.add(p_next_node, p_next_node_given_target[ii])
+
     # Now we need to normalise the p_next_node_given_target matrices so that
     # each row sums to 1
     for ii in p_next_node_given_target:
         # Normalise this matrix
         p_next_node_given_target[ii] = g.normalise_matrix_rows(p_next_node_given_target[ii])
 
+    # Normalise p_next_node
+    p_next_node = g.normalise_matrix_rows(p_next_node)
+
     # Assign the p_next_node_given_target matrix to the PLG object
     PLG.p_next_node_given_target = p_next_node_given_target
+    PLG.p_next_node = p_next_node
 
     return PLG
 

@@ -103,22 +103,34 @@ def draw(PLG):
             plt.text(x[ii] + dx, y[ii] + dy, graph_plot_info.node_labels[ii], color=graph_plot_info.node_labels_font_colour, fontsize=graph_plot_info.node_labels_font_size, fontweight="bold", zorder=5)
 
 
-def arg_max_p_next_node(p_next_node, current_node):
+def arg_max_p_next_node(p_next_node, current_node, n_max=1):
     """Returns the next node with the highest probability of being visited
     given the current node"""
     if np.sum(p_next_node[current_node,:]) == 0:
-        return False
+        return None
     else:
-        return np.argmax(p_next_node[current_node,:])
+        # Probability of transition
+        p_transition = np.partition(p_next_node[current_node,:], -n_max)[-n_max]
+
+        # If the probability is greater than 0 return True, otherwise return
+        # False. So if we take the 2nd max node but it turns out there is no
+        # 2nd max, we will return False.
+        if p_transition > 0:
+            return np.argpartition(p_next_node[current_node,:], -n_max)[-n_max]
+        else:
+            return None
 
 
-def arg_max_p_next_node_given_target(p_next_node_given_target, closest_clusters_list, current_node):
+def arg_max_p_next_node_given_target(p_next_node_given_target, closest_clusters_list, current_node, n_max=1):
     """Returns the next node with the highest probability of being visited
     given the current node and the target cluster. If we cannot find a next
     node given the target cluster then we will search for a next node given the
-    next closest cluster, and so on."""
+    next closest cluster, and so on.
+    
+    n_max - Get the nth max.
+    """
     for target_cluster in closest_clusters_list:
-        next_node = arg_max_p_next_node(p_next_node_given_target[target_cluster], current_node)
+        next_node = arg_max_p_next_node(p_next_node_given_target[target_cluster], current_node, n_max=n_max)
         if next_node:
             return next_node
     
@@ -131,9 +143,6 @@ def path_generation(PLG, start_node, target_cluster):
     closest_clusters_list = PLG.closest_clusters_dict[target_cluster]
     max_path_length = 300
     
-    # Create copies of the transition matrices
-    p_next_node_given_target = copy.deepcopy(PLG.p_next_node_given_target)
-
     # Continue to add nodes to the path until we reach the target cluster. If
     # We add "None" to the path then we have reached a dead end and should
     # stop. I.e. we have reached a node that has no outgoing edges.
@@ -141,11 +150,45 @@ def path_generation(PLG, start_node, target_cluster):
           (len(path) < max_path_length) and \
           (path[-1] != None):
         # Get the next node
-        next_node = arg_max_p_next_node_given_target(p_next_node_given_target, closest_clusters_list, path[-1])
+        next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, closest_clusters_list, path[-1])
         # Add the next node to the path
         path.append(next_node)
 
     return path
+
+
+def path_tree_generation(PLG, target_cluster, path, paths, depth=2):
+    """Generates a set of paths from the start node to the target cluster.
+    we reach a dead end then we will return a path that ends with "None".
+    
+    target_cluster - Target cluster this vehicle is trying to get to.
+    path           - A path from the starting node to the current node.
+    paths          - A dictionary used to store the each paths in the tree of
+                     possible paths this vehicle can take.
+    depth          - At each node search 2 possible next nodes.
+    """
+
+    # Initialise the path
+    closest_clusters_list = PLG.closest_clusters_dict[target_cluster]
+    max_path_length = 10
+
+    # Check if we can terminate this path, otherwise add a node
+    if (path[-1] in PLG.target_clusters[target_cluster]) or \
+       (len(path) >= max_path_length) or \
+       (path[-1] == None):
+        # Add the generated path to our set of possible list of paths
+        paths[len(paths)] = path
+
+    else:
+        # Loop every neighbour and generate a path
+        for ii in range(depth):
+            # Get the next node
+            next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, closest_clusters_list, path[-1], n_max=ii+1)
+            # Recursively call into path_tree_generation and extend the path by
+            # the next_node
+            rc = path_tree_generation(PLG, target_cluster, path+[next_node], paths)
+
+    return True
 
 
 def node_list_to_edge_phase(PLG, node_list):
