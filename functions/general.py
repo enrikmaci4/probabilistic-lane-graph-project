@@ -1,5 +1,7 @@
 import numpy as np
 import pickle
+import math
+import matplotlib.pyplot as plt
 
 
 # When we index data_vec we need to go from [index_lower:index_upper + 1]
@@ -337,4 +339,83 @@ def normalise_matrix_rows(mat):
         if row_sum > 0:
             mat[ii,:] = mat[ii,:] / row_sum
     return mat
+
+
+def is_in_rectangle(x: float, y: float, xc: float, yc: float, alpha: float, Rx=1, Ry=1):
+    """Returns true if (x,y) is in the rectangle:
+                         y
+                     ____|____(Rx,Ry)
+                 ___|____|____|___x
+                    |____|____|  
+            (-Rx,-Ry)    |
+
+    Where (xc,yc) is the centre of the rectangle and Rx,Ry is the half length
+    of the longer and shorter sides respectively.
+
+    Args:
+        alpha (float): The orientation of the rectangle in radians.
+    """
+    # Centre (x,y) on the origin
+    x_centred = x - xc
+    y_centred = y - yc
+    # Rotate the centred coordinates (x,y) by alpha degrees clockwise and
+    # subtract (xc,yc)
+    x_normalised = x_centred*math.cos(-alpha) - y_centred*math.sin(-alpha)
+    y_normalised = x_centred*math.sin(-alpha) + y_centred*math.cos(-alpha)
+    # Check if normalised (x,y) is within the rectangle we drew above
+    if (abs(x_normalised) < Rx) and (abs(y_normalised) < Ry):
+        return True
+    else:
+        return False
+    
+
+def generate_normalised_rectangle():
+    """Generate a 2D numpy array of coordinates for a rectangle centred on the
+    origin with lengths Rx,Ry in the x,y directions respectively.
+    """
+    # Generate a normalised set of coords
+    X = np.array([[1, 1],
+                  [-1, 1],
+                  [-1, -1],
+                  [1, -1],
+                  [1, 1]])
+    return X
+
+
+def plot_rectangle(xc=0, yc=0, Rx=1, Ry=1, alpha=0):
+    """Plots a rectangle.
+
+    Args:
+        xc (float): Centre x coord.
+        yc (float): Centre y coord.
+        Rx (float): Length along x axis.
+        Ry (float): Length along y axis.
+        alpha (float): Angle of rotation.
+    """
+    # Get the normalised coordinates
+    X = generate_normalised_rectangle()
+
+    # Matrix to stretch X by Rx and Ry in the x and y coords
+    I_stretch = np.array([[Rx, 0],
+                          [0, Ry]])
+
+    # Get the rotation matrix
+    R = np.array([[math.cos(alpha), -math.sin(alpha)],
+                  [math.sin(alpha), math.cos(alpha)]])
+
+    # NOTE: X is a tall matrix with columns [x,y]. Usually we would do M*X
+    #       where M is the matrix that performs the operation we're interested
+    #       in and X is a fat matrix of coordindates with rows [x]
+    #                                                          [y].
+    #       Since X is tall, we need to transpo.se M so we do the following
+    #       matrix multiplication: X*(M^T)
+    # Stretch X
+    X = np.matmul(X, np.transpose(I_stretch))
+    
+    # Rotate the rectangle
+    X = np.matmul(X, np.transpose(R))
+
+    plt.plot(X[:,0]+xc, X[:,1]+yc, linewidth=0.5, color="black")
+
+    return True
 

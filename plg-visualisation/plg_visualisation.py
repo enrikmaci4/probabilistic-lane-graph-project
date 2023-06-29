@@ -216,7 +216,7 @@ def main():
 
         # Select a random path and highlight it
         ii_path_plot = None
-        #ii_path_plot = random.randint(0, num_paths_generated-1)
+        ii_path_plot = random.randint(0, num_paths_generated-1)
         print(date_time.get_current_time(), "ii_path_plot =", ii_path_plot)
         #ii_path_plot = 
         if ii_path_plot:
