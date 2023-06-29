@@ -6,6 +6,7 @@ from inputs import *
 import copy
 import cmath
 import functions.general as g
+from classes.PLG import *
 
 
 COLOUR_LOWER = 0
@@ -157,7 +158,7 @@ def path_generation(PLG, start_node, target_cluster):
     return path
 
 
-def path_tree_generation(PLG, target_cluster, path, paths, depth=2):
+def path_tree_generation(PLG, target_cluster, path, paths, degree=2):
     """Generates a set of paths from the start node to the target cluster.
     we reach a dead end then we will return a path that ends with "None".
     
@@ -165,7 +166,7 @@ def path_tree_generation(PLG, target_cluster, path, paths, depth=2):
     path           - A path from the starting node to the current node.
     paths          - A dictionary used to store the each paths in the tree of
                      possible paths this vehicle can take.
-    depth          - At each node search 2 possible next nodes.
+    degree         - At each node search 2 possible next nodes.
     """
 
     # Initialise the path
@@ -181,12 +182,79 @@ def path_tree_generation(PLG, target_cluster, path, paths, depth=2):
 
     else:
         # Loop every neighbour and generate a path
-        for ii in range(depth):
+        for ii in range(degree):
             # Get the next node
             next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, closest_clusters_list, path[-1], n_max=ii+1)
             # Recursively call into path_tree_generation and extend the path by
             # the next_node
             rc = path_tree_generation(PLG, target_cluster, path+[next_node], paths)
+
+    return True
+
+
+def fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: dict, degree=3, max_lane_change=2):
+    """Generates a set of paths from the start node to the target cluster.
+    we reach a dead end then we will return a path that ends with "None".
+
+    In this version we add a max lane limitation to reduce the number of paths
+    generated so we don't get silly paths that zig-zag between lanes.
+    
+    target_cluster - Target cluster this vehicle is trying to get to.
+    path           - A path from the starting node to the current node.
+    paths          - A dictionary used to store the each paths in the tree of
+                     possible paths this vehicle can take.
+    degree         - At each node search 2 possible next nodes.
+    max_lane_change
+                   - The maximum number of lane changes per path in our path
+                     tree.
+    """
+    # The first element of path, path[0], should always be an integer so check
+    # that this is the case.
+    assert type(path[0]) == int
+
+    # Initialise some constants
+    closest_clusters_list = PLG.closest_clusters_dict[target_cluster]
+    max_path_length = 10
+    last_element_is_none = False
+
+    # Check the last element, it might be None
+    if path[-1] == None:
+        last_element_is_none = True
+        path.pop(-1)
+
+    # Now check the number of lane changes
+    len_of_path = len(path)
+    min_path_length_for_n_lane_changes = max_lane_change+1
+    num_lane_changes = 0
+    if len_of_path > min_path_length_for_n_lane_changes:
+        # There has to be more than max_lane_change+1 nodes in the path for
+        # the number of lane changes to exceed max_lane_change
+        lane_ids = [PLG.node_lane_ids[path[ii]] for ii in range(len_of_path)]
+
+        # Now cycle through the path and count the number of lane changes
+        for ii in range(len_of_path-1):
+            if lane_ids[ii] != lane_ids[ii+1]:
+                num_lane_changes += 1
+
+    # Check if we can terminate this path, otherwise add a node
+    if (path[-1] in PLG.target_clusters[target_cluster]) or \
+       (len(path) >= max_path_length) or \
+       (last_element_is_none) or \
+       (num_lane_changes > max_lane_change):
+        
+        # Only add the generated path to our set of possible list of paths if
+        # it satisifies our lane changing constraints
+        if num_lane_changes <= max_lane_change:
+            paths[len(paths)] = path
+
+    else:
+        # Loop every neighbour and generate a path
+        for ii in range(degree):
+            # Get the next node
+            next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, closest_clusters_list, path[-1], n_max=ii+1)
+            # Recursively call into path_tree_generation and extend the path by
+            # the next_node
+            rc = fast_path_tree_generation(PLG, target_cluster, path+[next_node], paths)
 
     return True
 

@@ -184,9 +184,9 @@ def main():
         # Generate a random path using our path planning algorithm and plot it.
         # First generate a random starting cluster, then choose a random start
         # node from that cluster, then generate a random target cluster
-        start_cluster = np.random.choice(list(PLG.start_clusters.keys()))
-        start_node = np.random.choice(PLG.start_clusters[start_cluster])
-        target_cluster = np.random.choice(list(PLG.target_clusters.keys()))
+        start_cluster = int(np.random.choice(list(PLG.start_clusters.keys())))
+        start_node = int(np.random.choice(PLG.start_clusters[start_cluster]))
+        target_cluster = int(np.random.choice(list(PLG.target_clusters.keys())))
         print(date_time.get_current_time(), "start_cluster =", start_cluster)
         print(date_time.get_current_time(), "start_node =", start_node)
         print(date_time.get_current_time(), "target_cluster =", target_cluster)
@@ -194,7 +194,8 @@ def main():
         # Now generate the path tree
         path = [start_node]
         paths = {}
-        rc = graph.path_tree_generation(PLG, target_cluster, path, paths)
+        #rc = graph.path_tree_generation(PLG, target_cluster, path, paths)
+        rc = graph.fast_path_tree_generation(PLG, target_cluster, path, paths)
         num_paths_generated = len(paths)
         print(date_time.get_current_time(), "Number of generated paths =", num_paths_generated)
 
@@ -205,6 +206,7 @@ def main():
         for ii in paths:
             if paths[ii][-1] == None:
                 paths[ii].pop(-1)
+            #print(paths[ii])
 
         if path_most_likely[-1] == None:
             path_most_likely.pop(-1)
@@ -225,6 +227,9 @@ def main():
 
         # Plot the most likely path
         plt.plot(PLG.nodes[path_most_likely,0], PLG.nodes[path_most_likely,1], color="red", linestyle="-", linewidth=1.5, zorder=12)
+
+        # Scatter the first node in the path
+        plt.scatter(PLG.nodes[start_node,0], PLG.nodes[start_node,1], color="skyblue", marker="x", s=25, zorder=12)
 
     # Set the aspect ratio to be equal
     plt.gca().set_aspect("equal", adjustable="box")
