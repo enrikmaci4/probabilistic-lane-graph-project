@@ -96,7 +96,7 @@ UNIT = "feet"
 #                                   nodes in the PLG.                         #
 #                                                                             #
 ###############################################################################
-MIN_DIST_BETWEEN_NODES = 3
+MIN_DIST_BETWEEN_NODES = 2.5
 NUM_START_CLUSTERS = 10
 NUM_TARGET_CLUSTERS = 10
 DO_KMEANS = True

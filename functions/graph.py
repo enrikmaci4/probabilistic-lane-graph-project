@@ -192,7 +192,7 @@ def path_tree_generation(PLG, target_cluster, path, paths, degree=2):
     return True
 
 
-def fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: dict, degree=3, max_lane_change=2):
+def fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: dict, degree=2, max_path_length=15, max_lane_change=2):
     """Generates a set of paths from the start node to the target cluster.
     we reach a dead end then we will return a path that ends with "None".
 
@@ -214,7 +214,6 @@ def fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: 
 
     # Initialise some constants
     closest_clusters_list = PLG.closest_clusters_dict[target_cluster]
-    max_path_length = 10
     last_element_is_none = False
 
     # Check the last element, it might be None
