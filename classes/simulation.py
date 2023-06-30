@@ -1,8 +1,1 @@
-
-###############################################################################
-# Define some constants which are relevant to the simulation:                 #
-#                                                                             #
-# dt - The time increment in the simulation.                                  #
-#                                                                             #
-###############################################################################
-dt = 0.1
+# Empty for now. Might delete later if we decide we don't need this anymore.

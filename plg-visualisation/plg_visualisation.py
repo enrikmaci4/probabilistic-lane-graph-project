@@ -211,6 +211,9 @@ def main():
         if path_most_likely[-1] == None:
             path_most_likely.pop(-1)
 
+        # Plot the most likely path
+        plt.plot(PLG.nodes[path_most_likely,0], PLG.nodes[path_most_likely,1], color="red", linestyle="-", linewidth=1.5, zorder=12)
+
         # Plot the path tree
         for ii in paths:
             path = paths[ii]
@@ -224,9 +227,6 @@ def main():
         if ii_path_plot:
             path_to_highlight = paths[ii_path_plot]
             plt.plot(PLG.nodes[path_to_highlight,0], PLG.nodes[path_to_highlight,1], color="yellow", linestyle="-", linewidth=1.5, zorder=12)
-
-        # Plot the most likely path
-        plt.plot(PLG.nodes[path_most_likely,0], PLG.nodes[path_most_likely,1], color="red", linestyle="-", linewidth=1.5, zorder=12)
 
         # Scatter the first node in the path
         plt.scatter(PLG.nodes[start_node,0], PLG.nodes[start_node,1], color="skyblue", marker="x", s=25, zorder=12)

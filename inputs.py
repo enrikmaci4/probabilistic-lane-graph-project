@@ -255,4 +255,12 @@ PLOT_RANDOM_GENERATED_PATH = False
 PLOT_RANDOM_GENERATED_PATH_TREE = True
 PLOT_START_AND_TARGET_CLUSTERS = True
 
-                                                                            
+###############################################################################
+# Define some constants which are relevant to the code for generating         #
+# simulations:                                                                #
+#                                                                             #
+# dt - The time increment in the simulation.                                  #
+#                                                                             #
+###############################################################################
+dt = 0.1
+                                                          
