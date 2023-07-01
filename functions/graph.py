@@ -122,7 +122,7 @@ def arg_max_p_next_node(p_next_node, current_node, n_max=1):
             return None
 
 
-def arg_max_p_next_node_given_target(p_next_node_given_target, closest_clusters_list, current_node, n_max=1):
+def arg_max_p_next_node_given_target(p_next_node_given_target, p_next_node, closest_clusters_list, current_node, n_max=1):
     """Returns the next node with the highest probability of being visited
     given the current node and the target cluster. If we cannot find a next
     node given the target cluster then we will search for a next node given the
@@ -130,19 +130,23 @@ def arg_max_p_next_node_given_target(p_next_node_given_target, closest_clusters_
     
     n_max - Get the nth max.
     """
+    # Search for a node
     for target_cluster in closest_clusters_list:
         next_node = arg_max_p_next_node(p_next_node_given_target[target_cluster], current_node, n_max=n_max)
         if next_node:
             return next_node
+        
+    # If we get here it means we didn't find a node with the code above, try
+    # p_next_node
+    #next_node = arg_max_p_next_node(p_next_node, current_node, n_max=n_max)
     
 
-def path_generation(PLG, start_node, target_cluster):
+def path_generation(PLG: PLG, start_node: int, target_cluster: int, max_path_length=300):
     """Generates a path from the start node to the target cluster. If we reach
     a dead end then we will return a path that ends with "None"."""
     # Initialise the path
     path = [start_node]
     closest_clusters_list = PLG.closest_clusters_dict[target_cluster]
-    max_path_length = 300
     
     # Continue to add nodes to the path until we reach the target cluster. If
     # We add "None" to the path then we have reached a dead end and should
@@ -151,14 +155,14 @@ def path_generation(PLG, start_node, target_cluster):
           (len(path) < max_path_length) and \
           (path[-1] != None):
         # Get the next node
-        next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, closest_clusters_list, path[-1])
+        next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, PLG.p_next_node, closest_clusters_list, path[-1])
         # Add the next node to the path
         path.append(next_node)
 
     return path
 
 
-def path_tree_generation(PLG, target_cluster, path, paths, degree=2):
+def path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: int, degree=2):
     """Generates a set of paths from the start node to the target cluster.
     we reach a dead end then we will return a path that ends with "None".
     
@@ -184,7 +188,7 @@ def path_tree_generation(PLG, target_cluster, path, paths, degree=2):
         # Loop every neighbour and generate a path
         for ii in range(degree):
             # Get the next node
-            next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, closest_clusters_list, path[-1], n_max=ii+1)
+            next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, PLG.p_next_node, closest_clusters_list, path[-1], n_max=ii+1)
             # Recursively call into path_tree_generation and extend the path by
             # the next_node
             rc = path_tree_generation(PLG, target_cluster, path+[next_node], paths)
@@ -192,7 +196,36 @@ def path_tree_generation(PLG, target_cluster, path, paths, degree=2):
     return True
 
 
-def fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: dict, degree=2, max_path_length=15, max_lane_change=2):
+def fast_path_tree_generation(PLG: PLG, start_node: int, target_cluster: int, degree=2, max_path_length=20, max_lane_change=2, min_num_paths=3):
+    """Generate a tree of possible paths.
+
+    num_lanes_in_map
+                   - The total number of lanes in the map.
+    """
+    # Initiailise some constants
+    num_lanes_in_map = len(set(PLG.node_lane_ids))
+    path = [start_node]
+    paths = {}
+    ii = 0
+
+    # Call fast_path_generation_ until we generate enough paths, or until we
+    # can't call it anymore.
+    while (len(paths) < min_num_paths) and (max_lane_change <= num_lanes_in_map):
+        # Initialisions. Yes - we initialise these two variables above aswell.
+        # This is because we need the length in the while-statement so we have
+        # to initialise them above. It's a bit ugly but that's ok :(
+        path = [start_node]
+        paths = {}
+        
+        # Generate paths
+        rc = fast_path_tree_generation_(PLG, target_cluster, path, paths, max_lane_change=max_lane_change, degree=degree, max_path_length=max_path_length)
+        max_lane_change += 1
+
+    # We found some paths, now return them
+    return paths
+
+
+def fast_path_tree_generation_(PLG: PLG, target_cluster: int, path: list, paths: dict, degree=2, max_path_length=15, max_lane_change=2):
     """Generates a set of paths from the start node to the target cluster.
     we reach a dead end then we will return a path that ends with "None".
 
@@ -207,6 +240,8 @@ def fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: 
     max_lane_change
                    - The maximum number of lane changes per path in our path
                      tree.
+    min_num_paths  - Continue incrementing max_lane_change by 1 until we've
+                     generated atleast this many paths.
     """
     # The first element of path, path[0], should always be an integer so check
     # that this is the case.
@@ -241,19 +276,23 @@ def fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: 
        (last_element_is_none) or \
        (num_lane_changes > max_lane_change):
         
+        # Check if we have any repeated nodes. This indicates the algorithm is
+        # stuck in a loop generating the same two nodes over and over again.
+        num_unique_nodes = len(set(path))
+
         # Only add the generated path to our set of possible list of paths if
         # it satisifies our lane changing constraints
-        if num_lane_changes <= max_lane_change:
+        if (num_lane_changes <= max_lane_change) and (not last_element_is_none) and (num_unique_nodes == len_of_path):
             paths[len(paths)] = path
 
     else:
         # Loop every neighbour and generate a path
         for ii in range(degree):
             # Get the next node
-            next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, closest_clusters_list, path[-1], n_max=ii+1)
+            next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, PLG.p_next_node, closest_clusters_list, path[-1], n_max=ii+1)
             # Recursively call into path_tree_generation and extend the path by
             # the next_node
-            rc = fast_path_tree_generation(PLG, target_cluster, path+[next_node], paths)
+            rc = fast_path_tree_generation_(PLG, target_cluster, path+[next_node], paths, max_lane_change=max_lane_change, degree=degree, max_path_length=max_path_length)
 
     return True
 

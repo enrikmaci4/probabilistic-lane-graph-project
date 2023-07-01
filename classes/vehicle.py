@@ -68,7 +68,7 @@ class Vehicle():
     ###########################################################################
     # Initialisation.                                                         #
     ###########################################################################
-    def __init__(self, PLG: PLG, current_data: DataRow) -> None:
+    def __init__(self, PLG: PLG, current_data: DataRow, target_destination: int) -> None:
         # Store the PLG. Objects should be passed by reference in Python so
         # this shouldn't be computationally expensive. We will not modify PLG
         # at any stage so we will never create a copy of it. We want to avoid
@@ -76,11 +76,13 @@ class Vehicle():
         self.PLG = PLG
         # Initialise the data matrix describing the trajectory for this vehicle
         self.current_data = current_data
-        self.trajectory_matrix = np.zeros((0, current_data.num_rows))
+        self.trajectory = np.zeros((0, current_data.num_rows))
         # Future nodes. This tuple stores:
         # (current node, next node, next next node)
         self.future_nodes = ()
-        # List of background vehicles and their stats
+        # We need to know this vehicle's destination
+        self.target_destination = target_destination
+        # List of background vehicles and their states
 
     ###########################################################################
     # Initialisation functions.                                               #
@@ -95,7 +97,7 @@ class Vehicle():
     # Use this function to append a new row to the trajectory matrix          #
     ###########################################################################
     def append_current_data(self):
-        self.trajectory_matrix = np.vstack((self.trajectory_matrix, [self.current_data.vehicle_id, self.current_data.time, self.current_data.x, self.current_data.y, self.current_data.lane_id, self.current_data.speed, self.current_data.acc, self.current_data.ttc, self.current_data.head_ang]))
+        self.trajectory = np.vstack((self.trajectory, [self.current_data.vehicle_id, self.current_data.time, self.current_data.x, self.current_data.y, self.current_data.lane_id, self.current_data.speed, self.current_data.acc, self.current_data.ttc, self.current_data.head_ang]))
 
     ###########################################################################
     # Functions to update the kinematics of the vehicle                       #

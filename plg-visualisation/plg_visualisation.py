@@ -195,7 +195,7 @@ def main():
         path = [start_node]
         paths = {}
         #rc = graph.path_tree_generation(PLG, target_cluster, path, paths)
-        rc = graph.fast_path_tree_generation(PLG, target_cluster, path, paths)
+        paths = graph.fast_path_tree_generation(PLG, start_node, target_cluster, min_num_paths=3)
         num_paths_generated = len(paths)
         print(date_time.get_current_time(), "Number of generated paths =", num_paths_generated)
 
