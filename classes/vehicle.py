@@ -36,7 +36,7 @@ import models.acceleration as acc_models
 #                      D_0]                                                   #
 #                                                                             #
 ###############################################################################
-class DataRow():
+class DataRow:
     def __init__(self) -> None:
         # Initialise all values of the row to something invalid. We use a
         # character. These values will be set assigned in a separate part of
@@ -147,7 +147,7 @@ class Vehicle():
         # next node
         if edge_distance_traversed > edge_length:
             # TODO: change node, change direction, generate new nodes
-
+            pass
         
         return True
 

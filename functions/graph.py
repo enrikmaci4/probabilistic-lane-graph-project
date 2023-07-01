@@ -115,7 +115,7 @@ def arg_max_p_next_node(p_next_node, current_node, n_max=1):
 
         # If the probability is greater than 0 return True, otherwise return
         # False. So if we take the 2nd max node but it turns out there is no
-        # 2nd max, we will return False.
+        # 2nd max, we will return None.
         if p_transition > 0:
             return np.argpartition(p_next_node[current_node,:], -n_max)[-n_max]
         else:
@@ -138,7 +138,7 @@ def arg_max_p_next_node_given_target(p_next_node_given_target, p_next_node, clos
         
     # If we get here it means we didn't find a node with the code above, try
     # p_next_node
-    #next_node = arg_max_p_next_node(p_next_node, current_node, n_max=n_max)
+    next_node = arg_max_p_next_node(p_next_node, current_node, n_max=n_max)
     
 
 def path_generation(PLG: PLG, start_node: int, target_cluster: int, max_path_length=300):
@@ -158,6 +158,14 @@ def path_generation(PLG: PLG, start_node: int, target_cluster: int, max_path_len
         next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, PLG.p_next_node, closest_clusters_list, path[-1])
         # Add the next node to the path
         path.append(next_node)
+
+    # If the last node is None then remove it
+    if path[-1] == None:
+        path.pop(-1)
+
+    # TODO: Could possibly remove repeated nodes so we don't need the
+    # "max_path_length" parameter to break out of an infinite path loop
+    # <code>
 
     return path
 
@@ -297,10 +305,11 @@ def fast_path_tree_generation_(PLG: PLG, target_cluster: int, path: list, paths:
     return True
 
 
-def node_list_to_edge_phase(PLG, node_list):
+def node_list_to_edge_phase(PLG: PLG, node_list: list):
     """Converts a list of nodes into a list of edge phases. The edge phases
     are the phases that are traversed when moving from one node to the next.
     If there are N nodes in the list then there will be N-1 edge phases.
+    We will pad beggining of the phase list by repeating the first value once.
     """
     edge_phase_list = []
     num_nodes = len(node_list)
@@ -325,10 +334,13 @@ def node_list_to_edge_phase(PLG, node_list):
         edge_phase = cmath.phase(next_node - current_node)
         edge_phase_list.append(edge_phase)
 
+    # Pad the list by repeating the first element
+    edge_phase_list.insert(0, edge_phase_list[0])
+
     return edge_phase_list
 
 
-def node_path_to_output_data(PLG, node_path):
+def node_path_to_output_data(PLG: PLG, node_path: list, mov_avg_win=3):
     """Converts a list of nodes into a 2D matrix of output data. The columns
     of the matrix are as follows:
     1. x coordinate of node
@@ -337,7 +349,8 @@ def node_path_to_output_data(PLG, node_path):
 
     The heading angle is calculated by taking the phase of the vector that
     connects the current node to the next node. The heading angle is then
-    smoothed using a moving average filter.
+    smoothed using a moving average filter. The size of this moving average
+    filter is given by mov_avg_win.
     """
     # Check if final node is None, if so then remove it
     if node_path[-1] == None:
@@ -346,7 +359,6 @@ def node_path_to_output_data(PLG, node_path):
     path_length = len(node_path)
     output_data = np.zeros((path_length, 3))
     edge_phase_list = node_list_to_edge_phase(PLG, node_path)
-    mov_avg_win = 3
 
     # Assert that the path length is atleast mov_avg_win
     assert path_length >= mov_avg_win
@@ -370,4 +382,7 @@ def node_path_to_output_data(PLG, node_path):
     return output_data
 
 
+def plot_node_path(PLG: PLG, node_path: list, color="red"):
+    plt.plot(PLG.nodes[node_path, 0], PLG.nodes[node_path, 1], linewidth=2, color=color, zorder=10)
+    return True
 

@@ -253,7 +253,7 @@ PLOT_AVERAGE_DISCRETE_PATH = True
 
 PLOT_RANDOM_GENERATED_PATH = False
 PLOT_RANDOM_GENERATED_PATH_TREE = True
-PLOT_START_AND_TARGET_CLUSTERS = True
+PLOT_START_AND_TARGET_CLUSTERS = False
 
 ###############################################################################
 # Define some constants which are relevant to the code for generating         #

@@ -3,8 +3,8 @@
 # Looks something like this:                                                  #
 #                                                                             #
 #  A_max _|    ____                                                           #
-#         |   /                                                               #
-#      0 _|__/_____ttc                                                        #
+#         |   /|                                                              #
+#      0 _|__/_|___ttc                                                        #
 #         | /| |                                                              #
 # -A_max _|/ T 2T                                                             #
 #         |                                                                   #
