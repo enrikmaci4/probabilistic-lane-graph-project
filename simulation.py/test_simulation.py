@@ -32,7 +32,7 @@ PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
 # av - A "Vehicle" type object with an initial state.                         #
 #                                                                             #
 ###############################################################################
-def initialise_av_position(PLG: PLG) -> Vehicle:
+def initialise_av_position(PLG_: PLG) -> Vehicle:
     # First we're going to generate a single vehicle path from an entry point
     # to an exit. We will then choose a random node, somewhere in the middle
     # of the path, and choose this as the initial state of the AV. There are a
@@ -42,12 +42,12 @@ def initialise_av_position(PLG: PLG) -> Vehicle:
     #   model better.
     # - We don't really want vehicle's to suddenly disappear from the map which
     #   is what will happen if a vehicle reaches it's target destination.
-    start_cluster = int(np.random.choice(list(PLG.start_clusters.keys())))
-    start_node = int(np.random.choice(PLG.start_clusters[start_cluster]))
+    start_cluster = int(np.random.choice(list(PLG_.start_clusters.keys())))
+    start_node = int(np.random.choice(PLG_.start_clusters[start_cluster]))
     # We want kind of long paths to get a nice long simulation so choose 
     # one of the target clusters which is further away.
-    start_coords = PLG.nodes[start_node,:]
-    distance_from_start_to_targets = np.sum(np.square(PLG.target_cluster_centres - start_coords), axis=1)
+    start_coords = PLG_.nodes[start_node,:]
+    distance_from_start_to_targets = np.sum(np.square(PLG_.target_cluster_centres - start_coords), axis=1)
     # TODO: The way we select this could probable improve to get more
     # variation in target clusters. E.g. randomly choose one betwee the mid-
     # point and the end in a list ordered from lowest to highest (or vice
@@ -76,7 +76,13 @@ def initialise_av_position(PLG: PLG) -> Vehicle:
     # Create a DataRow data structure and populate it with the data we need to
     # initialise the AV.
     initial_state = DataRow()
-    initial_state.
+    initial_state.vehicle_id = 0
+    initial_state.time = 0
+    initial_state.x = output_data[initial_node_index, 0]
+    initial_state.y = output_data[initial_node_index, 1]
+    initial_state.node = initial_node
+    initial_state.lane_id = PLG_.node_lane_ids[initial_node]
+
 
     graph.draw(PLG)
     graph.plot_node_path(PLG, path)

@@ -144,3 +144,5 @@ dmypy.json
 # Ignore the contents of the "videos" folder but not the folder itself
 /videos/*
 !videos/.gitkeep
+# clean_data data-structure is now too large to push/pull using to GitHub
+/data/lankershim/cleaned/*

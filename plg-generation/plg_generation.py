@@ -17,6 +17,7 @@ from get_discrete_vehicle_paths import get_discrete_vehicle_paths
 from adj_mat_generation import adj_mat_generation
 from cluster_generation import cluster_generation
 from travel_dict_generation import travel_dict_generation
+from statistics_generation import statistics_generation
 
 
 DATA_LOC = "data/"+DATASET+"/cleaned/"
@@ -29,7 +30,7 @@ def main():
     print(date_time.get_current_time(), "Program started")
 
     # Load the cleaned data
-    data = g.load_pickled_data(DATA_LOC+"clean_data")
+    data = g.load_pickled_data(DATA_LOC+"clean_data_v2")
     print(date_time.get_current_time(), "Loaded clean data")
 
     # Create a PLG object
@@ -65,6 +66,11 @@ def main():
     print(date_time.get_current_time(), "Travel dictionary generated")
     g.save_pickled_data(PLG_SAVE_LOC+"PLG", PLG)
     print(date_time.get_current_time(), "Travel dictionary generated. Saved...")
+
+    # Generate some simple statistics about this dataset that might come 
+    # handy
+    rc = statistics_generation(PLG, data)
+    print(date_time.get_current_time(), "Got kinematics stats")
 
     # Print time take
     print(f"PLG generation time taken = {round(time.time() - t_start, 3)} s")

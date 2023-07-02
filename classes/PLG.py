@@ -30,6 +30,7 @@
 ###############################################################################
 class PLG:
     def __init__(self) -> None:
+        # PLG description information
         self.num_nodes = None
         self.nodes = None
         self.node_lane_ids = None
@@ -42,4 +43,24 @@ class PLG:
         self.closest_clusters_dict = None
         self.p_next_node = None
         self.p_next_node_given_target = None
+        # Dataset statistics
+        self.statistics = PLGStatistics()
 
+
+###############################################################################
+# Use this class to store some basic stastics about the dataset. When we're   #
+# using the PLG they might come in handy and it will be cumbersome to have to #
+# load these simple values from the dataset every time we need them.          #
+###############################################################################
+class PLGStatistics:
+    def __init__(self) -> None:
+        # Speed statistics
+        self.speed_max = None
+        self.speed_min = None
+        self.speed_avg = None
+        self.speed_std = None
+        # Acceleration statistics
+        self.acc_max = None
+        self.acc_min = None
+        self.acc_avg = None
+        self.acc_std = None

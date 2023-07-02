@@ -32,6 +32,9 @@ class load_data:
             self.lane_id = np.genfromtxt(DATA_LOC+"Lane_ID", dtype=int)
         except FileNotFoundError:
             self.lane_id = np.zeros(len(self.x), dtype=int)
+        self.time = np.genfromtxt(DATA_LOC+"Frame_ID", dtype=int)
+        self.speed = np.genfromtxt(DATA_LOC+"Speed", dtype=float)
+        self.acc = np.genfromtxt(DATA_LOC+"Acceleration", dtype=float)
 
         # Normalise position to start at (0,0)
         self.x = self.x - min(self.x)
@@ -58,6 +61,9 @@ class data:
         self.node = []              # node corresponding to these x,y coords
         self.lane_id = []           # lane ID
         self.vehicle_id = []        # vehicle ID
+        self.time = []              # time (id)
+        self.speed = []             # speed
+        self.acc = []               # acceleration
         self.vehicle_sese = None    # vehicle ID sese matrix
         self.lane_sese = None       # lane ID sese matrix
 

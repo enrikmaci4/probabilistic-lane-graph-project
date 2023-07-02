@@ -25,17 +25,17 @@ SAVE_LOC = "data/"+DATASET+"/cleaned/"
 # This function will take the original dataset loaded via the load_data class #
 # and will return a cleaned dataset.                                          #
 ###############################################################################
-def clean_data(orignal_dataset):
+def clean_data(original_dataset):
     # Define constants used for this function
     cleaned_dataset = d.data()
     dr_upper_threshold = 10
-    num_vehicles = len((orignal_dataset.vehicle_sese)[:,0])
+    num_vehicles = len((original_dataset.vehicle_sese)[:,0])
     new_vehicle_id = -1
 
     # Look through every vehicle and every vehicle's path and inspect change in
     # distance between adjacent time steps to remove anomalous data points.
     for ii_path in range(num_vehicles):
-        for ii_sub_path in range((orignal_dataset.vehicle_sese)[ii_path, 1]):
+        for ii_sub_path in range((original_dataset.vehicle_sese)[ii_path, 1]):
             # We will re-name the vehicle IDs such that there is a single
             # vehicle ID corresponding to a single "path". Right now there are
             # multiple "paths" for each vehicle. In real life this corresponds
@@ -49,15 +49,21 @@ def clean_data(orignal_dataset):
             new_vehicle_id += 1
 
             # Extract the data corresponding to each vehicle path
-            x = g.se_extraction(orignal_dataset.vehicle_sese[ii_path, 0], orignal_dataset.x, orignal_dataset.vehicle_sese, sub_index=ii_sub_path)
-            y = g.se_extraction(orignal_dataset.vehicle_sese[ii_path, 0], orignal_dataset.y, orignal_dataset.vehicle_sese, sub_index=ii_sub_path)
-            lane_id = g.se_extraction(orignal_dataset.vehicle_sese[ii_path, 0], orignal_dataset.lane_id, orignal_dataset.vehicle_sese, sub_index=ii_sub_path)
+            x = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.x, original_dataset.vehicle_sese, sub_index=ii_sub_path)
+            y = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.y, original_dataset.vehicle_sese, sub_index=ii_sub_path)
+            lane_id = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.lane_id, original_dataset.vehicle_sese, sub_index=ii_sub_path)
+            speed = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.speed, original_dataset.vehicle_sese, sub_index=ii_sub_path)
+            acc = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.acc, original_dataset.vehicle_sese, sub_index=ii_sub_path)
+            time = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.time, original_dataset.vehicle_sese, sub_index=ii_sub_path)
 
             # Intantiate variables to hold the new cleaned version of the data
             # for this path
             x_clean = [x[0,0]]
             y_clean = [y[0,0]]
             lane_id_clean = [lane_id[0,0]]
+            speed_clean = [speed[0,0]]
+            acc_clean = [acc[0,0]]
+            time_clean = [time[0,0]]
             vehicle_id_clean = [new_vehicle_id]
 
             # Number of data points in this vehicle path
@@ -83,12 +89,18 @@ def clean_data(orignal_dataset):
                     x_clean.extend(x[ii])
                     y_clean.extend(y[ii])
                     lane_id_clean.extend(lane_id[ii])
+                    speed_clean.extend(speed[ii])
+                    acc_clean.extend(acc[ii])
+                    time_clean.extend(time[ii])
                     vehicle_id_clean.append(new_vehicle_id)
 
-            # Appeand the cleaned vehicle data to our data object
+            # Append the cleaned vehicle data to our data object
             (cleaned_dataset.x).extend(x_clean)
             (cleaned_dataset.y).extend(y_clean)
             (cleaned_dataset.lane_id).extend(lane_id_clean)
+            (cleaned_dataset.speed).extend(speed_clean)
+            (cleaned_dataset.acc).extend(acc_clean)
+            (cleaned_dataset.time).extend(time_clean)
             (cleaned_dataset.vehicle_id).extend(vehicle_id_clean)
 
     # Build the sese matrices for this new cleaned dataset
@@ -114,7 +126,7 @@ def main():
     print(date_time.get_current_time(), "Finished cleaning data")
 
     # Save data
-    g.save_pickled_data(SAVE_LOC+"clean_data", cleaned_dataset)
+    g.save_pickled_data(SAVE_LOC+"clean_data_v2", cleaned_dataset)
     print(date_time.get_current_time(), "Saved clean data")
 
 
