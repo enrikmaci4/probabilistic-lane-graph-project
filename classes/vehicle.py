@@ -1,8 +1,10 @@
-
+from inputs import *
 import numpy as np
 import cmath
+import math
 import classes.simulation as sim
 import functions.graph as graph
+import functions.general as g
 from classes.PLG import *
 import models.acceleration as acc_models
 
@@ -45,20 +47,20 @@ class DataRow:
         # DataRow.vehicle_id = id
         #
         # instead of being passed as parameters into the constructor.
-        vehicle_id = "x"
-        time = "x"
-        x = "x"
-        y = "x"
-        node = "x"
-        lane_id = "x"
-        speed = "x"
-        acc = "x"
-        ttc = "x"
-        head_ang = "x"
+        self.vehicle_id = "x"
+        self.time = "x"
+        self.x = "x"
+        self.y = "x"
+        self.node = "x"
+        self.lane_id = "x"
+        self.speed = "x"
+        self.acc = "x"
+        self.ttc = "x"
+        self.head_ang = "x"
         # Use a variable to track the number of rows in our data matrix
-        num_rows = 9
+        self.num_rows = 9
         # Use a variable to track whether the node has changed
-        node_changed = False
+        self.node_changed = False
 
 
 ###############################################################################
@@ -75,7 +77,7 @@ class Vehicle():
         # creating a copy because it is a fairly large data structure.
         self.PLG = PLG
         # Initialise the data matrix describing the trajectory for this vehicle
-        self.current_data = current_data
+        self.current_state = current_data
         self.trajectory = np.zeros((0, current_data.num_rows))
         # Future nodes. This tuple stores:
         # (current node, next node, next next node)
@@ -97,20 +99,20 @@ class Vehicle():
     # Use this function to append a new row to the trajectory matrix          #
     ###########################################################################
     def append_current_data(self):
-        self.trajectory = np.vstack((self.trajectory, [self.current_data.vehicle_id, self.current_data.time, self.current_data.x, self.current_data.y, self.current_data.lane_id, self.current_data.speed, self.current_data.acc, self.current_data.ttc, self.current_data.head_ang]))
+        self.trajectory = np.vstack((self.trajectory, [self.current_state.vehicle_id, self.current_state.time, self.current_state.x, self.current_state.y, self.current_state.lane_id, self.current_state.speed, self.current_state.acc, self.current_state.ttc, self.current_state.head_ang]))
 
     ###########################################################################
     # Functions to update the kinematics of the vehicle                       #
     ###########################################################################
     def get_acceleration(self, ttc: float):
         # Acceleration is a function of time to collision
-        #self.current_data.acceleration = <function to generate acceleration from ttc>
-        self.current_data.acceleration = acc_models.linear(ttc)
+        #self.current_state.acceleration = <function to generate acceleration from ttc>
+        self.current_state.acceleration = acc_models.linear(ttc)
         return True
 
     def get_speed(self):
         # Use SUVAT over an interval dt.
-        self.current_data.speed += sim.dt * self.current_data.acceleration
+        self.current_state.speed += sim.dt * self.current_state.acceleration
         return True
     
     def get_position(self):
@@ -123,9 +125,9 @@ class Vehicle():
 
         # Use SUVAT over an interval dt.
         edge_phase = cmath.phase(next_node_pos - node_pos)
-        ds = sim.dt * self.current_data.speed + (1/2) * (sim.dt**2) * self.current_data.acceleration
-        self.current_data.x += ds * cmath.cos(edge_phase)
-        self.current_data.y += ds * cmath.sin(edge_phase)
+        ds = sim.dt * self.current_state.speed + (1/2) * (sim.dt**2) * self.current_state.acceleration
+        self.current_state.x += ds * cmath.cos(edge_phase)
+        self.current_state.y += ds * cmath.sin(edge_phase)
 
         # Now that we've updated the position, check if the node has changed.
         #
@@ -136,7 +138,7 @@ class Vehicle():
         #       of our simulations would become quite poor anyway.
         #
         # Convert the current position into a complex number
-        current_pos = complex(self.current_data.x, self.current_data.y)
+        current_pos = complex(self.current_state.x, self.current_state.y)
 
         # Get length of edge and distance we've traversed from node
         edge_length = abs(next_node_pos - node_pos)
@@ -179,3 +181,43 @@ class Vehicle():
         # current_node is now the value of next_node. We'll update
         # self.future_nodes once we've chosen the new path.
         current_node = self.future_nodes[1]
+
+    ###########################################################################
+    # Utility functions.                                                      #
+    ###########################################################################
+    def get_rectangle(self):
+        # Intialisations
+        Rx = V_LENGTH/2
+        Ry = V_WIDTH/2
+        alpha = self.current_state.head_ang
+
+        # Returns a set of coordinates which describe the edges of the vehicle.
+        # Note that we're modelling the vehicle as a rectangle.
+        # Get the normalised coordinates
+        X = g.generate_normalised_rectangle()
+
+        # Matrix to stretch X by Rx and Ry in the x and y coords
+        I_stretch = np.array([[Rx, 0],
+                              [0, Ry]])
+
+        # Get the rotation matrix
+        R = np.array([[math.cos(alpha), -math.sin(alpha)],
+                      [math.sin(alpha), math.cos(alpha)]])
+
+        # NOTE: X is a tall matrix with columns [x,y]. Usually we would do M*X
+        #       where M is the matrix that performs the operation we're interested
+        #       in and X is a fat matrix of coordindates with rows [x]
+        #                                                          [y].
+        #       Since X is tall, we need to transpo.se M so we do the following
+        #       matrix multiplication: X*(M^T)
+        # Stretch X
+        X = np.matmul(X, np.transpose(I_stretch))
+
+        # Rotate the rectangle
+        X = np.matmul(X, np.transpose(R))
+
+        # Shift rectangle
+        X[:,0] += self.current_state.x
+        X[:,1] += self.current_state.y
+
+        return X

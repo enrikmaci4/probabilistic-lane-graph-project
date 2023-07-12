@@ -12,8 +12,8 @@ from inputs import *
 #          given that we know the target cluster. Therefore we will generate  #
 #          a dictionary of {target cluster: transition matrix}.               #
 #                                                                             #
-# Params: IN/OUT PLG  - The travel dictionary will be assigned to the PLG     #
-#                       PLG.p_next_node_given_target parameter.               #
+# Params: IN/OUT PLG - The travel dictionary will be assigned to the PLG      #
+#                      PLG.p_next_node_given_target parameter.                #
 #                                                                             # 
 ###############################################################################
 def travel_dict_generation(PLG):
@@ -54,6 +54,6 @@ def travel_dict_generation(PLG):
     PLG.p_next_node_given_target = p_next_node_given_target
     PLG.p_next_node = p_next_node
 
-    return PLG
+    return True
 
 

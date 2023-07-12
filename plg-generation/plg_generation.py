@@ -39,41 +39,33 @@ def main():
     # Generate node set
     rc = node_generation(PLG, data)
     print(date_time.get_current_time(), "Generated nodes")
-    g.save_pickled_data(PLG_SAVE_LOC+"PLG", PLG)
-    print(date_time.get_current_time(), "Generated nodes. Saved...")
 
     # Generate discrete vehicle paths
     rc = get_discrete_vehicle_paths(data=data, PLG=PLG)
     print(date_time.get_current_time(), "Discretised vehicle paths")
-    g.save_pickled_data(PLG_SAVE_LOC+"PLG", PLG)
-    g.save_pickled_data(DATA_LOC+"clean_data", data)
-    print(date_time.get_current_time(), "Discretised vehicle paths. Saved...")
 
     # Create the adjacency matrix
     rc = adj_mat_generation(PLG)
     print(date_time.get_current_time(), "Adjacency matrix generated")
-    g.save_pickled_data(PLG_SAVE_LOC+"PLG", PLG)
-    print(date_time.get_current_time(), "Adjacency matrix generated. Saved...")
 
     # Get the start and target node clusters
     rc = cluster_generation(PLG)
     print(date_time.get_current_time(), "Start/target node clusters generated")
-    g.save_pickled_data(PLG_SAVE_LOC+"PLG", PLG)
-    print(date_time.get_current_time(), "Start/target node clusters generated. Saved...")
 
     # Generate the travel dictionary
     rc = travel_dict_generation(PLG)
     print(date_time.get_current_time(), "Travel dictionary generated")
-    g.save_pickled_data(PLG_SAVE_LOC+"PLG", PLG)
-    print(date_time.get_current_time(), "Travel dictionary generated. Saved...")
 
     # Generate some simple statistics about this dataset that might come 
     # handy
     rc = statistics_generation(PLG, data)
     print(date_time.get_current_time(), "Got kinematics stats")
 
-    # Print time take
+    # Save and print time take
+    g.save_pickled_data(DATA_LOC+"clean_data", data)
+    g.save_pickled_data(PLG_SAVE_LOC+"PLG", PLG)
     print(f"PLG generation time taken = {round(time.time() - t_start, 3)} s")
+
 
 
 if __name__=="__main__":

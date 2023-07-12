@@ -2,6 +2,8 @@ import numpy as np
 import pickle
 import math
 import matplotlib.pyplot as plt
+from shapely.geometry import Polygon
+from classes.vehicle import *
 
 
 # When we index data_vec we need to go from [index_lower:index_upper + 1]
@@ -382,40 +384,168 @@ def generate_normalised_rectangle():
     return X
 
 
-def plot_rectangle(xc=0, yc=0, Rx=1, Ry=1, alpha=0):
-    """Plots a rectangle.
+def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="skyblue"):
+    """Plots a rectangle. If X is defined, just plot the columns against each
+    other. Otherwise, use the other information.
 
     Args:
+        X (2D numpy matrix): 
         xc (float): Centre x coord.
         yc (float): Centre y coord.
         Rx (float): Length along x axis.
         Ry (float): Length along y axis.
         alpha (float): Angle of rotation.
     """
-    # Get the normalised coordinates
-    X = generate_normalised_rectangle()
+    # Check if a matrix of x,y coordinates is defined. If it's not, generate
+    # it, using the information provided.
+    if len(X) == 0:
+        # Get the normalised coordinates
+        X = generate_normalised_rectangle()
 
-    # Matrix to stretch X by Rx and Ry in the x and y coords
-    I_stretch = np.array([[Rx, 0],
-                          [0, Ry]])
+        # Matrix to stretch X by Rx and Ry in the x and y coords
+        I_stretch = np.array([[Rx, 0],
+                              [0, Ry]])
 
-    # Get the rotation matrix
-    R = np.array([[math.cos(alpha), -math.sin(alpha)],
-                  [math.sin(alpha), math.cos(alpha)]])
+        # Get the rotation matrix
+        R = np.array([[math.cos(alpha), -math.sin(alpha)],
+                      [math.sin(alpha), math.cos(alpha)]])
 
-    # NOTE: X is a tall matrix with columns [x,y]. Usually we would do M*X
-    #       where M is the matrix that performs the operation we're interested
-    #       in and X is a fat matrix of coordindates with rows [x]
-    #                                                          [y].
-    #       Since X is tall, we need to transpo.se M so we do the following
-    #       matrix multiplication: X*(M^T)
-    # Stretch X
-    X = np.matmul(X, np.transpose(I_stretch))
-    
-    # Rotate the rectangle
-    X = np.matmul(X, np.transpose(R))
+        # NOTE: X is a tall matrix with columns [x,y]. Usually we would do M*X
+        #       where M is the matrix that performs the operation we're interested
+        #       in and X is a fat matrix of coordindates with rows [x]
+        #                                                          [y].
+        #       Since X is tall, we need to transpo.se M so we do the following
+        #       matrix multiplication: X*(M^T)
+        # Stretch X
+        X = np.matmul(X, np.transpose(I_stretch))
 
-    plt.plot(X[:,0]+xc, X[:,1]+yc, linewidth=0.5, color="black")
+        # Rotate the rectangle
+        X = np.matmul(X, np.transpose(R))
+
+    # Plot
+    plt.plot(X[:,0]+xc, X[:,1]+yc, linewidth=linewidth, color=color, zorder=15)
 
     return True
+
+
+class LineSegment:
+    def __init__(self, x1=None, y1=None, x2=None, y2=None) -> None:
+        # Store coordinates as complex numbers
+        self.C1 = complex(x1, y1)
+        self.C2 = complex(x2, y2)
+        # Get the gradient and the y intercept for this line. The gradient and
+        # intercept are m and c, y = mx + c.
+        self.m = (self.C1.imag - self.C2.imag)/(self.C1.real - self.C2.real)
+        self.c = self.C1.imag - self.m*self.C1.real
+
+
+def is_x_in_line_segment(x: float, L: LineSegment):
+    """Function to check if the value x is within the domain of the line 
+    segment defined by L.
+
+    Args:
+        x (float): An x coordinate.
+        L (LineSegment): A line segment in 2D space defined by two 2D coords.
+    """
+    # Find which coord is lower and upper bound
+    if L.C1.real > L.C2.real:
+        x_low = L.C2.real
+        x_upp = L.C1.real
+    else:
+        x_low = L.C1.real
+        x_upp = L.C2.real
+
+    # Check if x is in between x_low and x_upp
+    if x_low <= x <= x_upp:
+        return True
+    else:
+        return False
+
+
+def do_line_segments_intersect(L1: LineSegment, L2:LineSegment):
+    """Check if these two line segments intersect. We check these by solving
+    for the intersection coordinate, x_int, between the two lines (if it
+    exists). Then if x_int lies between x coordinates of L1 and L2, these two
+    lines intersect."""
+    # Solve for the intersection coordinate:
+    #   => y = mx + c
+    #   => m1*x + c1 = m2*x + c2
+    #   => (m1 - m2)*x = c2 - c1
+    #   =>     c2 - c1
+    #   => x = --------
+    #   =>     m1 - m2 
+    x_intersection = (L2.c - L1.c)/(L1.m - L2.m)
+    if is_x_in_line_segment(x_intersection, L1) and is_x_in_line_segment(x_intersection, L2):
+        return True
+    else:
+        return False
+
+
+def is_collision(V1: Vehicle, V2: Vehicle):
+    """Check if the two vehicles V1 and V2 collided. I.e. do the polygons
+    which describe the two vehicles intersect? The polygons are 2D numpy arrays
+    with the following coordinates:
+    [x1, y1]
+    [x2, y2]
+    [x3, y3]
+    [x4, y4]
+    [x1, y1]
+    The last coordinate is repeated so that the polygon forms a closed loop.
+
+    Args:
+        V1 (Vehicle): A vehicle object.
+        V2 (Vehicle): A vehicle object.
+    """
+    # Num coords in rectangle polygon should be 5
+    num_coords = 5
+
+    # Get the two polygons
+    P1 = V1.get_rectangle()
+    P2 = V2.get_rectangle()
+
+    # Cycle through each coordinate and create a line segment, then see if any
+    # two line segments of the two rectangles intersect with each other. If two
+    # line segments intersect then it means there must be a collision because
+    # the two rectangles overlap at some point.
+    for ii in range(num_coords-1):
+        # Get line segment from first rectangle
+        L1 = LineSegment(x1=P1[ii,0], y1=P1[ii,1], x2=P1[ii+1,0], y2=P1[ii+1,1])
+        for jj in range(num_coords-1):
+            # Get line segment from second rectangle
+            L2 = LineSegment(x1=P2[jj,0], y1=P2[jj,1], x2=P2[jj+1,0], y2=P2[jj+1,1])
+
+            # If the two line segments intersect, return, otherwise continue
+            if do_line_segments_intersect(L1, L2):
+                return True
+
+    return False
+
+
+def check_for_collision(v_list: list):
+    """Checks a list of vehicles, v_list, for any collisions between vehicles.
+
+    Args:
+        v_list (list): List of Vehicle objects.
+    """
+    # Initialisations
+    num_vehicles = len(v_list)
+
+    # There is no point in calling this function if there's not atleast 2
+    # vehicles
+    if num_vehicles <= 1:
+        return False
+    
+    # Compare each vehicle against every other vehicle
+    for ii in range(num_vehicles-1):
+        # Get first vehicle
+        V1 = v_list[ii]
+        for jj in range(ii+1, num_vehicles):
+            # Get second vehicle
+            V2 = v_list[jj]
+
+            # Check for collision
+            if is_collision(V1, V2):
+                return True
+
+    return False
 

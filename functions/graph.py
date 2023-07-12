@@ -170,40 +170,6 @@ def path_generation(PLG: PLG, start_node: int, target_cluster: int, max_path_len
     return path
 
 
-def path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: int, degree=2):
-    """Generates a set of paths from the start node to the target cluster.
-    we reach a dead end then we will return a path that ends with "None".
-    
-    target_cluster - Target cluster this vehicle is trying to get to.
-    path           - A path from the starting node to the current node.
-    paths          - A dictionary used to store the each paths in the tree of
-                     possible paths this vehicle can take.
-    degree         - At each node search 2 possible next nodes.
-    """
-
-    # Initialise the path
-    closest_clusters_list = PLG.closest_clusters_dict[target_cluster]
-    max_path_length = 10
-
-    # Check if we can terminate this path, otherwise add a node
-    if (path[-1] in PLG.target_clusters[target_cluster]) or \
-       (len(path) >= max_path_length) or \
-       (path[-1] == None):
-        # Add the generated path to our set of possible list of paths
-        paths[len(paths)] = path
-
-    else:
-        # Loop every neighbour and generate a path
-        for ii in range(degree):
-            # Get the next node
-            next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, PLG.p_next_node, closest_clusters_list, path[-1], n_max=ii+1)
-            # Recursively call into path_tree_generation and extend the path by
-            # the next_node
-            rc = path_tree_generation(PLG, target_cluster, path+[next_node], paths)
-
-    return True
-
-
 def fast_path_tree_generation(PLG: PLG, start_node: int, target_cluster: int, degree=2, max_path_length=20, max_lane_change=2, min_num_paths=3):
     """Generate a tree of possible paths.
 
@@ -252,8 +218,11 @@ def fast_path_tree_generation_(PLG: PLG, target_cluster: int, path: list, paths:
                      generated atleast this many paths.
     """
     # The first element of path, path[0], should always be an integer so check
-    # that this is the case.
-    assert type(path[0]) == int
+    # that this is the case and if this fails then something went wrong
+    # before we tried to call this function. It's not our fault but we can stop
+    # the error from propagating any further.
+    assert (path[0] - int(path[0])) == 0
+    path[0] = int(path[0])
 
     # Initialise some constants
     closest_clusters_list = PLG.closest_clusters_dict[target_cluster]
@@ -298,8 +267,8 @@ def fast_path_tree_generation_(PLG: PLG, target_cluster: int, path: list, paths:
         for ii in range(degree):
             # Get the next node
             next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, PLG.p_next_node, closest_clusters_list, path[-1], n_max=ii+1)
-            # Recursively call into path_tree_generation and extend the path by
-            # the next_node
+            # Recursively call into fast_path_tree_generation_ and extend the
+            # path by the next_node
             rc = fast_path_tree_generation_(PLG, target_cluster, path+[next_node], paths, max_lane_change=max_lane_change, degree=degree, max_path_length=max_path_length)
 
     return True
@@ -382,7 +351,23 @@ def node_path_to_output_data(PLG: PLG, node_path: list, mov_avg_win=3):
     return output_data
 
 
-def plot_node_path(PLG: PLG, node_path: list, color="red"):
-    plt.plot(PLG.nodes[node_path, 0], PLG.nodes[node_path, 1], linewidth=2, color=color, zorder=10)
+def plot_node_path(PLG: PLG, node_path: list, color="red", linewidth=1):
+    plt.plot(PLG.nodes[node_path, 0], PLG.nodes[node_path, 1], linewidth=linewidth, color=color, zorder=20)
     return True
 
+
+def scatter_plot_nodes(PLG: PLG, node_path: list, color="red", s=10):
+    plt.scatter(PLG.nodes[node_path, 0], PLG.nodes[node_path, 1], s=s, color=color, zorder=20)
+    return True
+
+
+def scatter_vehicles(v_list: list, color="red"):
+    """Plot the list of vehicles in v_list. We will use the self.current_state
+    of the vehicle for the plot.
+
+    Args:
+        v_list (list): List of Vehicle objects.
+    """
+    for V in v_list:
+        # Plot vehicle
+        g.plot_rectangle(X=V.get_rectangle(), color=color)

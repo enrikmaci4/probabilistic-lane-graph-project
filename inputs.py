@@ -246,21 +246,41 @@ NODE_LABELS = None
 NODE_LABELS_FONT_SIZE = 6
 NODE_LABELS_FONT_COLOUR = "red"
 
-PLOT_RANDOM_VEHICLE_PATH = False
-PLOT_CONTINUOUS_PATH = True
+PLOT_RANDOM_VEHICLE_PATH = True
+PLOT_CONTINUOUS_PATH = False
 PLOT_DISCRETE_PATH = True
 PLOT_AVERAGE_DISCRETE_PATH = True
 
 PLOT_RANDOM_GENERATED_PATH = False
-PLOT_RANDOM_GENERATED_PATH_TREE = True
-PLOT_START_AND_TARGET_CLUSTERS = False
+PLOT_RANDOM_GENERATED_PATH_TREE = False
+PLOT_START_AND_TARGET_CLUSTERS = True
 
 ###############################################################################
 # Define some constants which are relevant to the code for generating         #
 # simulations:                                                                #
 #                                                                             #
-# dt - The time increment in the simulation.                                  #
+# dt       - The time increment in the simulation.                            #     
+# NO_TTC   - Default to 1000. If the ttc in our simulation data has this      #
+#            value then it means that there is no time to collision, or a     #
+#            time to Collision of infinity  (i.e. following vehicle is        #
+#            travelling slower than preceeding vehicle).                      #
+# V_LENGTH - The length of the vehicles in the simulation (in metres).        #
+# V_WIDTH  - The width of the vehicles in the simulation (in metres).         #
+# SCREEN_WIDTH                                                                #
+#          - For the simulation videos we'll zoom in on the AV and look       #
+#            SCREE_WIDTH/2 either side of the AV.                             #
+# SCREEN_HEIGHT                                                               #
+#          - For the simulation videos we'll zoom in on the AV and look       #
+#            SCREE_HEIGHT/2 above/below the AV.                               #
 #                                                                             #
 ###############################################################################
 dt = 0.1
-                                                          
+NO_TTC = 1000
+V_LENGTH = 2.5
+V_WIDTH = 1.5
+SCREEN_WIDTH = 40
+SCREEN_HEIGHT = 60
+BV_DETECTION_LOOK_AHEAD = 10
+BV_DETECTION_LOOK_ASIDE = 3
+BV_DETECTION_RX = 2*BV_DETECTION_LOOK_AHEAD
+BV_DETECTION_RY = 2*BV_DETECTION_LOOK_ASIDE
