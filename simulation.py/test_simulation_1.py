@@ -62,6 +62,11 @@ def initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, ve
 
     # Create a DataRow data structure and populate it with the data we need to
     # initialise the AV.
+    # - Some constants used to initialise the state
+    speed_mean = 10
+    speed_std = 3
+
+    # - Initialise state
     initial_node_index = 0
     initial_node = start_node
 
@@ -72,7 +77,7 @@ def initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, ve
     initial_state.y = output_data[initial_node_index, 1]
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
-    initial_state.speed = random.uniform(PLG_.statistics.speed_min, PLG_.statistics.speed_max)
+    initial_state.speed = random.uniform(speed_mean-speed_std, speed_mean+speed_std)
     initial_state.acc = acc_models.linear(graph.INF_TTC, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
@@ -138,6 +143,11 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 
     # Create a DataRow data structure and populate it with the data we need to
     # initialise the AV.
+    # - Some constants used to initialise the state
+    speed_mean = 10
+    speed_std = 3
+
+    # - Initialise state
     initial_state = DataRow()
     initial_state.vehicle_id = 0
     initial_state.time = 0
@@ -145,7 +155,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
     initial_state.y = output_data[initial_node_index, 1]
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
-    initial_state.speed = random.uniform(PLG_.statistics.speed_avg-4, PLG_.statistics.speed_avg+4)
+    initial_state.speed = random.uniform(speed_mean-speed_std, speed_mean+speed_std)
     initial_state.acc = acc_models.linear(graph.INF_TTC, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
@@ -249,10 +259,22 @@ def main():
     sim_frame_length = 100
     data = np.zeros((0, NUM_ROWS_IN_DATA_MATRIX))
     num_vehicles = len(v_list)
+    terminate_simulation = False
 
+    # Simulation
     for ii in range(sim_frame_length):
         for jj in range(num_vehicles):
-            v_list[jj].step(ii, v_list)
+            # Simulate a time step for this vehicle
+            rc = v_list[jj].step(ii, v_list)
+
+            # Check if we should terminate the simulation
+            if rc == SIGNAL_TERM_SIM:
+                terminate_simulation = True
+
+        # We need to break out of the outer loop too
+        if terminate_simulation:
+            print(date_time.get_current_time(), f"Target destination reached! {ii} | {jj}")
+            break
 
         if (ii+1)%10 == 0:
             print(ii+1)

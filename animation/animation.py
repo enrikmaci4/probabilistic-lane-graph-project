@@ -27,7 +27,7 @@ SIM_DATA_SAVE_LOC = "output-data/simulation/"
 ###############################################################################
 # ANIMATION CONSTANTS
 START_ANIMATION = False
-dx = 0.5
+dx = 0.75
 dy = 0.1
 # GLOBAL VARIABLES NEEDED FOR ANIMATION
 # - PLG object
@@ -70,14 +70,14 @@ def animate(ii):
         # Cycle through vehicle list and plot the vehicle
         for V in v_list:
             # Get some constants
-            id = int(V.trajectory[ii, 0])
-            x = V.trajectory[ii, 2]
-            y = V.trajectory[ii, 3]
-            speed = round(V.trajectory[ii, 5], 3)
-            acc = round(V.trajectory[ii, 6], 3)
-            ttc = round(V.trajectory[ii, 7], 3)
+            id = int(V.trajectory[ii, II_VEHICLE_ID])
+            x = V.trajectory[ii, II_X]
+            y = V.trajectory[ii, II_Y]
+            speed = round(V.trajectory[ii, II_SPEED], 3)
+            acc = round(V.trajectory[ii, II_ACC], 3)
+            ttc = round(V.trajectory[ii, II_TTC], 3)
             if ttc == graph.INF_TTC:
-                ttc = "-"
+                ttc = "---"
 
             # Plot this vehicle
             v_plot.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red"))
@@ -126,7 +126,7 @@ def main():
     anim.save('test.gif', writer='pillow', fps=5)
 
     #V = v_list[0]
-    #plt.scatter(V.trajectory[:,2], V.trajectory[:,3], s=10, color="skyblue", zorder=20)
+    #plt.scatter(V.trajectory[:,II_X], V.trajectory[:,II_Y], s=10, color="skyblue", zorder=20)
     #plt.xlim([V.current_state.x-SCREEN_WIDTH/2, V.current_state.x+SCREEN_WIDTH/2])
     #plt.ylim([V.current_state.y-SCREEN_HEIGHT/2, V.current_state.y+SCREEN_HEIGHT/2])
     #plt.show()

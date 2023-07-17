@@ -293,9 +293,8 @@ def node_list_to_edge_phase(PLG: PLG, node_list: list):
     # Cycle through the nodes and get the edge phase between each pair of 
     # nodes
     for ii in range(num_nodes-1):
-        node_ii = node_list[ii]
-        node_jj = node_list[ii+1]
-
+        node_ii = int(node_list[ii])
+        node_jj = int(node_list[ii+1])
         x_ii = PLG.nodes[node_ii, 0]
         y_ii = PLG.nodes[node_ii, 1]
         x_jj = PLG.nodes[node_jj, 0]
@@ -647,7 +646,8 @@ def calculate_num_lane_changes(PLG_: PLG, path: list):
     # Get the length of the path and check that it's atleast length 2 otherwise
     # we can't do anything here.
     path_length = len(path)
-    assert path_length >= 2
+    if path_length < 2:
+        return 1
 
     # Now iterate over the path and count the number of lane changes
     for ii in range(path_length-1):

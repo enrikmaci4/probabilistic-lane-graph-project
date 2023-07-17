@@ -10,7 +10,21 @@ import models.acceleration as acc_models
 import models.decision_rules as rules
 import random
 
-NUM_ROWS_IN_DATA_MATRIX = 9
+NUM_ROWS_IN_DATA_MATRIX = 10
+# TRAJECTORY INDICES
+II_VEHICLE_ID = 0
+II_TIME = 1
+II_NODE = 2
+II_X = 3
+II_Y = 4
+II_LANE_ID = 5
+II_SPEED = 6
+II_ACC = 7
+II_TTC = 8
+II_HEAD_ANG = 9
+# SIGNALS
+SIGNAL_CONTINUE_SIM = 0
+SIGNAL_TERM_SIM = 1
 
 ###############################################################################
 # Create a data structure to store the information for one row of our data    #
@@ -51,19 +65,19 @@ class DataRow:
         # DataRow.vehicle_id = id
         #
         # instead of being passed as parameters into the constructor.
-        self.vehicle_id = "x"
-        self.time = "x"
-        self.x = "x"
-        self.y = "x"
-        self.node = "x"
-        self.lane_id = "x"
-        self.speed = "x"
-        self.acc = "x"
-        self.ttc = "x"
-        self.head_ang = "x"
+        self.vehicle_id = graph.EMPTY_ENTRY
+        self.time = graph.EMPTY_ENTRY
+        self.x = graph.EMPTY_ENTRY
+        self.y = graph.EMPTY_ENTRY
+        self.node = graph.EMPTY_ENTRY
+        self.lane_id = graph.EMPTY_ENTRY
+        self.speed = graph.EMPTY_ENTRY
+        self.acc = graph.EMPTY_ENTRY
+        self.ttc = graph.EMPTY_ENTRY
+        self.head_ang = graph.EMPTY_ENTRY
         # Store the most likely path here so that we can use it as a
         # "prediction" for the motion of background vehicls
-        self.most_likely_path = "x"
+        self.most_likely_path = graph.EMPTY_ENTRY
 
 
 ###############################################################################
@@ -134,15 +148,16 @@ class Vehicle():
     ###########################################################################
     def append_current_data(self):
         self.trajectory = np.vstack((self.trajectory, [
-            self.current_state.vehicle_id,      # 0
-            self.current_state.time,            # 1
-            self.current_state.x,               # 2
-            self.current_state.y,               # 3
-            self.current_state.lane_id,         # 4
-            self.current_state.speed,           # 5
-            self.current_state.acc,             # 6
-            self.current_state.ttc,             # 7
-            self.current_state.head_ang         # 8
+            self.current_state.vehicle_id,      # 0 II_VEHICLE_ID
+            self.current_state.time,            # 1 II_TIME
+            self.current_state.node,            # 2 II_NODE
+            self.current_state.x,               # 3 II_X
+            self.current_state.y,               # 4 II_Y
+            self.current_state.lane_id,         # 5 II_LANE_ID
+            self.current_state.speed,           # 6 II_SPEED
+            self.current_state.acc,             # 7 II_ACC
+            self.current_state.ttc,             # 8 II_TTC
+            self.current_state.head_ang         # 9 II_HEAD_ANG
             ]))
 
     ###########################################################################
@@ -271,6 +286,9 @@ class Vehicle():
         # the more expensive computation 5 times instead of at every single
         # time step.
 
+        # Get the current node
+        current_node = self.future_nodes[0]
+
         # First update the list of background vehicles kinematics of 
         # vehicle.
         self.bv_detection(v_list)
@@ -289,6 +307,10 @@ class Vehicle():
             # - Remember that the node has changes so we need to set the
             #   "current node" to the previous "next node".
             current_node  = self.future_nodes[1]
+
+            # Check if we've reached the target destination
+            if current_node in self.PLG.target_clusters[self.target_destination]:
+                return SIGNAL_TERM_SIM
             
             # First generate a tree of paths
             path_tree = graph.fast_path_tree_generation(self.PLG, current_node, self.target_destination)
@@ -354,17 +376,24 @@ class Vehicle():
             # Update acceleration
             self.current_state.acc = acc_models.linear(ttc)
 
-        # Update the remaining values of the current state
+        # Update the remaining values of the current state.
+        # NOTE: We don't update heading angle here. We'll append the current
+        #       state to the path first and then append the heading angle. This
+        #       is so that we can include the most recent node in the heading
+        #       angle calculation performed in self.get_head_ang().
         self.current_state.ttc = ttc
-        self.current_state.head_ang = self.get_head_ang()
         self.current_state.time = ii*dt
+        self.current_state.node = current_node
 
         # Update the kinematics of the vehicle
         self.update_kinematics()
 
         # Append this data row to the trajectory matrix
         self.append_current_data()
+        self.trajectory[-1, II_HEAD_ANG] = self.get_head_ang()
         self.trajectory_length += 1
+
+        return SIGNAL_CONTINUE_SIM
 
     ###########################################################################
     # Utility functions.                                                      #
@@ -378,9 +407,9 @@ class Vehicle():
             y = self.current_state.y
             alpha = self.current_state.head_ang
         else:
-            x = self.trajectory[ii,2]
-            y = self.trajectory[ii,3]
-            alpha = self.trajectory[ii,8]
+            x = self.trajectory[ii,II_X]
+            y = self.trajectory[ii,II_Y]
+            alpha = self.trajectory[ii,II_HEAD_ANG]
 
         # Returns a set of coordinates which describe the edges of the vehicle.
         # Note that we're modelling the vehicle as a rectangle.
@@ -448,31 +477,56 @@ class Vehicle():
     def get_head_ang(self):
         """Calculate the most recent phase using the x,y coordinates in the
         trajectory.
+
+        NOTE: The trajectory length should always be ATLEAST 1 before this
+        function is called.
         """
         # Initialisations
-        mov_avg_win = 15
-        phase_list = []
+        mov_avg_win = 2
 
-        # Get x,y coords
-        x = self.trajectory[:,2]
-        y = self.trajectory[:,3]
-        path_length = len(x)
+        # Get node coords
+        node_path = self.trajectory[:,II_NODE]
+        unique_node_path = [node_path[0]]
+        path_length = len(node_path)
 
-        # Calculate the most recent heading angle
+        # Unique-ify the node path
         for ii in range(path_length-1):
-            dx = x[ii+1] - x[ii]
-            dy = y[ii+1] - y[ii]
-            phase_list.append(cmath.phase(complex(dx, dy)))
+            next_node = node_path[ii+1]
+            # Only append this node if it is different to the previoud node
+            if next_node != unique_node_path[-1]:
+                unique_node_path.append(next_node)
 
-        # Calculate moving average of phase list
-        phase_list_len = len(phase_list)
-        if phase_list_len == 0:
+        # Append some of the future node since we're travelling in that
+        # direction the car should orient itself in that direction
+        #
+        # NOTE: We could get an error here if the path length is only 1 or 2
+        #       long
+        if unique_node_path[-1] != self.current_state.most_likely_path[1]:
+            unique_node_path.append(self.current_state.most_likely_path[1])
+
+        if unique_node_path[-1] != self.current_state.most_likely_path[2]:
+            unique_node_path.append(self.current_state.most_likely_path[2])
+
+        # Phase list
+        num_nodes_in_path = len(unique_node_path)
+
+        # Check the number of nodes in the path
+        assert num_nodes_in_path >= 1
+        if num_nodes_in_path == 1:
+            # Just return the current value
             return self.current_state.head_ang
         
-        elif phase_list_len >= mov_avg_win:
-            return np.average(phase_list[-mov_avg_win::])
+        elif num_nodes_in_path-1 < mov_avg_win:
+            # NOTE: We use num_nodes_in_path-1 because if there are N nodes
+            #       there are N-1 phases.
+            # Turn the node path into a phase list
+            phase_list = graph.node_list_to_edge_phase(self.PLG, unique_node_path)
+            return np.average(phase_list)
         
         else:
-            return np.average(phase_list)
+            # Turn the node path into a phase list and take the average of the
+            # last mov_avg_win number of phases
+            phase_list = graph.node_list_to_edge_phase(self.PLG, unique_node_path)
+            return np.average(phase_list[-mov_avg_win::])
 
 
