@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-from math import inf
+import math
 from inputs import *
 import copy
 import cmath
@@ -12,6 +12,10 @@ from classes.PLG import *
 COLOUR_LOWER = 0
 COLOUR_UPPER = 1
 EMPTY_ENTRY = -1010101
+HEAD_ANG_MOV_AVG_WIN = 3
+# NOTE: This needs to be a high positive number
+INF_TTC = 1000
+INF_SMALL = 1E-10
 
 
 class GraphPlotInformation:
@@ -182,7 +186,7 @@ def fast_path_tree_generation(PLG: PLG, start_node: int, target_cluster: int, de
     paths = {}
     ii = 0
 
-    # Call fast_path_generation_ until we generate enough paths, or until we
+    # Call _fast_path_generation until we generate enough paths, or until we
     # can't call it anymore.
     while (len(paths) < min_num_paths) and (max_lane_change <= num_lanes_in_map):
         # Initialisions. Yes - we initialise these two variables above aswell.
@@ -192,14 +196,14 @@ def fast_path_tree_generation(PLG: PLG, start_node: int, target_cluster: int, de
         paths = {}
         
         # Generate paths
-        rc = fast_path_tree_generation_(PLG, target_cluster, path, paths, max_lane_change=max_lane_change, degree=degree, max_path_length=max_path_length)
+        rc = _fast_path_tree_generation(PLG, target_cluster, path, paths, max_lane_change=max_lane_change, degree=degree, max_path_length=max_path_length)
         max_lane_change += 1
 
     # We found some paths, now return them
     return paths
 
 
-def fast_path_tree_generation_(PLG: PLG, target_cluster: int, path: list, paths: dict, degree=2, max_path_length=15, max_lane_change=2):
+def _fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths: dict, degree=2, max_path_length=15, max_lane_change=2):
     """Generates a set of paths from the start node to the target cluster.
     we reach a dead end then we will return a path that ends with "None".
 
@@ -267,9 +271,9 @@ def fast_path_tree_generation_(PLG: PLG, target_cluster: int, path: list, paths:
         for ii in range(degree):
             # Get the next node
             next_node = arg_max_p_next_node_given_target(PLG.p_next_node_given_target, PLG.p_next_node, closest_clusters_list, path[-1], n_max=ii+1)
-            # Recursively call into fast_path_tree_generation_ and extend the
+            # Recursively call into _fast_path_tree_generation and extend the
             # path by the next_node
-            rc = fast_path_tree_generation_(PLG, target_cluster, path+[next_node], paths, max_lane_change=max_lane_change, degree=degree, max_path_length=max_path_length)
+            rc = _fast_path_tree_generation(PLG, target_cluster, path+[next_node], paths, max_lane_change=max_lane_change, degree=degree, max_path_length=max_path_length)
 
     return True
 
@@ -309,7 +313,7 @@ def node_list_to_edge_phase(PLG: PLG, node_list: list):
     return edge_phase_list
 
 
-def node_path_to_output_data(PLG: PLG, node_path: list, mov_avg_win=3):
+def node_path_to_output_data(PLG: PLG, node_path: list, mov_avg_win=HEAD_ANG_MOV_AVG_WIN):
     """Converts a list of nodes into a 2D matrix of output data. The columns
     of the matrix are as follows:
     1. x coordinate of node
@@ -371,3 +375,288 @@ def scatter_vehicles(v_list: list, color="red"):
     for V in v_list:
         # Plot vehicle
         g.plot_rectangle(X=V.get_rectangle(), color=color)
+
+
+def _solve_quadratic(a: float, b: float, c: float):
+    """Solves a quadratic in the form:
+      
+       a*t^2 + b*t + t = 0
+
+    Note that we are solving for a time, t, in this case. Since this is a
+    physical quantity, we're going to disallow complex roots to this quadratic.
+    The solution to this quadratic is meant to be a time-to-collision, a
+    complex solution simply means that the two vehicles will not collide
+    therefore we return an infinite TTC in this case. We'll use the value
+    "INF_TTC" to represent this case.
+
+    The solution to the quadratic is:
+
+           - b +/- sqrt(b^2 - 4*a*c)
+       t = -------------------------
+                     2*a              
+       
+    """
+    # Calculate the discriminant
+    discriminant = b**2 - 4*a*c
+
+    # Calculate the roots
+    if discriminant >= 0:
+        root1 = (-b - math.sqrt(discriminant))/(2*a)
+        root2 = (-b + math.sqrt(discriminant))/(2*a)
+        roots = [root1, root2]
+        if min(roots) > 0:
+            return min(min(roots), INF_TTC)
+        else:
+            return min(max(roots), INF_TTC)
+    else:
+        return INF_TTC
+
+
+def _calculate_distance_between_nodes(PLG_: PLG, n1: int, n2: int):
+    """Calculate the Euclidean distance between two nodes n1 and n2.
+    """
+    # Coords of node 1
+    x1 = PLG_.nodes[n1, 0]
+    y1 = PLG_.nodes[n1, 1]
+    # Coords of node 2
+    x2 = PLG_.nodes[n2, 0]
+    y2 = PLG_.nodes[n2, 1]
+    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+
+
+def _vt_2at2(v: float, a: float, t: float):
+    """Calculates: s = v*t + (1/2)*a*t^2
+
+    Args:
+        v (float): Speed.
+        a (float): Acceleration.
+        t (float): Time.
+    """
+    return v*t + (1/2)*a*t**2
+
+
+def _calculate_1d_ttc(ds: float, dv: float, da:float):
+    """Calculate the TTC for a one-dimensional case in the following form:
+
+        |              # Where the two vehicles are both travelling upwards.
+        A  --- v1, a1  # The symbol definitions are:
+        |   |          # - ds = distance between the two vehicles.
+        |   |          # - dv = v2 - v1. If this quantity is greater than 0 it
+        |   | ds       #        means that the two vehicles will collide in a
+        |   |          #        finite time. If this quantity is less than 0
+        |   |          #        the two vehicles will may never collide.
+        B  --- v2, a2  #        Depending on the acceleration difference.
+        |              # - da = a2 - a1. If this is greater than 0 it means
+                       #        the following vehicle is speeding up faster
+                       #        than the preceding vehicle and vice versa.
+
+        To calculate the TTC here, we use the following SUVAT equation:
+
+          s = v*T + (1/2)*a*T^2
+
+        Set the quantities, s, v and a to the differential quantities described
+        above to get:
+
+          ds = dv*T + (1/2)*da*T^2
+
+          (1/2)*da*T^2 + dv*T - ds = 0
+
+        Now we have a quadratic equation in the form a*x^2 + bx + c = 0 where:
+          a = (1/2)*da
+          b = dv
+          c = -ds
+
+        NOTE: It is the responsibility of the caller of this function to ensure
+        that ds, dv, and da have been assigned correctly.
+    """
+    # Set quadratic variables
+    a = (1/2)*(da)
+    b = dv
+    c = -ds
+
+    # If da = 0 then set it to a really small non-zero number. This is because
+    # we'll get a division by 0 error in the quadratic formula.
+    if a == 0:
+        a = INF_SMALL
+
+    # Solve the quadratic - we only want one root
+    root = _solve_quadratic(a, b, c)
+
+    return root
+
+
+def calculate_ttc(PLG_: PLG, path_av: list, speed_av: float, acc_av: float, path_bv: list, speed_bv: float, acc_bv: float):
+    """Calculate the TTC between two vehicles with the future trajectories and
+    speeds specified. This calculates the time-to-collision for the "AV".
+
+    There are 3 unique cases here:
+
+    - Case 1 - AV is leading - 1D:
+
+        |    # In this case both vehicles are travelling upwards along the
+        A    # lane. The "AV" is leading. In this case there will be a finite
+        |    # TTC if the following vehicle is moving faster than our vehicle.
+        |    # We'll represent this using a negative value for the TTC to
+        B    # indicate that the risk is due to a fast travelling vehicle
+        |    # behind us.
+
+    - Case 2 - AV is following - 1D:
+
+        |    # Both vehicles are travelling upwards. The "AV" is following. We
+        B    # have a finite TTC if we're travelling faster than the BV. We 
+        |    # represent this case using a finite TTC which is greater than 0.
+        |    
+        A    
+        |    
+
+    - Case 3 - Future intersection point - 2D:
+
+        |  |  # Both vehicles must travel a finite distance to the future
+        x  |  # intersection point (denoted by "x"). This is a 2D case because
+        |\ |  # it involved a lane change. The collision cases where both
+        | \|  # vehicles remain in a single lane throughout the course of the
+        |  |  # simulation are 1D because we can thing travelling along a lane
+        B  A  # as though being constrained to a single line.
+        |  |  # 
+              # Calculating the TTC in this case is slightly less straight
+              # forward because the standard formula SUVAT formula
+              # s = u*t + (1/2)*a*t^2 does not hold between the two vehicles
+              # simultaneously.
+              #
+              # In this case we do the following, calculate the time taken for
+              # each vehicle to go from their current location to "x".
+              # We simulate the motion of the two vehicles until the first
+              # vehicle arrives at point "x". We then treat this as the
+              # standard 1D case described above.
+    """
+    # First check if there is a node in common between the paths of the two
+    # vehicles
+    nodes_in_common = set(path_av).intersection(set(path_bv))
+    if len(nodes_in_common) == 0:
+        return False
+    else:
+        # We need to store the first node of each vehicles path. If thist
+        # first node is the list of nodes that the paths have in common, then
+        # this is a simple 1D collison case. This is either case 1 or case 2.
+        current_node_av = path_av[0]
+        current_node_bv = path_bv[0]
+
+        if current_node_av in nodes_in_common:
+            # Case 1 - The current AV position is in the intersection of the
+            # nodes.
+            ds = _calculate_distance_between_nodes(PLG_, current_node_av, current_node_bv)
+            dv = speed_bv - speed_av
+            da = acc_bv - acc_av
+
+            # Calculate the TTC
+            ttc = _calculate_1d_ttc(ds, dv, da)
+
+            if ttc == INF_TTC:
+                return ttc
+            else:
+                return -ttc
+
+        elif current_node_bv in nodes_in_common:
+            # Case 2 - The current BV position is in the intersection of the
+            # nodes.
+            ds = _calculate_distance_between_nodes(PLG_, current_node_av, current_node_bv)
+            dv = speed_av - speed_bv
+            da = acc_av - acc_bv
+
+            # Calculate the TTC
+            ttc = _calculate_1d_ttc(ds, dv, da)
+            return ttc
+
+        else:
+            # Case 3 - Neither starting node is in the intersection of the
+            # paths but the two vehicles paths intersect at some point so this
+            # is case 3.
+            # 
+            # First find the node "x".
+            node_x = None
+            for node in path_av:
+                if node in nodes_in_common:
+                    node_x = node
+                    break
+            assert node_x != None
+            assert node_x != current_node_av
+            assert node_x != current_node_bv
+
+            # Get distance between vehicles and node_x
+            ds_av = _calculate_distance_between_nodes(PLG_, current_node_av, node_x)
+            ds_bv = _calculate_distance_between_nodes(PLG_, current_node_bv, node_x)
+
+            # Calculate time for each vehicle to get to node x
+            t_av = _calculate_1d_ttc(ds_av, speed_av, acc_av)
+            t_bv = _calculate_1d_ttc(ds_bv, speed_bv, acc_bv)
+
+            if t_av < t_bv:
+                # AV will get there first
+                #
+                # Calculate the distance that the BV will have travelled in
+                # the time it takes the AV to get to node_x.
+                bv_distance_travelled_in_t_av = _vt_2at2(speed_bv, acc_bv, t_av)
+                assert bv_distance_travelled_in_t_av < ds_bv
+
+                # Distance left to travel after the AV gets to node x
+                ds = ds_bv - bv_distance_travelled_in_t_av
+
+                # Calculate the TTC from this point onwards. We now have a 1D
+                # case.
+                dv = speed_bv - speed_av
+                da = acc_bv - acc_av
+                ttc_ = _calculate_1d_ttc(ds, dv, da)
+
+                # The total TTC is then the time taken for the AV to get to
+                # node_x plus the time TTC after that.
+                if ttc_ == INF_TTC:
+                    return INF_TTC
+                else:
+                    return -(t_av + ttc_)
+            else:
+                # BV will get there first
+                #
+                # Calculate the distance that the AV will have travelled in
+                # the time it takes the BV to get to node_x.
+                av_distance_travelled_in_t_bv = _vt_2at2(speed_av, acc_av, t_bv)
+                assert av_distance_travelled_in_t_bv < ds_av
+
+                # Distance left to travel after the BV gets to node x
+                ds = ds_av - av_distance_travelled_in_t_bv
+
+                # Calculate the TTC from this point onwards. We now have a 1D
+                # case.
+                dv = speed_av - speed_bv
+                da = acc_av - acc_bv
+                ttc_ = _calculate_1d_ttc(ds, dv, da)
+
+                # The total TTC is then the time taken for the AV to get to
+                # node_x plus the time TTC after that.
+                if ttc_ == INF_TTC:
+                    return INF_TTC
+                else:
+                    return t_bv + ttc_
+
+
+def calculate_num_lane_changes(PLG_: PLG, path: list):
+    """Calculate the number of lane changes in the path.
+    """
+    # Initialisations
+    num_lane_change = 0
+
+    # Get the length of the path and check that it's atleast length 2 otherwise
+    # we can't do anything here.
+    path_length = len(path)
+    assert path_length >= 2
+
+    # Now iterate over the path and count the number of lane changes
+    for ii in range(path_length-1):
+        # Get current lane ID and previous lane ID
+        current_lid = PLG_.node_lane_ids[ii+1]
+        previous_lid = PLG_.node_lane_ids[ii]
+        
+        # Check for a lane change
+        if current_lid != previous_lid:
+            num_lane_change += 1
+
+    return num_lane_change

@@ -274,8 +274,8 @@ def moving_average(y, x=[], n=None):
 
     Returns:
         ma (np row vec): Moving average of y
-        ma_x (np row vec): Horizontal axis (e.g. time) vector corresponding to moving
-                         average of y
+        ma_x (np row vec): Horizontal axis (e.g. time) vector corresponding to
+                         moving average of y
     """
     """Check the optional input arguments"""
     if len(x) == 0:
@@ -411,10 +411,11 @@ def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="sk
                       [math.sin(alpha), math.cos(alpha)]])
 
         # NOTE: X is a tall matrix with columns [x,y]. Usually we would do M*X
-        #       where M is the matrix that performs the operation we're interested
-        #       in and X is a fat matrix of coordindates with rows [x]
-        #                                                          [y].
-        #       Since X is tall, we need to transpo.se M so we do the following
+        #       where M is the matrix that performs the operation we're
+        #       interested in and X is a fat matrix of coordindates with rows
+        #       [x]
+        #       [y].
+        #       Since X is tall, we need to transpose M so we do the following
         #       matrix multiplication: X*(M^T)
         # Stretch X
         X = np.matmul(X, np.transpose(I_stretch))
@@ -423,9 +424,7 @@ def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="sk
         X = np.matmul(X, np.transpose(R))
 
     # Plot
-    plt.plot(X[:,0]+xc, X[:,1]+yc, linewidth=linewidth, color=color, zorder=15)
-
-    return True
+    return plt.plot(X[:,0]+xc, X[:,1]+yc, linewidth=linewidth, color=color, zorder=15)
 
 
 class LineSegment:

@@ -21,11 +21,12 @@ from shapely.geometry import Polygon
 
 DATA_LOC = "data/"+DATASET+"/cleaned/"
 PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
+SIM_DATA_SAVE_LOC = "output-data/simulation/"
 
 ###############################################################################
 # ABOUT THIS SCRIPT:                                                          #
 #                                                                             #
-# - Generates an initial state for a simulation and plots this state.         #
+# - Created the animation given a list of vehicles and their data.            #
 #                                                                             #
 ###############################################################################
 
@@ -144,7 +145,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
     initial_state.y = output_data[initial_node_index, 1]
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
-    initial_state.speed = random.uniform(PLG_.statistics.speed_min, PLG_.statistics.speed_max)
+    initial_state.speed = random.uniform(PLG_.statistics.speed_avg-4, PLG_.statistics.speed_avg+4)
     initial_state.acc = acc_models.linear(graph.INF_TTC, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
@@ -167,7 +168,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 ###############################################################################
 def generate_platoon(PLG_:PLG, AV: Vehicle):
     # Initialisations
-    num_bvs = 5
+    num_bvs = 3
     v_list = [AV]
 
     # First we're going to get a list of nodes which we know are within the AV
@@ -233,31 +234,36 @@ def main():
     # Initialise an AV
     AV = initialise_av_position(PLG_)
 
-    # Generate some paths
-    path = graph.path_generation(PLG_, int(AV.current_state.node), AV.target_destination)
-    paths = graph.fast_path_tree_generation(PLG_, AV.current_state.node, AV.target_destination, max_path_length=10)
-    print(date_time.get_current_time(), "Number of paths generated =", len(paths))
-
     # Generate a platoon of vehicles
     v_list = generate_platoon(PLG_, AV)
+    print(date_time.get_current_time(), f"Generated platoon with {len(v_list)} vehicles")
 
-    # Do some plots
-    graph.draw(PLG_)
-    ii_random = random.randint(0, len(paths)-1)
-    for ii in paths:
-        graph.plot_node_path(PLG_, paths[ii], color="orange")
+    # Save platoon incase we want to re-use it
+    load_platoon = False
+    if load_platoon:
+        v_list = g.load_pickled_data("platoon")
+    else:
+        g.save_pickled_data("platoon", v_list)
 
-    graph.plot_node_path(PLG_, path)
-    graph.plot_node_path(PLG_, paths[ii_random], color="yellow")
-    graph.scatter_vehicles(v_list, color="red")
-    g.plot_rectangle(AV.get_rectangle(), color="skyblue")
-    g.plot_rectangle(xc=AV.current_state.x, yc=AV.current_state.y, Rx=BV_DETECTION_RX, Ry=BV_DETECTION_RY, alpha=AV.current_state.head_ang, color="grey")    
+    # Simulation params
+    sim_frame_length = 100
+    data = np.zeros((0, NUM_ROWS_IN_DATA_MATRIX))
+    num_vehicles = len(v_list)
 
-    # Set the aspect ratio to be equal
-    plt.xlim([AV.current_state.x-SCREEN_WIDTH/2, AV.current_state.x+SCREEN_WIDTH/2])
-    plt.ylim([AV.current_state.y-SCREEN_HEIGHT/2, AV.current_state.y+SCREEN_HEIGHT/2])
-    plt.gca().set_aspect("equal", adjustable="box")
-    plt.show()
+    for ii in range(sim_frame_length):
+        for jj in range(num_vehicles):
+            v_list[jj].step(ii, v_list)
+
+        if (ii+1)%10 == 0:
+            print(ii+1)
+
+    # Get a data matrix
+    for ii in range(num_vehicles):
+        data = np.vstack((data, v_list[ii].trajectory))
+
+    # Save data
+    np.savetxt(SIM_DATA_SAVE_LOC+"test_data", data)
+    g.save_pickled_data(SIM_DATA_SAVE_LOC+"test_list", v_list)
 
 
 if __name__=="__main__":

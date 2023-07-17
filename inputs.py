@@ -260,10 +260,6 @@ PLOT_START_AND_TARGET_CLUSTERS = True
 # simulations:                                                                #
 #                                                                             #
 # dt       - The time increment in the simulation.                            #     
-# NO_TTC   - Default to 1000. If the ttc in our simulation data has this      #
-#            value then it means that there is no time to collision, or a     #
-#            time to Collision of infinity  (i.e. following vehicle is        #
-#            travelling slower than preceeding vehicle).                      #
 # V_LENGTH - The length of the vehicles in the simulation (in metres).        #
 # V_WIDTH  - The width of the vehicles in the simulation (in metres).         #
 # SCREEN_WIDTH                                                                #
@@ -274,8 +270,7 @@ PLOT_START_AND_TARGET_CLUSTERS = True
 #            SCREE_HEIGHT/2 above/below the AV.                               #
 #                                                                             #
 ###############################################################################
-dt = 0.1
-NO_TTC = 1000
+dt = 0.05
 V_LENGTH = 2.5
 V_WIDTH = 1.5
 SCREEN_WIDTH = 40

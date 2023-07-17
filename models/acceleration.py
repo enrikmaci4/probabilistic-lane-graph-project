@@ -1,3 +1,5 @@
+import functions.graph as graph
+
 ###############################################################################
 # A linear acceleration model used in order to test our framework. The model  #
 # Looks something like this:                                                  #
@@ -15,8 +17,12 @@
 # => c = -A_max                                                               #
 ###############################################################################
 def linear(ttc: float, A_max=2, T=1):
-    # Check the input is > 0
-    assert ttc > 0
+    # Check the input is > 0 - Unless it's the special value we assigned to
+    # indicate infinite ttc.
+    if ttc != graph.INF_TTC:
+        assert ttc > 0
+    elif ttc == graph.INF_TTC:
+        ttc = 1000
     # Get gradient and intercept
     m = A_max/T
     c = -A_max
