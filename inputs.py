@@ -246,14 +246,16 @@ NODE_LABELS = None
 NODE_LABELS_FONT_SIZE = 6
 NODE_LABELS_FONT_COLOUR = "red"
 
-PLOT_RANDOM_VEHICLE_PATH = True
+PLOT_RANDOM_VEHICLE_PATH = False
 PLOT_CONTINUOUS_PATH = False
-PLOT_DISCRETE_PATH = True
-PLOT_AVERAGE_DISCRETE_PATH = True
+PLOT_DISCRETE_PATH = False
+PLOT_AVERAGE_DISCRETE_PATH = False
 
 PLOT_RANDOM_GENERATED_PATH = False
 PLOT_RANDOM_GENERATED_PATH_TREE = False
-PLOT_START_AND_TARGET_CLUSTERS = True
+PLOT_START_AND_TARGET_CLUSTERS = False
+
+PLOT_ARTIFICIAL_CONNECTIONS = True
 
 ###############################################################################
 # Define some constants which are relevant to the code for generating         #

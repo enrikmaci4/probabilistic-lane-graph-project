@@ -107,6 +107,78 @@ def draw(PLG):
         for ii in range(PLG.num_nodes):
             plt.text(x[ii] + dx, y[ii] + dy, graph_plot_info.node_labels[ii], color=graph_plot_info.node_labels_font_colour, fontsize=graph_plot_info.node_labels_font_size, fontweight="bold", zorder=5)
 
+    # Plot artificial edges
+    if PLOT_ARTIFICIAL_CONNECTIONS:
+        _draw(connect_nodes(PLG), PLG, color="red")
+
+
+def _draw(adj_mat, PLG_: PLG, color: str):
+    """Plot graph specified in colour specified
+    """
+    # Initialise Graph Plot Information
+    graph_plot_info = GraphPlotInformation(PLG_)
+    # Coordinates of nodes
+    x = PLG_.nodes[:,0]
+    y = PLG_.nodes[:,1]
+
+    # Get the shape of the adjacency matrix and assert that it is square
+    shape_of_adj_mat = np.shape(adj_mat)
+    num_rows = shape_of_adj_mat[0]
+    num_cols = shape_of_adj_mat[1]
+    assert num_rows == num_cols
+    # Cycle through the adjacency matrix and plot edges
+    for ii in range(num_rows):
+        for jj in range(ii+1, num_cols):
+            if max(adj_mat[ii,jj], adj_mat[jj,ii]) > 0:
+                # If we've decided to shade the edges by probability then get
+                # the shading for this edge
+                if graph_plot_info.shade_edges_with_connection_probability:
+                    shade_value = min(1 - adj_mat[ii, jj], 1 - adj_mat[jj, ii])*graph_plot_info.shade_darkness
+                    graph_plot_info.edge_colour = [shade_value, shade_value, shade_value]
+
+                # Plot the edge
+                plt.plot([x[ii], x[jj]], [y[ii], y[jj]], color=color, linewidth=graph_plot_info.edge_line_width, zorder=3)
+
+
+
+def connect_nodes(PLG_: PLG):
+    """Artificially connect nodes
+    """
+    # Initialie another matrix
+    PLG_adverse_conn = np.zeros((PLG_.num_nodes, PLG_.num_nodes))
+
+    # Create connections
+    PLG_adverse_conn[1200,173] = 1
+    PLG_adverse_conn[1201,171] = 1
+    PLG_adverse_conn[1202,170] = 1
+    PLG_adverse_conn[1203,169] = 1
+    PLG_adverse_conn[1419,168] = 1
+    PLG_adverse_conn[1204,167] = 1
+    PLG_adverse_conn[1205,166] = 1
+    PLG_adverse_conn[1206,165] = 1
+    PLG_adverse_conn[1207,164] = 1
+    PLG_adverse_conn[1208,162] = 1
+    PLG_adverse_conn[1210,160] = 1
+    PLG_adverse_conn[1212,158] = 1
+    PLG_adverse_conn[1214,524] = 1
+    PLG_adverse_conn[1256,523] = 1
+
+    PLG_adverse_conn[391,736] = 1
+    PLG_adverse_conn[1312,735] = 1
+    PLG_adverse_conn[390,736] = 1
+
+    PLG_adverse_conn[32,1356] = 1
+    PLG_adverse_conn[30,1051] = 1
+
+    PLG_adverse_conn[403,485] = 1
+    PLG_adverse_conn[405,485] = 1
+
+    PLG_adverse_conn[1443,227] = 1
+    PLG_adverse_conn[1477,226] = 1
+    PLG_adverse_conn[1477,226] = 1
+
+    return PLG_adverse_conn
+
 
 def arg_max_p_next_node(p_next_node, current_node, n_max=1):
     """Returns the next node with the highest probability of being visited
