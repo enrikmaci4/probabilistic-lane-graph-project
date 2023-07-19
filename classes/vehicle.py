@@ -382,6 +382,7 @@ class Vehicle():
             # Continue the step
             self._continue_step(ii, ttc, current_node)
 
+        # TODO: Fix overshoot problem -> creates jaggy heading angles
 
         return SIGNAL_CONTINUE_SIM
     

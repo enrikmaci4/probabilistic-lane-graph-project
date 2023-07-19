@@ -250,9 +250,9 @@ def main():
     # Save platoon incase we want to re-use it
     load_platoon = False
     if load_platoon:
-        v_list = g.load_pickled_data("platoon")
+        v_list = g.load_pickled_data(SIM_DATA_SAVE_LOC+"platoon")
     else:
-        g.save_pickled_data("platoon", v_list)
+        g.save_pickled_data(SIM_DATA_SAVE_LOC+"platoon", v_list)
 
     # Simulation params
     sim_frame_length = 100
@@ -262,6 +262,8 @@ def main():
 
     # Simulation
     for ii in range(sim_frame_length):
+        # For each time step loop over every vehicle and take a "step" i.e.
+        # update it's state over a period "dt".
         for jj in range(num_vehicles):
             # Simulate a time step for this vehicle
             rc = v_list[jj].step(ii, v_list)
@@ -279,6 +281,9 @@ def main():
             print(ii+1)
 
     # TODO: Smooth the heading angle.
+    # TODO: Add collision detection to simulation.
+    # TODO: Add distance to collision
+    # TODO: Sometimes this script fails. Will fix...
 
     # Get a data matrix
     for ii in range(num_vehicles):

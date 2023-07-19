@@ -92,7 +92,8 @@ def animate(ii):
                 plt.ylim([y-SCREEN_HEIGHT/2, y+SCREEN_HEIGHT/2])
         
         # Print the index
-        print(ii)
+        if (ii+1)%10 == 0:
+            print(ii+1)
         
 
 # Initializing a figure in which the graph will be plotted
@@ -103,9 +104,6 @@ plt.gca().set_aspect("equal", adjustable="box")
 def main():
     # Global variabls
     global PLG_, v_list
-
-    # Get simulation length
-    simulation_length = len(v_list[0].trajectory[:,0])
 
     # Plot PLG
     graph.draw(PLG_)
@@ -123,8 +121,11 @@ def main():
     plt.tight_layout(h_pad=0.1, w_pad=0.1)
 
     # Save the animation
-    anim.save('test.gif', writer='pillow', fps=1)
+    anim.save(SIM_DATA_SAVE_LOC+'test.gif', writer='pillow', fps=10)
 
+    # TODO: Sometimes this script fails. Will fix...
+
+    # Plot one of the vehicles trajectories
     #V = v_list[0]
     #plt.scatter(V.trajectory[:,II_X], V.trajectory[:,II_Y], s=10, color="skyblue", zorder=20)
     #plt.xlim([V.current_state.x-SCREEN_WIDTH/2, V.current_state.x+SCREEN_WIDTH/2])
