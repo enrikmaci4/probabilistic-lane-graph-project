@@ -2,7 +2,6 @@ import numpy as np
 import pickle
 import math
 import matplotlib.pyplot as plt
-from shapely.geometry import Polygon
 from classes.vehicle import *
 
 

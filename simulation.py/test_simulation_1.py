@@ -16,7 +16,6 @@ import numpy as np
 from classes.PLG import *
 from classes.vehicle import *
 import models.acceleration as acc_models
-from shapely.geometry import Polygon
 
 
 DATA_LOC = "data/"+DATASET+"/cleaned/"

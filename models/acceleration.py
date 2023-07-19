@@ -16,7 +16,7 @@ import functions.graph as graph
 # => m = A_max/T                                                              #
 # => c = -A_max                                                               #
 ###############################################################################
-def linear(ttc: float, A_max=2, T=1):
+def linear(ttc: float, A_max=2, T=5):
     # Check the input is > 0 - Unless it's the special value we assigned to
     # indicate infinite ttc.
     if ttc != graph.INF_TTC:

@@ -360,6 +360,9 @@ class Vehicle():
 
             # Don't forget to add the overshoot!
             self.add_overshoot()
+
+            # Continue the step
+            self._continue_step(ii, ttc, current_node)
         else:
             # Calculate TTC
             ttc = graph.INF_TTC
@@ -376,6 +379,16 @@ class Vehicle():
             # Update acceleration
             self.current_state.acc = acc_models.linear(ttc)
 
+            # Continue the step
+            self._continue_step(ii, ttc, current_node)
+
+
+        return SIGNAL_CONTINUE_SIM
+    
+    def _continue_step(self, ii: int, ttc: float, current_node: int):
+        """This is a chunk of repeated code. We'd rather not have the same code
+        in two different places so use this function instead.
+        """
         # Update the remaining values of the current state.
         # NOTE: We don't update heading angle here. We'll append the current
         #       state to the path first and then append the heading angle. This
@@ -392,8 +405,6 @@ class Vehicle():
         self.append_current_data()
         self.trajectory[-1, II_HEAD_ANG] = self._get_head_ang_2()
         self.trajectory_length += 1
-
-        return SIGNAL_CONTINUE_SIM
 
     ###########################################################################
     # Utility functions.                                                      #
