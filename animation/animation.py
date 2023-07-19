@@ -123,7 +123,7 @@ def main():
     plt.tight_layout(h_pad=0.1, w_pad=0.1)
 
     # Save the animation
-    anim.save('test.gif', writer='pillow', fps=5)
+    anim.save('test.gif', writer='pillow', fps=1)
 
     #V = v_list[0]
     #plt.scatter(V.trajectory[:,II_X], V.trajectory[:,II_Y], s=10, color="skyblue", zorder=20)

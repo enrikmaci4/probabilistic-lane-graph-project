@@ -178,7 +178,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 ###############################################################################
 def generate_platoon(PLG_:PLG, AV: Vehicle):
     # Initialisations
-    num_bvs = 3
+    num_bvs = 5
     v_list = [AV]
 
     # First we're going to get a list of nodes which we know are within the AV
@@ -214,7 +214,7 @@ def generate_platoon(PLG_:PLG, AV: Vehicle):
         # Only add this node to our list of nodes for BVs if there is no
         # collision with a vehicle on this node and every other vehicle on the
         # map
-        if not g.check_for_collision(v_list + [BV]):
+        if not g.check_for_collision(v_list + [BV], x_scale=3):
             if start_node not in bv_start_nodes:
                 bv_start_nodes.append(start_node)
                 v_list.append(BV)
@@ -278,6 +278,8 @@ def main():
 
         if (ii+1)%10 == 0:
             print(ii+1)
+
+    # TODO: Smooth the heading angle.
 
     # Get a data matrix
     for ii in range(num_vehicles):

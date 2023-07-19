@@ -480,7 +480,7 @@ def do_line_segments_intersect(L1: LineSegment, L2:LineSegment):
         return False
 
 
-def is_collision(V1: Vehicle, V2: Vehicle):
+def is_collision(V1: Vehicle, V2: Vehicle, x_scale=1, y_scale=1):
     """Check if the two vehicles V1 and V2 collided. I.e. do the polygons
     which describe the two vehicles intersect? The polygons are 2D numpy arrays
     with the following coordinates:
@@ -499,7 +499,7 @@ def is_collision(V1: Vehicle, V2: Vehicle):
     num_coords = 5
 
     # Get the two polygons
-    P1 = V1.get_rectangle()
+    P1 = V1.get_rectangle(x_scale=x_scale, y_scale=y_scale)
     P2 = V2.get_rectangle()
 
     # Cycle through each coordinate and create a line segment, then see if any
@@ -520,11 +520,14 @@ def is_collision(V1: Vehicle, V2: Vehicle):
     return False
 
 
-def check_for_collision(v_list: list):
+def check_for_collision(v_list: list, x_scale=1, y_scale=1):
     """Checks a list of vehicles, v_list, for any collisions between vehicles.
 
     Args:
         v_list (list): List of Vehicle objects.
+        x/y_scale (float): If you would like to increase the collision region
+                       by, say, a factor of 2 in the x/y direction then set
+                       x/y_scale to 2.
     """
     # Initialisations
     num_vehicles = len(v_list)
@@ -543,7 +546,7 @@ def check_for_collision(v_list: list):
             V2 = v_list[jj]
 
             # Check for collision
-            if is_collision(V1, V2):
+            if is_collision(V1, V2, x_scale=x_scale, y_scale=y_scale):
                 return True
 
     return False

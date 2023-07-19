@@ -390,7 +390,7 @@ class Vehicle():
 
         # Append this data row to the trajectory matrix
         self.append_current_data()
-        self.trajectory[-1, II_HEAD_ANG] = self.get_head_ang()
+        self.trajectory[-1, II_HEAD_ANG] = self._get_head_ang_2()
         self.trajectory_length += 1
 
         return SIGNAL_CONTINUE_SIM
@@ -398,7 +398,7 @@ class Vehicle():
     ###########################################################################
     # Utility functions.                                                      #
     ###########################################################################
-    def get_rectangle(self, ii=None):
+    def get_rectangle(self, ii=None, x_scale=1, y_scale=1):
         # Intialisations
         Rx = V_LENGTH/2
         Ry = V_WIDTH/2
@@ -417,8 +417,8 @@ class Vehicle():
         X = g.generate_normalised_rectangle()
 
         # Matrix to stretch X by Rx and Ry in the x and y coords
-        I_stretch = np.array([[Rx, 0],
-                              [0, Ry]])
+        I_stretch = np.array([[x_scale*Rx, 0],
+                              [0, y_scale*Ry]])
 
         # Get the rotation matrix
         R = np.array([[math.cos(alpha), -math.sin(alpha)],
@@ -474,7 +474,7 @@ class Vehicle():
 
         return True
 
-    def get_head_ang(self):
+    def _get_head_ang_1(self):
         """Calculate the most recent phase using the x,y coordinates in the
         trajectory.
 
@@ -504,8 +504,8 @@ class Vehicle():
         if unique_node_path[-1] != self.current_state.most_likely_path[1]:
             unique_node_path.append(self.current_state.most_likely_path[1])
 
-        if unique_node_path[-1] != self.current_state.most_likely_path[2]:
-            unique_node_path.append(self.current_state.most_likely_path[2])
+        #if unique_node_path[-1] != self.current_state.most_likely_path[2]:
+        #    unique_node_path.append(self.current_state.most_likely_path[2])
 
         # Phase list
         num_nodes_in_path = len(unique_node_path)
@@ -528,5 +528,32 @@ class Vehicle():
             # last mov_avg_win number of phases
             phase_list = graph.node_list_to_edge_phase(self.PLG, unique_node_path)
             return np.average(phase_list[-mov_avg_win::])
+
+    def _get_head_ang_2(self):
+        """Simple model: Use just the current and previous x,y coords and we
+        will smooth the result after the simulation is finished
+        """
+        # Get the current x,y coords
+        x_curr = self.trajectory[-1,II_X]
+        y_curr = self.trajectory[-1,II_Y]
+
+        # Previous x,y coords
+        x_prev = self.trajectory[-2,II_X]
+        y_prev = self.trajectory[-2,II_Y]
+
+        # dx and dy
+        dx = x_curr - x_prev
+        dy = y_curr - y_prev
+
+        # Check the number of nodes in the path
+        if  (dx == 0) and (dy == 0):
+            # Just return the current value
+            return self.current_state.head_ang
+
+        else:
+            # Turn the node path into a phase list and take the average of the
+            # last mov_avg_win number of phases
+            return cmath.phase(complex(dx, dy))
+
 
 
