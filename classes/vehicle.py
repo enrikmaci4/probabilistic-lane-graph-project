@@ -286,6 +286,10 @@ class Vehicle():
         # the more expensive computation 5 times instead of at every single
         # time step.
 
+        # Initialisations
+        current_node = self.future_nodes[0]
+        overshot_edge = False
+
         # Update the kinematics of the vehicle based on the previously
         # generated acceleration. We need to update them first thing because if
         # there's an overshoot we need to catch it straight away and decide
@@ -294,9 +298,6 @@ class Vehicle():
         # because todays acceleration affects tomorrow's state. This is
         # essentially an implementeation of that logic...
         rc = self.update_kinematics()
-
-        # Get the current node
-        current_node = self.future_nodes[0]
 
         # First update the list of background vehicles kinematics of 
         # vehicle.
@@ -316,6 +317,7 @@ class Vehicle():
             # - Remember that the node has changes so we need to set the
             #   "current node" to the previous "next node".
             current_node  = self.future_nodes[1]
+            overshot_edge = True
 
             # Check if we've reached the target destination
             if current_node in self.PLG.target_clusters[self.target_destination]:
@@ -394,33 +396,36 @@ class Vehicle():
 
         # Append this data row to the trajectory matrix
         self.append_current_data()
-        self.trajectory[-1, II_HEAD_ANG] = self._get_head_ang_2()
+        if overshot_edge:
+            self.trajectory[-1, II_HEAD_ANG] = self.trajectory[-2, II_HEAD_ANG]
+        else:
+            self.trajectory[-1, II_HEAD_ANG] = self._get_head_ang_2()
         self.trajectory_length += 1
 
         # TODO: Fix overshoot problem -> creates jaggy heading angles
+        # NOTE: I've figured out why the heading angle is jerky! Consider the
+        #       following node set up:
+        #
+        #           x3    x4         If we calculate the current heading angle
+        # (node) x2 o--.----.----o   as the phase of (dx,dy). Then we have the
+        #          /                 following cases:
+        #     x1  .                  
+        #        /                   Case 1 - Travelling from x1->x2 OR x3->x4.
+        #       /                    This results in a heading angle which is
+        #      o                     perfectly aligned along the edge, this is
+        #                            what we want.
+        #
+        #                            Case 2 - The vehicle overshoots its
+        #                            current edge, e.g., it goes from x1->x3.
+        #                            in this case we get a heading angle which
+        #                            is not aligned with either the first edge
+        #                            or the second edge.
+        #
+        # How do we solve this? When we detect that we've overshot an edge,
+        # repeat the same heading angle as before. Then, on the next time step
+        # the heading angle calculation will yield the desired result.
 
         return SIGNAL_CONTINUE_SIM
-    
-    def _continue_step(self, ii: int, ttc: float, current_node: int):
-        """This is a chunk of repeated code. We'd rather not have the same code
-        in two different places so use this function instead.
-        """
-        # Update the remaining values of the current state.
-        # NOTE: We don't update heading angle here. We'll append the current
-        #       state to the path first and then append the heading angle. This
-        #       is so that we can include the most recent node in the heading
-        #       angle calculation performed in self.get_head_ang().
-        self.current_state.ttc = ttc
-        self.current_state.time = ii*dt
-        self.current_state.node = current_node
-
-        # Update the kinematics of the vehicle
-        self.update_kinematics()
-
-        # Append this data row to the trajectory matrix
-        self.append_current_data()
-        self.trajectory[-1, II_HEAD_ANG] = self._get_head_ang_2()
-        self.trajectory_length += 1
 
     ###########################################################################
     # Utility functions.                                                      #
