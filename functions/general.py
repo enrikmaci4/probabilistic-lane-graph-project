@@ -383,7 +383,7 @@ def generate_normalised_rectangle():
     return X
 
 
-def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="skyblue"):
+def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="skyblue", plot_heading=False):
     """Plots a rectangle. If X is defined, just plot the columns against each
     other. Otherwise, use the other information.
 
@@ -421,6 +421,26 @@ def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="sk
 
         # Rotate the rectangle
         X = np.matmul(X, np.transpose(R))
+    
+    else:
+        # Get the centre of the rectangle
+        xc = np.average(X[0:-1,0])
+        yc = np.average(X[0:-1,1])
+
+        # Centre on 0
+        X[:,0] = X[:,0] - xc
+        X[:,1] = X[:,1] - yc
+
+    # Append a line to the rectangle so we know the heading angle
+    if plot_heading:
+        # - First get the coordinates of the centre of the front face
+        xc_ff = (X[-1,0]+X[-2,0])/2
+        yc_ff = (X[-1,1]+X[-2,1])/2
+        # - Now append the following two coordinated to X [xc_ff, y_fcf] and
+        #   [x_c, y_c] to get a line plotted from the centre of the rectangle
+        #   to the centre of the front face.
+        X = np.vstack((X, [xc_ff, yc_ff]))
+        X = np.vstack((X, [0, 0]))
 
     # Plot
     return plt.plot(X[:,0]+xc, X[:,1]+yc, linewidth=linewidth, color=color, zorder=15)

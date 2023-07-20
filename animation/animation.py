@@ -80,7 +80,7 @@ def animate(ii):
                 ttc = "---"
 
             # Plot this vehicle
-            v_plot.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red"))
+            v_plot.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red", plot_heading=True))
 
             # Plot annotations
             annot_string = f"ttc={ttc}\nv={speed}\nid={id}"
@@ -121,7 +121,7 @@ def main():
     plt.tight_layout(h_pad=0.1, w_pad=0.1)
 
     # Save the animation
-    anim.save(SIM_DATA_SAVE_LOC+'test.gif', writer='pillow', fps=10)
+    anim.save(SIM_DATA_SAVE_LOC+'test.gif', writer='pillow', fps=1)
 
     # TODO: Sometimes this script fails. Will fix...
 

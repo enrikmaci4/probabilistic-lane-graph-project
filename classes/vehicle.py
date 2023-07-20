@@ -286,12 +286,21 @@ class Vehicle():
         # the more expensive computation 5 times instead of at every single
         # time step.
 
+        # Update the kinematics of the vehicle based on the previously
+        # generated acceleration. We need to update them first thing because if
+        # there's an overshoot we need to catch it straight away and decide
+        # the new trajectory. Note that we're using the acceleration that we
+        # generated in the previous time step. This makes sense intuitively
+        # because todays acceleration affects tomorrow's state. This is
+        # essentially an implementeation of that logic...
+        rc = self.update_kinematics()
+
         # Get the current node
         current_node = self.future_nodes[0]
 
         # First update the list of background vehicles kinematics of 
         # vehicle.
-        self.bv_detection(v_list)
+        rc = self.bv_detection(v_list)
 
         # Now we have a list of background vehicles, we can proceed to
         # generating our own actions based on what's going on around us. First,
@@ -349,9 +358,7 @@ class Vehicle():
             # Now choose an action from the list of possible decisions
             self.decision = rules.rule_1(self.decision_list)
 
-            # Update the current state with the decision
-            ttc = self.decision.ttc
-            self.current_state.acc = self.decision.acc
+            # Update the path in the current state
             self.current_state.most_likely_path = self.decision.path
 
             # Update self.future_nodes
@@ -361,8 +368,6 @@ class Vehicle():
             # Don't forget to add the overshoot!
             self.add_overshoot()
 
-            # Continue the step
-            self._continue_step(ii, ttc, current_node)
         else:
             # Calculate TTC
             ttc = graph.INF_TTC
@@ -376,11 +381,21 @@ class Vehicle():
                 if (ttc_for_this_bv < ttc) and (ttc_for_this_bv > 0):
                     ttc = ttc_for_this_bv
 
-            # Update acceleration
-            self.current_state.acc = acc_models.linear(ttc)
+            # Update the information in our decision - the informaiton in the
+            # decision struct will then be propagated onto the current_state.
+            self.decision.ttc = ttc
+            self.decision.acc = acc_models.linear(ttc)
 
-            # Continue the step
-            self._continue_step(ii, ttc, current_node)
+        # Update the current state information
+        self.current_state.ttc = self.decision.ttc
+        self.current_state.acc = self.decision.acc
+        self.current_state.time = ii*dt
+        self.current_state.node = current_node
+
+        # Append this data row to the trajectory matrix
+        self.append_current_data()
+        self.trajectory[-1, II_HEAD_ANG] = self._get_head_ang_2()
+        self.trajectory_length += 1
 
         # TODO: Fix overshoot problem -> creates jaggy heading angles
 
