@@ -6,6 +6,7 @@ import os
 sys.path.append(os.getcwd())
 
 import functions.general as g
+from functions.general import progressbar
 import functions.date_time as date_time
 import functions.graph as graph
 import time
@@ -16,6 +17,7 @@ import numpy as np
 from classes.PLG import *
 from classes.vehicle import *
 import models.acceleration as acc_models
+#from tqdm import tqdm
 
 
 DATA_LOC = "data/"+DATASET+"/cleaned/"
@@ -25,7 +27,9 @@ SIM_DATA_SAVE_LOC = "output-data/simulation/"
 ###############################################################################
 # ABOUT THIS SCRIPT:                                                          #
 #                                                                             #
-# - Created the animation given a list of vehicles and their data.            #
+# - Simulate a single scenario and save the data in the output directory. The #
+#   data is saved as Python pickle. The data is a list of vehicle structures  #
+#   each with the same "trajectory" length.                                   #
 #                                                                             #
 ###############################################################################
 
@@ -77,7 +81,7 @@ def initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, ve
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
     initial_state.speed = random.uniform(speed_mean-speed_std, speed_mean+speed_std)
-    initial_state.acc = acc_models.linear(graph.INF_TTC, A_max=PLG_.statistics.acc_max)
+    initial_state.acc = acc_models.linear(graph.INF, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
     return initial_state
@@ -155,7 +159,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
     initial_state.speed = random.uniform(speed_mean-speed_std, speed_mean+speed_std)
-    initial_state.acc = acc_models.linear(graph.INF_TTC, A_max=PLG_.statistics.acc_max)
+    initial_state.acc = acc_models.linear(graph.INF, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
     # Create the AV
@@ -177,7 +181,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 ###############################################################################
 def generate_platoon(PLG_:PLG, AV: Vehicle):
     # Initialisations
-    num_bvs = 5
+    num_bvs = 10
     v_list = [AV]
 
     # First we're going to get a list of nodes which we know are within the AV
@@ -254,14 +258,19 @@ def main():
     else:
         g.save_pickled_data(SIM_DATA_SAVE_LOC+"platoon", v_list)
 
+    #print(v_list[0].trajectory)
+    #g.smooth_output_data(v_list[0])
+    #quit()
+    
     # Simulation params
-    sim_frame_length = 100
-    data = np.zeros((0, NUM_ROWS_IN_DATA_MATRIX))
+    sim_frame_length = 250
+    data = np.zeros((0, NUM_COLS_IN_DATA_MATRIX))
     num_vehicles = len(v_list)
     terminate_simulation = False
 
     # Simulation
-    for ii in range(sim_frame_length):
+    t_ = time.time()
+    for ii in progressbar(range(sim_frame_length), prefix="Simulating: "):
         # For each time step loop over every vehicle and take a "step" i.e.
         # update it's state over a period "dt".
         for jj in range(num_vehicles):
@@ -272,19 +281,21 @@ def main():
             if rc == SIGNAL_TERM_SIM:
                 terminate_simulation = True
 
+        # Now check for collisions
+        if g.check_for_collision(v_list, store_collision=True):
+            terminate_simulation = True
+
         # We need to break out of the outer loop too
         if terminate_simulation:
-            print(date_time.get_current_time(), f"Target destination reached! {ii} | {jj}")
+            print(date_time.get_current_time(), f"Terminating simulation! Either a collision occurred or a vehicle reached it's target destination.")
             break
 
-        if (ii+1)%10 == 0:
-            print(ii+1)
+    print(date_time.get_current_time(), "Time taken =", round(time.time()-t_, 3))
 
     # TODO: Smooth the heading angle.
     # TODO: Add collision detection to simulation.
-    # TODO: Add distance to collision
-    # TODO: Sometimes this script fails. Will fix...
-
+    # TODO: Sometimes this script fails. Will fix...    
+    
     # Get a data matrix
     for ii in range(num_vehicles):
         data = np.vstack((data, v_list[ii].trajectory))

@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import pickle
 import math
@@ -28,6 +29,31 @@ def load_pickled_data(fname):
     with open(fname, "rb") as file_to_read:
         loaded_struct = pickle.load(file_to_read)
     return loaded_struct
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def progressbar(it, prefix="", size=60, out=sys.stdout): # Python3.3+
+    count = len(it)
+    def show(j):
+        x = int(size*j/count)
+        print("{}[{}{}] {}/{}".format(prefix, "#"*x, "."*(size-x), j, count), 
+                end='\r', file=out, flush=True)
+    show(0)
+    for i, item in enumerate(it):
+        yield item
+        show(i+1)
+    print("\n", flush=True, file=out)
 
 
 def reorder(reorder_vector, mat_to_reorder, reverse=False):
@@ -539,7 +565,7 @@ def is_collision(V1: Vehicle, V2: Vehicle, x_scale=1, y_scale=1):
     return False
 
 
-def check_for_collision(v_list: list, x_scale=1, y_scale=1):
+def check_for_collision(v_list: list, x_scale=1, y_scale=1, store_collision=False):
     """Checks a list of vehicles, v_list, for any collisions between vehicles.
 
     Args:
@@ -547,6 +573,10 @@ def check_for_collision(v_list: list, x_scale=1, y_scale=1):
         x/y_scale (float): If you would like to increase the collision region
                        by, say, a factor of 2 in the x/y direction then set
                        x/y_scale to 2.
+        store_collision (bool): Set to True if you would like to set the
+                       V.is_collision to True. This is needed to store the fact
+                       that a vehicle has collided. We need this to highlight
+                       collided vehicles in the animation.py script.
     """
     # Initialisations
     num_vehicles = len(v_list)
@@ -566,7 +596,48 @@ def check_for_collision(v_list: list, x_scale=1, y_scale=1):
 
             # Check for collision
             if is_collision(V1, V2, x_scale=x_scale, y_scale=y_scale):
+                if store_collision:
+                    # Update Vehicle info so we know they've been involved in a
+                    # collision
+                    V1.is_collision = True
+                    V2.is_collision = True
                 return True
 
     return False
 
+
+def smooth_output_data(V: Vehicle, mov_avg_win=10):
+    """Smooth out the x,y and heading angle columns in a vehicle's trajectory
+    matrix using a moving average filter. We will take the centred moving
+    average instead of a trailing moving average.
+
+    Args:
+        D (np.ndarray): Data matrix for a single vehicle.
+        mov_avg_win (int, optional): Moving average window. Defaults to 10.
+    """
+    # Intialise a matrix of zeroes which will store the new data
+    smoothed_len = V.trajectory_length - mov_avg_win + 1
+    print(V.trajectory_length, smoothed_len, mov_avg_win)
+    assert smoothed_len > 1
+    smoothed_trajectory = np.zeros((smoothed_len, NUM_COLS_IN_DATA_MATRIX))
+
+    # If mov_avg_win-1 is even we're going to throw away the last and first
+    # (mov_avg_win-1)/2 number of data points i.e:
+    # 
+    # [x x x o o o o o o o o o x x x]
+    # 
+    # If mov_avg_win/2 is off we're going to throw away the first
+    # floor((mov_avg_win-1)/2) and the last ceil((mov_avg_win-1)/2), i.e:
+    # 
+    # [x x o o o o o o o o o o x x x]
+    left_start_ii = math.floor((mov_avg_win-1)/2)
+    right_end_ii = math.ceil((mov_avg_win-1)/2)
+    
+    # Fill in the columns that we will not be smoothing
+    smoothed_trajectory[:, II_VEHICLE_ID] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_VEHICLE_ID]
+    smoothed_trajectory[:, II_TIME] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_TIME]
+    smoothed_trajectory[:, II_NODE] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_NODE]
+    smoothed_trajectory[:, II_LANE_ID] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_LANE_ID]
+    smoothed_trajectory[:, II_SPEED] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_SPEED]
+    smoothed_trajectory[:, II_ACC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_ACC]
+    smoothed_trajectory[:, II_TTC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_TTC]

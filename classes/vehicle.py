@@ -10,8 +10,8 @@ import models.acceleration as acc_models
 import models.decision_rules as rules
 import random
 
-NUM_ROWS_IN_DATA_MATRIX = 10
-# TRAJECTORY INDICES
+NUM_COLS_IN_DATA_MATRIX = 11
+# TRAJECTORY (DATA MATRIX) INDICES
 II_VEHICLE_ID = 0
 II_TIME = 1
 II_NODE = 2
@@ -21,7 +21,8 @@ II_LANE_ID = 5
 II_SPEED = 6
 II_ACC = 7
 II_TTC = 8
-II_HEAD_ANG = 9
+II_DTC = 9
+II_HEAD_ANG = 10
 # SIGNALS
 SIGNAL_CONTINUE_SIM = 0
 SIGNAL_TERM_SIM = 1
@@ -74,6 +75,7 @@ class DataRow:
         self.speed = graph.EMPTY_ENTRY
         self.acc = graph.EMPTY_ENTRY
         self.ttc = graph.EMPTY_ENTRY
+        self.dtc = graph.EMPTY_ENTRY
         self.head_ang = graph.EMPTY_ENTRY
         # Store the most likely path here so that we can use it as a
         # "prediction" for the motion of background vehicls
@@ -90,10 +92,11 @@ class Decision:
         # Initialise all values of the row to something invalid. We use a
         # character. These values will be set assigned in a separate part of
         # the program.
-        self.path = "x"
-        self.ttc = "x"
-        self.acc = "x"
-        self.num_lane_changes_in_path = "x"
+        self.path = graph.EMPTY_ENTRY
+        self.ttc = graph.EMPTY_ENTRY
+        self.dtc = graph.EMPTY_ENTRY
+        self.acc = graph.EMPTY_ENTRY
+        self.num_lane_changes_in_path = graph.EMPTY_ENTRY
 
 
 ###############################################################################
@@ -104,6 +107,10 @@ class Vehicle():
     # Initialisation.                                                         #
     ###########################################################################
     def __init__(self, PLG: PLG, current_data: DataRow, target_destination: int) -> None:
+        # We should never generate a list of vehicles which are already in a
+        # collided state so initialise this to False. If we detect a collision,
+        # set this to True.
+        self.is_collision = False
         # Store the PLG. Objects should be passed by reference in Python so
         # this shouldn't be computationally expensive. We will not modify PLG
         # at any stage so we will never create a copy of it. We want to avoid
@@ -113,10 +120,10 @@ class Vehicle():
         self.target_destination = target_destination
         # Initialise the current data
         self.current_state = current_data
-        self.current_state.ttc = graph.INF_TTC
+        self.current_state.ttc = graph.INF
         self.init_most_likely_path()
         # Initialise the matrix describing the trajectory for this vehicle
-        self.trajectory = np.zeros((0, NUM_ROWS_IN_DATA_MATRIX))
+        self.trajectory = np.zeros((0, NUM_COLS_IN_DATA_MATRIX))
         self.append_current_data()
         self.trajectory_length = 1
         # Future nodes. This tuple stores:
@@ -157,7 +164,8 @@ class Vehicle():
             self.current_state.speed,           # 6 II_SPEED
             self.current_state.acc,             # 7 II_ACC
             self.current_state.ttc,             # 8 II_TTC
-            self.current_state.head_ang         # 9 II_HEAD_ANG
+            self.current_state.dtc,             # 9 II_DTC
+            self.current_state.head_ang         # 10 II_HEAD_ANG
             ]))
 
     ###########################################################################
@@ -287,6 +295,7 @@ class Vehicle():
         # time step.
 
         # Initialisations
+        rc_signal = SIGNAL_CONTINUE_SIM
         current_node = self.future_nodes[0]
         overshot_edge = False
 
@@ -321,7 +330,7 @@ class Vehicle():
 
             # Check if we've reached the target destination
             if current_node in self.PLG.target_clusters[self.target_destination]:
-                return SIGNAL_TERM_SIM
+                rc_signal = SIGNAL_TERM_SIM
             
             # First generate a tree of paths
             path_tree = graph.fast_path_tree_generation(self.PLG, current_node, self.target_destination)
@@ -332,7 +341,8 @@ class Vehicle():
                 # Initialse
                 path = path_tree[ii]
                 decision_option = Decision()
-                ttc = graph.INF_TTC
+                ttc = graph.INF
+                dtc = graph.INF
                 
                 # Now calculate the TTC between this path and the background
                 # vehicles. We will take the minimum TTC as this is what will
@@ -343,14 +353,18 @@ class Vehicle():
                 # anyway. That's a bit dangerous...
                 for bv in self.bv_list:
                     # Calculate TTC to this BV
-                    ttc_for_this_bv = graph.calculate_ttc(self.PLG, path, self.current_state.speed, self.current_state.acc, bv.most_likely_path, bv.speed, bv.acc)
+                    ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(self.PLG, path, self.current_state.speed, self.current_state.acc, bv.most_likely_path, bv.speed, bv.acc)
 
-                    if (ttc_for_this_bv < ttc) and (ttc_for_this_bv > 0):
+                    if (abs(ttc_for_this_bv) < abs(ttc)):
                         ttc = ttc_for_this_bv
+
+                    if (abs(dtc_for_this_bv) < abs(dtc)):
+                        dtc = dtc_for_this_bv
 
                 # Now calculate/set the rest of decision data
                 decision_option.path = path
                 decision_option.ttc = ttc
+                decision_option.dtc = dtc
                 decision_option.num_lane_changes_in_path = graph.calculate_num_lane_changes(self.PLG, path)
                 decision_option.acc = acc_models.linear(ttc)
 
@@ -358,7 +372,7 @@ class Vehicle():
                 self.decision_list.append(decision_option)
 
             # Now choose an action from the list of possible decisions
-            self.decision = rules.rule_1(self.decision_list)
+            self.decision = rules.rule_2(self.decision_list)
 
             # Update the path in the current state
             self.current_state.most_likely_path = self.decision.path
@@ -372,24 +386,30 @@ class Vehicle():
 
         else:
             # Calculate TTC
-            ttc = graph.INF_TTC
+            ttc = graph.INF
+            dtc = graph.INF
             path = self.current_state.most_likely_path
 
             # Cycle through the BVs
             for bv in self.bv_list:
                 # Calculate TTC to this BV
-                ttc_for_this_bv = graph.calculate_ttc(self.PLG, path, self.current_state.speed, self.current_state.acc, bv.most_likely_path, bv.speed, bv.acc)
+                ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(self.PLG, path, self.current_state.speed, self.current_state.acc, bv.most_likely_path, bv.speed, bv.acc)
 
-                if (ttc_for_this_bv < ttc) and (ttc_for_this_bv > 0):
+                if (abs(ttc_for_this_bv) < abs(ttc)):
                     ttc = ttc_for_this_bv
+
+                if (abs(dtc_for_this_bv) < abs(dtc)):
+                    dtc = dtc_for_this_bv
 
             # Update the information in our decision - the informaiton in the
             # decision struct will then be propagated onto the current_state.
             self.decision.ttc = ttc
+            self.decision.dtc = dtc
             self.decision.acc = acc_models.linear(ttc)
 
         # Update the current state information
         self.current_state.ttc = self.decision.ttc
+        self.current_state.dtc = self.decision.dtc
         self.current_state.acc = self.decision.acc
         self.current_state.time = ii*dt
         self.current_state.node = current_node
@@ -402,7 +422,6 @@ class Vehicle():
             self.trajectory[-1, II_HEAD_ANG] = self._get_head_ang_2()
         self.trajectory_length += 1
 
-        # TODO: Fix overshoot problem -> creates jaggy heading angles
         # NOTE: I've figured out why the heading angle is jerky! Consider the
         #       following node set up:
         #
@@ -425,7 +444,7 @@ class Vehicle():
         # repeat the same heading angle as before. Then, on the next time step
         # the heading angle calculation will yield the desired result.
 
-        return SIGNAL_CONTINUE_SIM
+        return rc_signal
 
     ###########################################################################
     # Utility functions.                                                      #

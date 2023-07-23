@@ -14,7 +14,7 @@ COLOUR_UPPER = 1
 EMPTY_ENTRY = -1010101
 HEAD_ANG_MOV_AVG_WIN = 3
 # NOTE: This needs to be a high positive number
-INF_TTC = 1000
+INF = 1000
 INF_SMALL = 1E-10
 
 
@@ -458,7 +458,7 @@ def _solve_quadratic(a: float, b: float, c: float):
     The solution to this quadratic is meant to be a time-to-collision, a
     complex solution simply means that the two vehicles will not collide
     therefore we return an infinite TTC in this case. We'll use the value
-    "INF_TTC" to represent this case.
+    "INF" to represent this case.
 
     The solution to the quadratic is:
 
@@ -476,11 +476,11 @@ def _solve_quadratic(a: float, b: float, c: float):
         root2 = (-b + math.sqrt(discriminant))/(2*a)
         roots = [root1, root2]
         if min(roots) > 0:
-            return min(min(roots), INF_TTC)
+            return min(min(roots), INF)
         else:
-            return min(max(roots), INF_TTC)
+            return min(max(roots), INF)
     else:
-        return INF_TTC
+        return INF
 
 
 def _calculate_distance_between_nodes(PLG_: PLG, n1: int, n2: int):
@@ -556,8 +556,8 @@ def _calculate_1d_ttc(ds: float, dv: float, da:float):
     return root
 
 
-def calculate_ttc(PLG_: PLG, path_av: list, speed_av: float, acc_av: float, path_bv: list, speed_bv: float, acc_bv: float):
-    """Calculate the TTC between two vehicles with the future trajectories and
+def calculate_ttc_and_dtc(PLG_: PLG, path_av: list, speed_av: float, acc_av: float, path_bv: list, speed_bv: float, acc_bv: float):
+    """Calculate the TTC and DTC between two vehicles with the future trajectories and
     speeds specified. This calculates the time-to-collision for the "AV".
 
     There are 3 unique cases here:
@@ -604,7 +604,11 @@ def calculate_ttc(PLG_: PLG, path_av: list, speed_av: float, acc_av: float, path
     # vehicles
     nodes_in_common = set(path_av).intersection(set(path_bv))
     if len(nodes_in_common) == 0:
-        return False
+        # If there are no nodes in common then set the ttc and dtc to and
+        # infinite value
+        ttc = INF
+        dtc = INF
+        return ttc, dtc
     else:
         # We need to store the first node of each vehicles path. If thist
         # first node is the list of nodes that the paths have in common, then
@@ -621,11 +625,12 @@ def calculate_ttc(PLG_: PLG, path_av: list, speed_av: float, acc_av: float, path
 
             # Calculate the TTC
             ttc = _calculate_1d_ttc(ds, dv, da)
+            dtc = -ds
 
-            if ttc == INF_TTC:
-                return ttc
+            if ttc == INF:
+                return ttc, dtc
             else:
-                return -ttc
+                return -ttc, dtc
 
         elif current_node_bv in nodes_in_common:
             # Case 2 - The current BV position is in the intersection of the
@@ -636,7 +641,8 @@ def calculate_ttc(PLG_: PLG, path_av: list, speed_av: float, acc_av: float, path
 
             # Calculate the TTC
             ttc = _calculate_1d_ttc(ds, dv, da)
-            return ttc
+            dtc = ds
+            return ttc, dtc
 
         else:
             # Case 3 - Neither starting node is in the intersection of the
@@ -677,13 +683,15 @@ def calculate_ttc(PLG_: PLG, path_av: list, speed_av: float, acc_av: float, path
                 dv = speed_bv - speed_av
                 da = acc_bv - acc_av
                 ttc_ = _calculate_1d_ttc(ds, dv, da)
+                dtc = -ds
+
 
                 # The total TTC is then the time taken for the AV to get to
                 # node_x plus the time TTC after that.
-                if ttc_ == INF_TTC:
-                    return INF_TTC
+                if ttc_ == INF:
+                    return INF, dtc
                 else:
-                    return -(t_av + ttc_)
+                    return -(t_av + ttc_), dtc
             else:
                 # BV will get there first
                 #
@@ -700,13 +708,14 @@ def calculate_ttc(PLG_: PLG, path_av: list, speed_av: float, acc_av: float, path
                 dv = speed_av - speed_bv
                 da = acc_av - acc_bv
                 ttc_ = _calculate_1d_ttc(ds, dv, da)
+                dtc = ds
 
                 # The total TTC is then the time taken for the AV to get to
                 # node_x plus the time TTC after that.
-                if ttc_ == INF_TTC:
-                    return INF_TTC
+                if ttc_ == INF:
+                    return INF, dtc
                 else:
-                    return t_bv + ttc_
+                    return t_bv + ttc_, dtc
 
 
 def calculate_num_lane_changes(PLG_: PLG, path: list):

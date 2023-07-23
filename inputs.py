@@ -255,7 +255,7 @@ PLOT_RANDOM_GENERATED_PATH = False
 PLOT_RANDOM_GENERATED_PATH_TREE = False
 PLOT_START_AND_TARGET_CLUSTERS = False
 
-PLOT_ARTIFICIAL_CONNECTIONS = True
+PLOT_ARTIFICIAL_CONNECTIONS = False
 
 ###############################################################################
 # Define some constants which are relevant to the code for generating         #
@@ -272,7 +272,7 @@ PLOT_ARTIFICIAL_CONNECTIONS = True
 #            SCREE_HEIGHT/2 above/below the AV.                               #
 #                                                                             #
 ###############################################################################
-dt = 0.05
+dt = 0.025
 V_LENGTH = 2.5
 V_WIDTH = 1.5
 SCREEN_WIDTH = 40

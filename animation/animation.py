@@ -21,12 +21,15 @@ DATA_LOC = "data/"+DATASET+"/cleaned/"
 PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
 SIM_DATA_SAVE_LOC = "output-data/simulation/"
 
+NEWLINE_CHAR = "\n"
 
 ###############################################################################
 # Generate an animation from an output dataset.                               #
 ###############################################################################
 # ANIMATION CONSTANTS
 START_ANIMATION = False
+FPS = 10
+FREEZE_FOR_X_SECONDS = 3
 dx = 0.75
 dy = 0.1
 # GLOBAL VARIABLES NEEDED FOR ANIMATION
@@ -35,6 +38,7 @@ PLG_ = g.load_pickled_data(PLG_SAVE_LOC+"PLG")
 # - Load vehicle data
 data = np.loadtxt(SIM_DATA_SAVE_LOC+"test_data")
 v_list = g.load_pickled_data(SIM_DATA_SAVE_LOC+"test_list")
+len_of_sim = v_list[0].trajectory_length
 # - Store the plotted vehicles so we can delete them before we plot them again
 v_plot = []
 # - Annotation
@@ -43,11 +47,13 @@ annotation_plot = []
 
 # Animation function
 def animate(ii):
-    global START_ANIMATION, PLG_, v_list
+    # Global vars
+    global START_ANIMATION, PLG_, v_list, len_of_sim
 
     if not START_ANIMATION:
         START_ANIMATION = True
-    else:
+
+    elif ii < len_of_sim:
         # Before plotting, remove the previous plots
         num_plots = len(v_plot)
         for nn in range(num_plots):
@@ -69,21 +75,23 @@ def animate(ii):
 
         # Cycle through vehicle list and plot the vehicle
         for V in v_list:
+            num_dp = 3
             # Get some constants
             id = int(V.trajectory[ii, II_VEHICLE_ID])
             x = V.trajectory[ii, II_X]
             y = V.trajectory[ii, II_Y]
-            speed = round(V.trajectory[ii, II_SPEED], 3)
-            acc = round(V.trajectory[ii, II_ACC], 3)
-            ttc = round(V.trajectory[ii, II_TTC], 3)
-            if ttc == graph.INF_TTC:
+            speed = round(V.trajectory[ii, II_SPEED], num_dp)
+            acc = round(V.trajectory[ii, II_ACC], num_dp)
+            ttc = round(V.trajectory[ii, II_TTC], num_dp)
+            dtc = round(V.trajectory[ii, II_DTC], num_dp)
+            if ttc == graph.INF:
                 ttc = "---"
 
             # Plot this vehicle
             v_plot.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red", plot_heading=True))
 
             # Plot annotations
-            annot_string = f"ttc={ttc}\nv={speed}\nid={id}"
+            annot_string = rf"ttc={ttc} | dtc={dtc}{NEWLINE_CHAR}v={speed} | id={id}"
             annotation_plot.append(plt.annotate(annot_string, (x+dx, y+dx), size=6.5, fontweight="bold", zorder=20, color="indigo"))
     
             # Set the axes
@@ -91,10 +99,13 @@ def animate(ii):
                 plt.xlim([x-SCREEN_WIDTH/2, x+SCREEN_WIDTH/2])
                 plt.ylim([y-SCREEN_HEIGHT/2, y+SCREEN_HEIGHT/2])
         
-        # Print the index
-        if (ii+1)%10 == 0:
-            print(ii+1)
-        
+    elif ii == len_of_sim:
+        # Animation as finished, check if there are any collisions and
+        # highlight them
+        for V in v_list:
+            if V.is_collision:
+                g.plot_rectangle(X=V.get_rectangle(len_of_sim-1), color="orange", plot_heading=True)
+  
 
 # Initializing a figure in which the graph will be plotted
 fig = plt.figure() 
@@ -103,16 +114,16 @@ plt.gca().set_aspect("equal", adjustable="box")
 
 def main():
     # Global variabls
-    global PLG_, v_list
+    global PLG_, v_list, len_of_sim
 
     # Plot PLG
     graph.draw(PLG_)
 
     # Length of the simulation
-    len_of_sim = v_list[0].trajectory_length
+    print(date_time.get_current_time(), "Saving animation")
+    num_freeze_frames = int(FREEZE_FOR_X_SECONDS*FPS)
+    anim = FuncAnimation(fig, animate, frames=len_of_sim+num_freeze_frames, interval=0)
 
-    anim = FuncAnimation(fig, animate, frames=len_of_sim, interval=0)
-    
     # Define some plot params
     # - Hide X and Y axes tick marks
     plt.gca().set_xticks([])
@@ -121,7 +132,7 @@ def main():
     plt.tight_layout(h_pad=0.1, w_pad=0.1)
 
     # Save the animation
-    anim.save(SIM_DATA_SAVE_LOC+'test.gif', writer='pillow', fps=10)
+    anim.save(SIM_DATA_SAVE_LOC+'test.gif', writer='pillow', fps=FPS)
 
     # TODO: Sometimes this script fails. Will fix...
 

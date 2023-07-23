@@ -71,7 +71,7 @@ def initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, ve
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
     initial_state.speed = random.uniform(PLG_.statistics.speed_min, PLG_.statistics.speed_max)
-    initial_state.acc = acc_models.linear(graph.INF_TTC, A_max=PLG_.statistics.acc_max)
+    initial_state.acc = acc_models.linear(graph.INF, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
     return initial_state
@@ -144,7 +144,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
     initial_state.speed = random.uniform(PLG_.statistics.speed_min, PLG_.statistics.speed_max)
-    initial_state.acc = acc_models.linear(graph.INF_TTC, A_max=PLG_.statistics.acc_max)
+    initial_state.acc = acc_models.linear(graph.INF, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
     # Create the AV
