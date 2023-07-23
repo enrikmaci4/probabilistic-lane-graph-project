@@ -147,7 +147,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
     # Create a DataRow data structure and populate it with the data we need to
     # initialise the AV.
     # - Some constants used to initialise the state
-    speed_mean = 10
+    speed_mean = 15
     speed_std = 3
 
     # - Initialise state
@@ -181,7 +181,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 ###############################################################################
 def generate_platoon(PLG_:PLG, AV: Vehicle):
     # Initialisations
-    num_bvs = 5
+    num_bvs = 10
     v_list = [AV]
 
     # First we're going to get a list of nodes which we know are within the AV
@@ -298,6 +298,10 @@ def main():
         rc = g.smooth_output_data(V, mov_avg_win=10)
 
     # TODO: Sometimes this script fails. Will fix...
+    # TODO: Sometimes we get weird heading angle stuff where the vehicle
+    #       rotates. This is because we're taking the moving average of the
+    #       heading angle but we need to find a way to stop this weird
+    #       rotations. They are rare but still need to prevented...
     
     # Get a data matrix
     for ii in range(num_vehicles):

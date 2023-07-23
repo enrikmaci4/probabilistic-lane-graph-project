@@ -381,8 +381,8 @@ def moving_average_centred(y, x=[], n=None):
     ma_x = np.zeros(mov_avg_len)
 
     """Initialise the amount we need to look left/right by"""
-    left_start_ii = math.floor((n-1)/2)
-    right_end_ii = math.ceil((n-1)/2)
+    left_start_ii = math.ceil((n-1)/2)
+    right_end_ii = math.floor((n-1)/2)
 
     """Calculate moving average"""
     ii_start = n - 1
@@ -689,11 +689,11 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10):
     # [x x x o o o o o o o o o x x x]
     # 
     # If mov_avg_win/2 is off we're going to throw away the first
-    # floor((mov_avg_win-1)/2) and the last ceil((mov_avg_win-1)/2), i.e:
+    # ceil((mov_avg_win-1)/2) and the last floor((mov_avg_win-1)/2), i.e:
     # 
-    # [x x o o o o o o o o o o x x x]
-    left_start_ii = math.floor((mov_avg_win-1)/2)
-    right_end_ii = math.ceil((mov_avg_win-1)/2)
+    # [x x x o o o o o o o o o o x x]
+    left_start_ii = math.ceil((mov_avg_win-1)/2)
+    right_end_ii = math.floor((mov_avg_win-1)/2)
     
     # Fill in the columns that we will not be smoothing
     smoothed_trajectory[:, II_VEHICLE_ID] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_VEHICLE_ID]

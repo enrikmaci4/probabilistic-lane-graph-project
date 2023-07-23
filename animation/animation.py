@@ -22,6 +22,7 @@ PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
 SIM_DATA_SAVE_LOC = "output-data/simulation/"
 
 NEWLINE_CHAR = "\n"
+EMPTY_VALUE_STR = "---"
 
 ###############################################################################
 # Generate an animation from an output dataset.                               #
@@ -85,7 +86,9 @@ def animate(ii):
             ttc = round(V.trajectory[ii, II_TTC], num_dp)
             dtc = round(V.trajectory[ii, II_DTC], num_dp)
             if ttc == graph.INF:
-                ttc = "---"
+                ttc = EMPTY_VALUE_STR
+            if dtc == graph.INF:
+                dtc = EMPTY_VALUE_STR
 
             # Plot this vehicle
             v_plot.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red", plot_heading=True))

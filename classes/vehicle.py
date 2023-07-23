@@ -372,7 +372,7 @@ class Vehicle():
                 self.decision_list.append(decision_option)
 
             # Now choose an action from the list of possible decisions
-            self.decision = rules.rule_2(self.decision_list)
+            self.decision = rules.rule_1(self.decision_list)
 
             # Update the path in the current state
             self.current_state.most_likely_path = self.decision.path
