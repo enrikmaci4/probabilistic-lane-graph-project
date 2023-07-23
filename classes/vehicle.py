@@ -372,7 +372,13 @@ class Vehicle():
                 self.decision_list.append(decision_option)
 
             # Now choose an action from the list of possible decisions
-            self.decision = rules.rule_1(self.decision_list)
+            ZZ=10
+            if self.trajectory_length <= 100*ZZ:
+                self.decision = rules.rule_1(self.decision_list)
+            elif self.trajectory_length <= 150*ZZ:
+                self.decision = rules.rule_3(self.decision_list)
+            else:
+                self.decision = rules.rule_4(self.decision_list)
 
             # Update the path in the current state
             self.current_state.most_likely_path = self.decision.path

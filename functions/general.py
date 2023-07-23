@@ -669,7 +669,7 @@ def check_for_collision(v_list: list, x_scale=1, y_scale=1, store_collision=Fals
     return False
 
 
-def smooth_output_data(V: Vehicle, mov_avg_win=10):
+def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
     """Smooth out the x,y and heading angle columns in a vehicle's trajectory
     matrix using a moving average filter. We will take the centred moving
     average instead of a trailing moving average.
@@ -677,6 +677,12 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10):
     Args:
         D (np.ndarray): Data matrix for a single vehicle.
         mov_avg_win (int, optional): Moving average window. Defaults to 10.
+        keep_end (bool): When two vehicles collide and we take the moving
+                         average this truncates our data matrices to cut off
+                         the part of the data where the vehicles collide. By
+                         setting keep_end=True, you keep the unsmoothed final
+                         part of the trajectory matrix so that we can see the
+                         crash.
     """
     # Intialise a matrix of zeroes which will store the new data
     smoothed_len = V.trajectory_length - mov_avg_win + 1
@@ -715,6 +721,14 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10):
     smoothed_trajectory[:, II_X] = x_smoothed
     smoothed_trajectory[:, II_Y] = y_smoothed
     smoothed_trajectory[:, II_HEAD_ANG] = head_ang_smoothed
+
+    # Take back the final part of the matrices so that we can see any
+    # collisions that have occurred
+    if keep_end:
+        for ii in range(right_end_ii):
+            jj = right_end_ii-ii
+            smoothed_trajectory = np.vstack((smoothed_trajectory, V.trajectory[-jj, :]))
+            smoothed_len += 1
 
     # Update the trajectory matrix and trajectory length in the vehicle, V
     V.trajectory = smoothed_trajectory

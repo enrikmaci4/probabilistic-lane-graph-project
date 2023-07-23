@@ -181,7 +181,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 ###############################################################################
 def generate_platoon(PLG_:PLG, AV: Vehicle):
     # Initialisations
-    num_bvs = 10
+    num_bvs = 5
     v_list = [AV]
 
     # First we're going to get a list of nodes which we know are within the AV
@@ -295,7 +295,7 @@ def main():
 
     # Smooth the x, y and heading angle columns
     for V in v_list:
-        rc = g.smooth_output_data(V, mov_avg_win=10)
+        rc = g.smooth_output_data(V, mov_avg_win=10, keep_end=True)
 
     # TODO: Sometimes this script fails. Will fix...
     # TODO: Sometimes we get weird heading angle stuff where the vehicle
