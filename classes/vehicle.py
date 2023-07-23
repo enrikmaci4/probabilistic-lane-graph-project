@@ -187,7 +187,7 @@ class Vehicle():
         next_node_pos = complex(self.PLG.nodes[self.future_nodes[1], 0], self.PLG.nodes[self.future_nodes[1], 1])
 
         # Use SUVAT over an interval dt.
-        edge_phase = cmath.phase(next_node_pos - node_pos)
+        edge_phase = g.phase(next_node_pos - node_pos)
         ds = dt * self.current_state.speed + (1/2) * (dt**2) * self.current_state.acc
         self.current_state.x += ds * math.cos(edge_phase)
         self.current_state.y += ds * math.sin(edge_phase)
@@ -236,7 +236,7 @@ class Vehicle():
         next_node_pos = complex(self.PLG.nodes[self.future_nodes[1], 0], self.PLG.nodes[self.future_nodes[1], 0])
 
         # Use SUVAT over an interval dt.
-        edge_phase = cmath.phase(next_node_pos - node_pos)
+        edge_phase = g.phase(next_node_pos - node_pos)
         self.current_state.x += self.overshoot * math.cos(edge_phase)
         self.current_state.y += self.overshoot * math.sin(edge_phase)
 
@@ -604,7 +604,27 @@ class Vehicle():
         else:
             # Turn the node path into a phase list and take the average of the
             # last mov_avg_win number of phases
-            return cmath.phase(complex(dx, dy))
+            return g.phase(complex(dx, dy))
 
 
+def get_min_max_dtc(V: Vehicle, min_or_max=None):
+    """Get the minimum/maxiumum DTC for a vehicle for it's current decision
+    list.
+
+    Args:
+        V (Vehicle): Vehicle
+        min_or_max (string): either "min" or "max".
+    """
+    # Initialisations
+    dtc_list = []
+
+    # Get dtc as a list
+    for decision in V.decision_list:
+        dtc_list.append(decision.dtc)
+
+    # Return either the min or max
+    if min_or_max=="max":
+        return max(dtc_list)
+    elif min_or_max == "min":
+        return min(dtc_list)
 

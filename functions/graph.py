@@ -375,7 +375,7 @@ def node_list_to_edge_phase(PLG: PLG, node_list: list):
         current_node = complex(x_ii, y_ii)
         next_node = complex(x_jj, y_jj)
 
-        edge_phase = cmath.phase(next_node - current_node)
+        edge_phase = g.phase(next_node - current_node)
         edge_phase_list.append(edge_phase)
 
     # Pad the list by repeating the first element

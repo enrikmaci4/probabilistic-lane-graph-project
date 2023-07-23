@@ -226,7 +226,13 @@ DO_KMEANS = True
 #          PLOT_START_AND_END_NODES                                           #
 #                              - Boolean value. Set to True if you would to   #
 #                                plot all of the start and end nodes in the   #
-#                                PLG to visualise the entry and exit points.  #                                              
+#                                PLG to visualise the entry and exit points.  #
+#          PLOT_ARTIFICIAL_CONNECTIONS                                        #
+#                              - In connect_nodes in graph.py we can specify  #
+#                                some extra node connections if we would like #
+#                                to manually connect some nodes. In order to  #
+#                                see these node connections when running      #
+#                                plg_visualisation.py, set this bool to True. #
 #                                                                             #
 ###############################################################################
 PLOT_PLG = True
@@ -273,6 +279,7 @@ PLOT_ARTIFICIAL_CONNECTIONS = False
 #                                                                             #
 ###############################################################################
 dt = 0.025
+SIM_LENGTH = 5
 V_LENGTH = 2.5
 V_WIDTH = 1.5
 SCREEN_WIDTH = 40

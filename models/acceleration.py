@@ -32,4 +32,4 @@ def _positive_x_linear(ttc: float, A_max=2, T=5):
     # Get gradient and intercept
     m = A_max/T
     c = -A_max
-    return min(m*ttc + c, A_max)
+    return min(m*ttc + c, A_max/4)

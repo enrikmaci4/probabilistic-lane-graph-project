@@ -181,7 +181,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 ###############################################################################
 def generate_platoon(PLG_:PLG, AV: Vehicle):
     # Initialisations
-    num_bvs = 10
+    num_bvs = 5
     v_list = [AV]
 
     # First we're going to get a list of nodes which we know are within the AV
@@ -263,7 +263,7 @@ def main():
     #quit()
     
     # Simulation params
-    sim_frame_length = 250
+    sim_frame_length = int(round(SIM_LENGTH/dt, 0))
     data = np.zeros((0, NUM_COLS_IN_DATA_MATRIX))
     num_vehicles = len(v_list)
     terminate_simulation = False
@@ -284,17 +284,20 @@ def main():
         # Now check for collisions
         if g.check_for_collision(v_list, store_collision=True):
             terminate_simulation = True
+            print(date_time.get_current_time(), "!!! Vehicles collided", "")
 
         # We need to break out of the outer loop too
         if terminate_simulation:
-            print(date_time.get_current_time(), f"Terminating simulation! Either a collision occurred or a vehicle reached it's target destination.")
+            print(date_time.get_current_time(), "Terminating simulation! Either a collision occurred or a vehicle reached it's target destination.")
             break
 
     print(date_time.get_current_time(), "Time taken =", round(time.time()-t_, 3))
 
-    # TODO: Smooth the heading angle.
-    # TODO: Add collision detection to simulation.
-    # TODO: Sometimes this script fails. Will fix...    
+    # Smooth the x, y and heading angle columns
+    for V in v_list:
+        rc = g.smooth_output_data(V, mov_avg_win=10)
+
+    # TODO: Sometimes this script fails. Will fix...
     
     # Get a data matrix
     for ii in range(num_vehicles):

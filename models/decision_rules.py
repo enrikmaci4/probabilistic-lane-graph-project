@@ -16,7 +16,7 @@ def rule_1(decision_list: list):
 
     # Cycle through the decision options and store the TTC
     for decision_option in decision_list:
-        ttc_list.append(decision_option.ttc)
+        ttc_list.append(abs(decision_option.ttc))
 
     # Get the path with the highest TTC
     ii_max_ttc = np.argmax(ttc_list)
@@ -32,7 +32,7 @@ def rule_2(decision_list: list):
 
     # Cycle through the decision options and store the TTC
     for decision_option in decision_list:
-        dtc_list.append(decision_option.dtc)
+        dtc_list.append(abs(decision_option.dtc))
 
     # Get the path with the highest TTC
     ii_max_dtc = np.argmax(dtc_list)

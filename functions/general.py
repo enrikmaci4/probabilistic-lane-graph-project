@@ -56,6 +56,20 @@ def progressbar(it, prefix="", size=60, out=sys.stdout): # Python3.3+
     print("\n", flush=True, file=out)
 
 
+def phase(C: complex):
+    """Return the phase of C bounded between 0 and 2*pi. g.phase returns a
+    value between -pi and pi which is not convenient for us.
+
+    Args:
+        C (complex): complex number.
+    """
+    ph = cmath.phase(C)
+    if ph < 0:
+        return 2*math.pi + ph
+    else:
+        return ph
+
+
 def reorder(reorder_vector, mat_to_reorder, reverse=False):
     """Reorders the matrix "mat_to_reorder" according to the reordering indices
     of the reorder_vector (low to high). E.g, we sort "reorder_vector" from
@@ -329,6 +343,55 @@ def moving_average(y, x=[], n=None):
 
         """Moving avg and corresponding time"""
         ma[ii] = np.mean(y[ii:jj+1]) # "+1" is because of Python indexing convention
+        ma_x[ii] = x[jj]
+
+    return ma, ma_x
+
+
+def moving_average_centred(y, x=[], n=None):
+    """Calculate a centred moving average of input y with respect to x
+
+    Args:
+        y (1D array): Vector to calculate the moving average of
+        x (1D array): The horizontal (e.g. time) vector corresponding to y
+        n (1D array): The moving average window size
+
+    Returns:
+        ma (np row vec): Moving average of y
+        ma_x (np row vec): Horizontal axis (e.g. time) vector corresponding to
+                         moving average of y
+    """
+    """Check the optional input arguments"""
+    if len(x) == 0:
+        x = np.arange(len(y))
+    assert n != None
+
+    """Length of our input vector"""
+    num_data_points = len(y)
+
+    """Check lengths of input vectors are ok"""
+    assert n > 0
+    assert type(n) == int
+    assert num_data_points - (n-1) > 0
+    assert num_data_points == len(x)
+
+    """Vectors for moving average and corresponding time"""
+    mov_avg_len = num_data_points - (n-1)
+    ma = np.zeros(mov_avg_len)
+    ma_x = np.zeros(mov_avg_len)
+
+    """Initialise the amount we need to look left/right by"""
+    left_start_ii = math.floor((n-1)/2)
+    right_end_ii = math.ceil((n-1)/2)
+
+    """Calculate moving average"""
+    ii_start = n - 1
+    for ii in range(mov_avg_len):
+        """Index that we start reading from in input vector"""
+        jj = ii+left_start_ii
+
+        """Moving avg and corresponding time"""
+        ma[ii] = np.mean(y[jj-left_start_ii:jj+right_end_ii]) # "+1" is because of Python indexing convention
         ma_x[ii] = x[jj]
 
     return ma, ma_x
@@ -617,7 +680,6 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10):
     """
     # Intialise a matrix of zeroes which will store the new data
     smoothed_len = V.trajectory_length - mov_avg_win + 1
-    print(V.trajectory_length, smoothed_len, mov_avg_win)
     assert smoothed_len > 1
     smoothed_trajectory = np.zeros((smoothed_len, NUM_COLS_IN_DATA_MATRIX))
 
@@ -641,3 +703,21 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10):
     smoothed_trajectory[:, II_SPEED] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_SPEED]
     smoothed_trajectory[:, II_ACC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_ACC]
     smoothed_trajectory[:, II_TTC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_TTC]
+    smoothed_trajectory[:, II_DTC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_DTC]
+
+    # Now smooth the x,y and heading angle columns
+    x_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_X], n=mov_avg_win)
+    y_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_Y], n=mov_avg_win)
+    head_ang_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_HEAD_ANG], n=mov_avg_win)
+
+    # Set the smoothed versions of the columns into the smoothed_trajectory
+    # matrix
+    smoothed_trajectory[:, II_X] = x_smoothed
+    smoothed_trajectory[:, II_Y] = y_smoothed
+    smoothed_trajectory[:, II_HEAD_ANG] = head_ang_smoothed
+
+    # Update the trajectory matrix and trajectory length in the vehicle, V
+    V.trajectory = smoothed_trajectory
+    V.trajectory_length = smoothed_len
+
+    return True
