@@ -386,7 +386,14 @@ class Vehicle():
 
             # Update self.future_nodes
             self.future_nodes[0] = current_node
-            self.future_nodes[1] = self.current_state.most_likely_path[1]
+            try:
+                # Try to get the next node, however, this can fail if we
+                # generate a path of length 1
+                self.future_nodes[1] = self.current_state.most_likely_path[1]
+            except IndexError:
+                # If we've generated a path of length 1, handle this gracefully
+                # by returning SIGNAL_TERM_SIM to terminate the simulation
+                rc_signal = SIGNAL_TERM_SIM
 
             # Don't forget to add the overshoot!
             self.add_overshoot()
