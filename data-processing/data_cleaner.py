@@ -72,8 +72,8 @@ def clean_data(original_dataset):
             # Cycle through the data for this path
             for ii in range(1, path_length):
                 # Current x,y values
-                x_current = x[ii]
-                y_current = y[ii]
+                x_current = x[ii,0]
+                y_current = y[ii,0]
                 # Previous x,y values
                 x_prev = x_clean[-1]
                 y_prev = y_clean[-1]

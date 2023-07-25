@@ -19,7 +19,7 @@ from classes.vehicle import *
 
 DATA_LOC = "data/"+DATASET+"/cleaned/"
 PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
-SIM_DATA_SAVE_LOC = "output-data/simulation/"
+SIM_DATA_SAVE_LOC = "output/simulation/"
 
 NEWLINE_CHAR = "\n"
 EMPTY_VALUE_STR = "---"
@@ -29,6 +29,7 @@ EMPTY_VALUE_STR = "---"
 ###############################################################################
 # ANIMATION CONSTANTS
 START_ANIMATION = False
+# Recommended FPS for smooth animations: 10
 FPS = 10
 FREEZE_FOR_X_SECONDS = 3
 dx = 0.75

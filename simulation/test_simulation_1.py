@@ -22,7 +22,7 @@ import models.acceleration as acc_models
 
 DATA_LOC = "data/"+DATASET+"/cleaned/"
 PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
-SIM_DATA_SAVE_LOC = "output-data/simulation/"
+SIM_DATA_SAVE_LOC = "output/simulation/"
 
 ###############################################################################
 # ABOUT THIS SCRIPT:                                                          #
@@ -81,7 +81,7 @@ def initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, ve
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
     initial_state.speed = random.uniform(speed_mean-speed_std, speed_mean+speed_std)
-    initial_state.acc = acc_models.linear(graph.INF, A_max=PLG_.statistics.acc_max)
+    initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
     return initial_state
@@ -159,7 +159,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
     initial_state.speed = random.uniform(speed_mean-speed_std, speed_mean+speed_std)
-    initial_state.acc = acc_models.linear(graph.INF, A_max=PLG_.statistics.acc_max)
+    initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
     # Create the AV

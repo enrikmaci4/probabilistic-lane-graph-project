@@ -366,13 +366,14 @@ class Vehicle():
                 decision_option.ttc = ttc
                 decision_option.dtc = dtc
                 decision_option.num_lane_changes_in_path = graph.calculate_num_lane_changes(self.PLG, path)
-                decision_option.acc = acc_models.linear(ttc)
+                decision_option.acc = acc_models.linear(ttc=ttc, dtc=dtc)
 
                 # Append this decision_option to the list of possible decisions
                 self.decision_list.append(decision_option)
 
             # Now choose an action from the list of possible decisions
-            ZZ=10
+            # !!! Corner case generation code
+            ZZ=1000
             if self.trajectory_length <= 100*ZZ:
                 self.decision = rules.rule_1(self.decision_list)
             elif self.trajectory_length <= 150*ZZ:
@@ -411,7 +412,7 @@ class Vehicle():
             # decision struct will then be propagated onto the current_state.
             self.decision.ttc = ttc
             self.decision.dtc = dtc
-            self.decision.acc = acc_models.linear(ttc)
+            self.decision.acc = acc_models.linear(ttc=ttc, dtc=dtc)
 
         # Update the current state information
         self.current_state.ttc = self.decision.ttc
