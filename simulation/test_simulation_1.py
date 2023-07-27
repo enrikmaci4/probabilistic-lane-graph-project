@@ -24,6 +24,9 @@ DATA_LOC = "data/"+DATASET+"/cleaned/"
 PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
 SIM_DATA_SAVE_LOC = "output/simulation/"
 
+SPEED_MEAN = 10
+SPEED_STD = 3
+
 ###############################################################################
 # ABOUT THIS SCRIPT:                                                          #
 #                                                                             #
@@ -65,11 +68,6 @@ def initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, ve
 
     # Create a DataRow data structure and populate it with the data we need to
     # initialise the AV.
-    # - Some constants used to initialise the state
-    speed_mean = 10
-    speed_std = 3
-
-    # - Initialise state
     initial_node_index = 0
     initial_node = start_node
 
@@ -80,7 +78,7 @@ def initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, ve
     initial_state.y = output_data[initial_node_index, 1]
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
-    initial_state.speed = random.uniform(speed_mean-speed_std, speed_mean+speed_std)
+    initial_state.speed = random.uniform(SPEED_MEAN-SPEED_STD, SPEED_MEAN+SPEED_STD)
     initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
@@ -146,11 +144,6 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 
     # Create a DataRow data structure and populate it with the data we need to
     # initialise the AV.
-    # - Some constants used to initialise the state
-    speed_mean = 15
-    speed_std = 3
-
-    # - Initialise state
     initial_state = DataRow()
     initial_state.vehicle_id = 0
     initial_state.time = 0
@@ -158,7 +151,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
     initial_state.y = output_data[initial_node_index, 1]
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
-    initial_state.speed = random.uniform(speed_mean-speed_std, speed_mean+speed_std)
+    initial_state.speed = random.uniform(SPEED_MEAN-SPEED_STD, SPEED_MEAN+SPEED_STD)
     initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF, A_max=PLG_.statistics.acc_max)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
@@ -181,7 +174,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 ###############################################################################
 def generate_platoon(PLG_:PLG, AV: Vehicle):
     # Initialisations
-    num_bvs = 5
+    num_bvs = 8
     v_list = [AV]
 
     # First we're going to get a list of nodes which we know are within the AV
@@ -284,7 +277,9 @@ def main():
         # Now check for collisions
         if g.check_for_collision(v_list, store_collision=True):
             terminate_simulation = True
-            print(date_time.get_current_time(), "!!! Vehicles collided", "")
+            # Print a blank line then print the collision log
+            print()
+            print(date_time.get_current_time(), "!!! VEHICLES COLLIDED", "")
 
         # We need to break out of the outer loop too
         if terminate_simulation:

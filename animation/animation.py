@@ -15,6 +15,7 @@ from inputs import *
 import numpy as np
 from classes.PLG import *
 from classes.vehicle import *
+from functions.general import progressbar_anim
 
 
 DATA_LOC = "data/"+DATASET+"/cleaned/"
@@ -102,6 +103,9 @@ def animate(ii):
             if V.current_state.vehicle_id == 0:
                 plt.xlim([x-SCREEN_WIDTH/2, x+SCREEN_WIDTH/2])
                 plt.ylim([y-SCREEN_HEIGHT/2, y+SCREEN_HEIGHT/2])
+
+        # Progress bar
+        progressbar_anim(len_of_sim, ii+1, prefix="Saving: ")
         
     elif ii == len_of_sim:
         # Animation as finished, check if there are any collisions and

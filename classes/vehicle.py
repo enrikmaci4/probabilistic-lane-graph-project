@@ -373,9 +373,11 @@ class Vehicle():
 
             # Now choose an action from the list of possible decisions
             # !!! Corner case generation code
-            ZZ=1000
+            #     CC  - ZZ = 1
+            #     NCC - ZZ = 10
+            ZZ=10
             if self.trajectory_length <= 100*ZZ:
-                self.decision = rules.rule_1(self.decision_list)
+                self.decision = rules.rule_2(self.decision_list)
             elif self.trajectory_length <= 150*ZZ:
                 self.decision = rules.rule_3(self.decision_list)
             else:

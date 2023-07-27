@@ -56,6 +56,21 @@ def progressbar(it, prefix="", size=60, out=sys.stdout): # Python3.3+
     print("\n", flush=True, file=out)
 
 
+def progressbar_anim(total_iterations, current_iteration, prefix="", size=60, out=sys.stdout):
+    count = total_iterations
+    
+    def show(j):
+        x = int(size * j / count)
+        print("{}[{}{}] {}/{}".format(prefix, "#"*x, "."*(size-x), j, count),
+              end='\r', file=out, flush=True)
+    
+    show(current_iteration)
+
+    # End with a newline character
+    if current_iteration == total_iterations:
+        print("\n", flush=True, file=out)
+
+
 def phase(C: complex):
     """Return the phase of C bounded between 0 and 2*pi. g.phase returns a
     value between -pi and pi which is not convenient for us.
