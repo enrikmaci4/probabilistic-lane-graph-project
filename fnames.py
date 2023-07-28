@@ -28,7 +28,6 @@ from fnames import *
 #                  - PLG             = "PLG"                                  #
 #                                                                             #
 # #############################################################################
-
 RAW_DATA_LOC = "data/"+DATASET+"/original/"
 CLEAN_DATA_LOC = "data/"+DATASET+"/clean/"
 PLG_SAVE_LOC = "data/"+DATASET+"/structs/"
