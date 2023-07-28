@@ -404,7 +404,7 @@ def moving_average_centred(y, x=[], n=None, phase=False):
     return ma, ma_x
 
 
-def mean_phase(ph_list):
+def mean_phase(ph_list: list):
     """Calculates the average phase (direction) from a list of phases.
 
     Args:
@@ -735,7 +735,7 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
     # Now smooth the x,y and heading angle columns
     x_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_X], n=mov_avg_win)
     y_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_Y], n=mov_avg_win)
-    head_ang_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_HEAD_ANG], n=mov_avg_win)
+    head_ang_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_HEAD_ANG], n=mov_avg_win, phase=True)
 
     # Set the smoothed versions of the columns into the smoothed_trajectory
     # matrix
@@ -747,9 +747,23 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
     # collisions that have occurred
     if keep_end:
         for ii in range(right_end_ii):
+            # Centre index + left window
             jj = right_end_ii-ii
+            left_start_jj = left_start_ii-ii
+
+            # Get lists of x,y and head ang
+            x_list = V.trajectory[-jj-left_start_jj::, II_X]
+            y_list = V.trajectory[-jj-left_start_jj::, II_Y]
+            head_ang_list = V.trajectory[-jj-left_start_jj::, II_HEAD_ANG]
+
+            # Append an extra row
             smoothed_trajectory = np.vstack((smoothed_trajectory, V.trajectory[-jj, :]))
             smoothed_len += 1
+
+            # Modify the x,y and head_ang columns
+            smoothed_trajectory[-1, II_X] = np.mean(x_list)
+            smoothed_trajectory[-1, II_Y] = np.mean(y_list)
+            smoothed_trajectory[-1, II_HEAD_ANG] = mean_phase(head_ang_list)
 
     # Update the trajectory matrix and trajectory length in the vehicle, V
     V.trajectory = smoothed_trajectory

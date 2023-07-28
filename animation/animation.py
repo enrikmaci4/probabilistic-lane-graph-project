@@ -33,6 +33,7 @@ FPS = 10
 FREEZE_FOR_X_SECONDS = 3
 dx = 0.75
 dy = 0.1
+CENTRE_V_ID = 0
 # GLOBAL VARIABLES NEEDED FOR ANIMATION
 # - PLG object
 PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
@@ -75,7 +76,7 @@ def animate(ii):
 
         # Cycle through vehicle list and plot the vehicle
         for V in v_list:
-            num_dp = 3
+            num_dp = 1
             # Get some constants
             id = int(V.trajectory[ii, II_VEHICLE_ID])
             x = V.trajectory[ii, II_X]
@@ -84,6 +85,7 @@ def animate(ii):
             acc = round(V.trajectory[ii, II_ACC], num_dp)
             ttc = round(V.trajectory[ii, II_TTC], num_dp)
             dtc = round(V.trajectory[ii, II_DTC], num_dp)
+            head_ang = round(V.trajectory[ii, II_HEAD_ANG] * 180/math.pi, num_dp)
             if ttc == graph.INF:
                 ttc = EMPTY_VALUE_STR
             if dtc == graph.INF:
@@ -93,11 +95,11 @@ def animate(ii):
             v_plot.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red", plot_heading=True))
 
             # Plot annotations
-            annot_string = rf"ttc={ttc} | dtc={dtc}{NEWLINE_CHAR}v={speed} | id={id}"
+            annot_string = rf"ttc={ttc}{NEWLINE_CHAR}dtc={dtc}{NEWLINE_CHAR}v={speed}{NEWLINE_CHAR}id={id}{NEWLINE_CHAR}"
             annotation_plot.append(plt.annotate(annot_string, (x+dx, y+dx), size=6.5, fontweight="bold", zorder=20, color="indigo"))
     
             # Set the axes
-            if V.current_state.vehicle_id == 0:
+            if V.current_state.vehicle_id == CENTRE_V_ID:
                 plt.xlim([x-SCREEN_WIDTH/2, x+SCREEN_WIDTH/2])
                 plt.ylim([y-SCREEN_HEIGHT/2, y+SCREEN_HEIGHT/2])
 
