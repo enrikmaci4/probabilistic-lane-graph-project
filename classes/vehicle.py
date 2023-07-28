@@ -2,6 +2,7 @@ from inputs import *
 from fnames import *
 import numpy as np
 import math
+import cmath
 import functions.graph as graph
 import functions.general as g
 from classes.PLG import *
@@ -186,7 +187,7 @@ class Vehicle():
         next_node_pos = complex(self.PLG.nodes[self.future_nodes[1], 0], self.PLG.nodes[self.future_nodes[1], 1])
 
         # Use SUVAT over an interval dt.
-        edge_phase = g.phase(next_node_pos - node_pos)
+        edge_phase = cmath.phase(next_node_pos - node_pos)
         ds = dt * self.current_state.speed + (1/2) * (dt**2) * self.current_state.acc
         self.current_state.x += ds * math.cos(edge_phase)
         self.current_state.y += ds * math.sin(edge_phase)
@@ -235,7 +236,7 @@ class Vehicle():
         next_node_pos = complex(self.PLG.nodes[self.future_nodes[1], 0], self.PLG.nodes[self.future_nodes[1], 0])
 
         # Use SUVAT over an interval dt.
-        edge_phase = g.phase(next_node_pos - node_pos)
+        edge_phase = cmath.phase(next_node_pos - node_pos)
         self.current_state.x += self.overshoot * math.cos(edge_phase)
         self.current_state.y += self.overshoot * math.sin(edge_phase)
 
@@ -619,7 +620,7 @@ class Vehicle():
         else:
             # Turn the node path into a phase list and take the average of the
             # last mov_avg_win number of phases
-            return g.phase(complex(dx, dy))
+            return cmath.phase(complex(dx, dy))
 
 
 def get_min_max_dtc(V: Vehicle, min_or_max=None):

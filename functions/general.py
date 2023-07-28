@@ -72,20 +72,6 @@ def progressbar_anim(total_iterations, current_iteration, prefix="", size=60, ou
         print("\n", flush=True, file=out)
 
 
-def phase(C: complex):
-    """Return the phase of C bounded between 0 and 2*pi. g.phase returns a
-    value between -pi and pi which is not convenient for us.
-
-    Args:
-        C (complex): complex number.
-    """
-    ph = cmath.phase(C)
-    if ph < 0:
-        return 2*math.pi + ph
-    else:
-        return ph
-
-
 def reorder(reorder_vector, mat_to_reorder, reverse=False):
     """Reorders the matrix "mat_to_reorder" according to the reordering indices
     of the reorder_vector (low to high). E.g, we sort "reorder_vector" from
@@ -364,13 +350,16 @@ def moving_average(y, x=[], n=None):
     return ma, ma_x
 
 
-def moving_average_centred(y, x=[], n=None):
+def moving_average_centred(y, x=[], n=None, phase=False):
     """Calculate a centred moving average of input y with respect to x
 
     Args:
         y (1D array): Vector to calculate the moving average of
         x (1D array): The horizontal (e.g. time) vector corresponding to y
         n (1D array): The moving average window size
+        phase (bool): If the input we're averaging is a phase. We can't take
+                      the mean of a list of phases in the same way that we can
+                      for other scalar values
 
     Returns:
         ma (np row vec): Moving average of y
@@ -401,16 +390,32 @@ def moving_average_centred(y, x=[], n=None):
     right_end_ii = math.floor((n-1)/2)
 
     """Calculate moving average"""
-    ii_start = n - 1
     for ii in range(mov_avg_len):
         """Index that we start reading from in input vector"""
         jj = ii+left_start_ii
 
         """Moving avg and corresponding time"""
-        ma[ii] = np.mean(y[jj-left_start_ii:jj+right_end_ii]) # "+1" is because of Python indexing convention
+        if phase:
+            ma[ii] = mean_phase(y[jj-left_start_ii:jj+right_end_ii])
+        else:
+            ma[ii] = np.mean(y[jj-left_start_ii:jj+right_end_ii])
         ma_x[ii] = x[jj]
 
     return ma, ma_x
+
+
+def mean_phase(ph_list):
+    """Calculates the average phase (direction) from a list of phases.
+
+    Args:
+        ph_list (list): Phase list in radians.
+    """
+    x_list = []
+    y_list = []
+    for ph in ph_list:
+        x_list.append(math.cos(ph))
+        y_list.append(math.sin(ph))
+    return cmath.phase(complex(np.mean(x_list), np.mean(y_list)))
 
 
 def get_dict_key_given_value_list_element(dict, value):

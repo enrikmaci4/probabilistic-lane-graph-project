@@ -247,14 +247,9 @@ def main():
         v_list = g.load_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME)
     else:
         g.save_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME, v_list)
-
-    #print(v_list[0].trajectory)
-    #g.smooth_output_data(v_list[0])
-    #quit()
     
     # Simulation params
     sim_frame_length = int(round(SIM_LENGTH/dt, 0))
-    data = np.zeros((0, NUM_COLS_IN_DATA_MATRIX))
     num_vehicles = len(v_list)
     terminate_simulation = False
 
@@ -295,13 +290,9 @@ def main():
     #       rotates. This is because we're taking the moving average of the
     #       heading angle but we need to find a way to stop this weird
     #       rotations. They are rare but still need to prevented...
-    
-    # Get a data matrix
-    for ii in range(num_vehicles):
-        data = np.vstack((data, v_list[ii].trajectory))
+    # TODO: Add termination signal + collision signal
 
     # Save data
-    np.savetxt(TEST_SIM_SAVE_LOC+SIM_DATA_TXT_NAME, data)
     g.save_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME, v_list)
 
 
