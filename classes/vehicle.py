@@ -26,6 +26,7 @@ II_HEAD_ANG = 10
 # SIGNALS
 SIGNAL_CONTINUE_SIM = 0
 SIGNAL_TERM_SIM = 1
+SIGNAL_COLLISION = 2
 
 ###############################################################################
 # Create a data structure to store the information for one row of our data    #

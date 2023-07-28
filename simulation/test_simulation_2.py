@@ -21,12 +21,14 @@ from classes.vehicle import *
 import models.acceleration as acc_models
 
 
+NUM_SIMULATIONS = 50
+
+
 ###############################################################################
 # ABOUT THIS SCRIPT:                                                          #
 #                                                                             #
-# - Simulate a single scenario and save the data in the output directory. The #
-#   data is saved as Python pickle. The data is a list of vehicle structures  #
-#   each with the same "trajectory" length.                                   #
+# - Generate and save many simulations and save them according to whether     #
+#   they terminated in a collision or not.                                    #
 #                                                                             #
 ###############################################################################
 def main():
@@ -77,35 +79,31 @@ def main():
             if rc == SIGNAL_TERM_SIM:
                 terminate_simulation = True
 
-        # Now check for collisions and print log
+        # Now check for collisions
         if g.check_for_collision(v_list, store_collision=True):
-            rc = SIGNAL_COLLISION
             terminate_simulation = True
-            # Print a blank line so that the loading bar doesn't overwrite our
-            # log then print the log
+            # Print a blank line then print the collision log
             print()
             print(date_time.get_current_time(), "!!! VEHICLES COLLIDED", "")
 
-        if rc == SIGNAL_TERM_SIM:
-            # Print a blank line so that the loading bar doesn't overwrite our
-            # log then print the log
-            print()
-            print(date_time.get_current_time(), "!!! TARGET DESTINATION REACHED", "")
-
         # We need to break out of the outer loop too
         if terminate_simulation:
-            # If this is NOT a collision then it is 
-            print(date_time.get_current_time(), "Terminating simulation")
+            print(date_time.get_current_time(), "Terminating simulation! Either a collision occurred or a vehicle reached it's target destination.")
             break
 
-    time_taken = 
     print(date_time.get_current_time(), "Time taken =", round(time.time()-t_, 3))
 
     # Smooth the x, y and heading angle columns
     for V in v_list:
         rc = g.smooth_output_data(V, mov_avg_win=20, keep_end=False)
+        # TODO: add some more smoothing to the final elements when keep_end is set to TRUE so it's not so jumpy
 
     # TODO: Sometimes this script fails. Will fix...
+    # TODO: Sometimes we get weird heading angle stuff where the vehicle
+    #       rotates. This is because we're taking the moving average of the
+    #       heading angle but we need to find a way to stop this weird
+    #       rotations. They are rare but still need to prevented...
+    # TODO: Add termination signal + collision signal
 
     # Save data
     g.save_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME, v_list)
