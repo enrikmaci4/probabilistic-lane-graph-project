@@ -137,7 +137,7 @@ def main():
     plt.tight_layout(h_pad=0.1, w_pad=0.1)
 
     # Save the animation
-    anim.save(TEST_SIM_SAVE_LOC+SIM_ANIM_NAME, writer='pillow', fps=FPS)
+    anim.save(TEST_SIM_SAVE_LOC+SIM_ANIM_NAME+".gif", writer='pillow', fps=FPS)
 
     # TODO: Sometimes this script fails. Will fix...
 
