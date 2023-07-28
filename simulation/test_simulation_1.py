@@ -98,7 +98,6 @@ def main():
             print(date_time.get_current_time(), "Terminating simulation")
             break
 
-    time_taken = 
     print(date_time.get_current_time(), "Time taken =", round(time.time()-t_, 3))
 
     # Smooth the x, y and heading angle columns
