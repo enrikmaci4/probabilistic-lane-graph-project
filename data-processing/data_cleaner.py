@@ -10,9 +10,7 @@ import classes.data as d
 import math
 import functions.date_time as date_time
 from inputs import *
-
-
-SAVE_LOC = "data/"+DATASET+"/cleaned/"
+from fnames import *
 
 
 ###############################################################################
@@ -126,7 +124,7 @@ def main():
     print(date_time.get_current_time(), "Finished cleaning data")
 
     # Save data
-    g.save_pickled_data(SAVE_LOC+"clean_data_v2", cleaned_dataset)
+    g.save_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME, cleaned_dataset)
     print(date_time.get_current_time(), "Saved clean data")
 
 

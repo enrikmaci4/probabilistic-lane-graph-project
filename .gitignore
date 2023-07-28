@@ -141,18 +141,26 @@ dmypy.json
 # keep the paths of the folders so the user doesn't get a "folder doesn't
 # exist" error when trying to generate files.
 # - lankershim
-/data/lankershim/cleaned/*
-/data/lankershim/data-structures/*
+/data/lankershim/clean/*
+/data/lankershim/structs/*
 #   - !!! This line has been commented so that this dataset is stored on GH
 #     for the user to have a readily available dataset.
 #/data/lankershim/original/*
 # - newdataset
 #   - A set of empty folders have already been created if the user would like
 #     to test the code with their own dataset.
-/data/newdataset/cleaned/*
-/data/newdataset/data-structures/*
+/data/newdataset/clean/*
+/data/newdataset/structs/*
 /data/newdataset/original/*
 # Outputs directory
-/output/*
-# Ignore the contents of the "videos" folder but not the folder itself
+/output/set1/cc/animations/*
+/output/set1/cc/data/*
+/output/set1/ncc/animations/*
+/output/set1/ncc/data/*
+/output/set2/cc/animations/*
+/output/set2/cc/data/*
+/output/set2/ncc/animations/*
+/output/set2/ncc/data/*
+/output/test/*
+# Folder with original carla videos
 /videos/*

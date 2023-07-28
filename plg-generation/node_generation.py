@@ -2,6 +2,7 @@ import numpy as np
 from numpy.linalg import norm
 from sklearn.cluster import KMeans
 from inputs import *
+from fnames import *
 
 
 ###############################################################################

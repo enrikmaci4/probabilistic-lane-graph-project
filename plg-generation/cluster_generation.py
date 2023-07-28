@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.cluster import KMeans
 from inputs import *
+from fnames import *
 from classes.PLG import *
 
 

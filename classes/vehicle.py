@@ -1,8 +1,7 @@
 from inputs import *
+from fnames import *
 import numpy as np
-import cmath
 import math
-import classes.simulation as sim
 import functions.graph as graph
 import functions.general as g
 from classes.PLG import *

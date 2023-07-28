@@ -12,11 +12,10 @@ import time
 import matplotlib.pyplot as plt
 import random
 from inputs import *
+from fnames import *
 import numpy as np
 
 
-DATA_LOC = "data/"+DATASET+"/cleaned/"
-PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
 COLOUR_LOWER = 0
 COLOUR_UPPER = 1
 
@@ -67,11 +66,11 @@ def main():
     print(date_time.get_current_time(), "Program started")
 
     # Load the cleaned data
-    data = g.load_pickled_data(DATA_LOC+"clean_data")
+    data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
     print(date_time.get_current_time(), "Loaded clean data")
 
     # Create a PLG object
-    PLG = g.load_pickled_data(PLG_SAVE_LOC+"PLG")
+    PLG = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Get the visualisation parameters

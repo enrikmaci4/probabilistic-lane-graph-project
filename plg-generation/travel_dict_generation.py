@@ -3,6 +3,7 @@ import functions.general as g
 from numpy.linalg import norm
 from sklearn.cluster import KMeans
 from inputs import *
+from fnames import *
 
 
 ###############################################################################

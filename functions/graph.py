@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import random
 import math
 from inputs import *
+from fnames import *
 import copy
 import cmath
 import functions.general as g

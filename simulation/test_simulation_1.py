@@ -13,6 +13,7 @@ import time
 import matplotlib.pyplot as plt
 import random
 from inputs import *
+from fnames import *
 import numpy as np
 from classes.PLG import *
 from classes.vehicle import *
@@ -20,12 +21,9 @@ import models.acceleration as acc_models
 #from tqdm import tqdm
 
 
-DATA_LOC = "data/"+DATASET+"/cleaned/"
-PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
-SIM_DATA_SAVE_LOC = "output/simulation/"
-
 SPEED_MEAN = 10
 SPEED_STD = 3
+
 
 ###############################################################################
 # ABOUT THIS SCRIPT:                                                          #
@@ -111,7 +109,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
     start_coords = PLG_.nodes[start_node,:]
     distance_from_start_to_targets = np.sum(np.square(PLG_.target_cluster_centres - start_coords), axis=1)
     # TODO: The way we select this could probable improve to get more
-    # variation in target clusters. E.g. randomly choose one betwee the mid-
+    # variation in target clusters. E.g. randomly choose one between the mid-
     # point and the end in a list ordered from lowest to highest (or vice
     # versa).
     target_cluster = np.argmax(distance_from_start_to_targets)
@@ -135,7 +133,6 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
     a_upp_ind = int(a_upp*len(path))
     initial_node = np.random.choice(path[a_low_ind:a_upp_ind])
     initial_node_index = path.index(initial_node)
-    path_trunc = graph.path_generation(PLG_, initial_node, target_cluster, max_path_length=15)
 
     # Get an "output_data" data structure. This data structure converts a node
     # path into a 2D matrix with columns [x, y, heading angle]. We're mainly
@@ -174,7 +171,7 @@ def initialise_av_position(PLG_: PLG) -> Vehicle:
 ###############################################################################
 def generate_platoon(PLG_:PLG, AV: Vehicle):
     # Initialisations
-    num_bvs = 8
+    num_bvs = NUM_BVS
     v_list = [AV]
 
     # First we're going to get a list of nodes which we know are within the AV
@@ -227,11 +224,11 @@ def main():
     print(date_time.get_current_time(), "Program started")
 
     # Load the cleaned data
-    data = g.load_pickled_data(DATA_LOC+"clean_data_v2")
+    data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
     print(date_time.get_current_time(), "Loaded clean data")
 
     # Create a PLG object
-    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+"PLG")
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Print time take
@@ -247,9 +244,9 @@ def main():
     # Save platoon incase we want to re-use it
     load_platoon = False
     if load_platoon:
-        v_list = g.load_pickled_data(SIM_DATA_SAVE_LOC+"platoon")
+        v_list = g.load_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME)
     else:
-        g.save_pickled_data(SIM_DATA_SAVE_LOC+"platoon", v_list)
+        g.save_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME, v_list)
 
     #print(v_list[0].trajectory)
     #g.smooth_output_data(v_list[0])
@@ -290,7 +287,8 @@ def main():
 
     # Smooth the x, y and heading angle columns
     for V in v_list:
-        rc = g.smooth_output_data(V, mov_avg_win=10, keep_end=True)
+        rc = g.smooth_output_data(V, mov_avg_win=20, keep_end=True)
+        # TODO: add some more smoothing to the final elements when keep_end is set to TRUE so it's not so jumpy
 
     # TODO: Sometimes this script fails. Will fix...
     # TODO: Sometimes we get weird heading angle stuff where the vehicle
@@ -303,8 +301,8 @@ def main():
         data = np.vstack((data, v_list[ii].trajectory))
 
     # Save data
-    np.savetxt(SIM_DATA_SAVE_LOC+"test_data", data)
-    g.save_pickled_data(SIM_DATA_SAVE_LOC+"test_list", v_list)
+    np.savetxt(TEST_SIM_SAVE_LOC+SIM_DATA_TXT_NAME, data)
+    g.save_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME, v_list)
 
 
 if __name__=="__main__":

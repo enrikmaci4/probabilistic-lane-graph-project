@@ -1,9 +1,9 @@
 import numpy as np
 import functions.general as g
 from inputs import *
+from fnames import *
 
 
-DATA_LOC = "data/"+DATASET+"/original/"
 ONE_FOOT_IN_METRES = 0.3048
 ONE_METRE_IN_METRES = 1
 # Add any other units here:
@@ -25,16 +25,16 @@ elif UNIT == "metres":
 class load_data:
     def __init__(self) -> None:
         # Load all data
-        self.x = np.genfromtxt(DATA_LOC+"Global_X", dtype=float)*UNIT_CONVERSION
-        self.y = np.genfromtxt(DATA_LOC+"Global_Y", dtype=float)*UNIT_CONVERSION
-        self.vehicle_id = np.genfromtxt(DATA_LOC+"Vehicle_ID", dtype=int)
+        self.x = np.genfromtxt(RAW_DATA_LOC+X_NAME, dtype=float)*UNIT_CONVERSION
+        self.y = np.genfromtxt(RAW_DATA_LOC+Y_NAME, dtype=float)*UNIT_CONVERSION
+        self.vehicle_id = np.genfromtxt(RAW_DATA_LOC+VEHICLE_ID_NAME, dtype=int)
         try:
-            self.lane_id = np.genfromtxt(DATA_LOC+"Lane_ID", dtype=int)
+            self.lane_id = np.genfromtxt(RAW_DATA_LOC+LANE_ID_NAME, dtype=int)
         except FileNotFoundError:
             self.lane_id = np.zeros(len(self.x), dtype=int)
-        self.time = np.genfromtxt(DATA_LOC+"Frame_ID", dtype=int)
-        self.speed = np.genfromtxt(DATA_LOC+"Speed", dtype=float)
-        self.acc = np.genfromtxt(DATA_LOC+"Acceleration", dtype=float)
+        self.time = np.genfromtxt(RAW_DATA_LOC+TIME_NAME, dtype=int)
+        self.speed = np.genfromtxt(RAW_DATA_LOC+SPEED_NAME, dtype=float)
+        self.acc = np.genfromtxt(RAW_DATA_LOC+ACC_NAME, dtype=float)
 
         # Normalise position to start at (0,0)
         self.x = self.x - min(self.x)

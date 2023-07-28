@@ -12,18 +12,16 @@ import time
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation 
 from inputs import *
+from fnames import *
 import numpy as np
 from classes.PLG import *
 from classes.vehicle import *
 from functions.general import progressbar_anim
 
 
-DATA_LOC = "data/"+DATASET+"/cleaned/"
-PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
-SIM_DATA_SAVE_LOC = "output/simulation/"
-
 NEWLINE_CHAR = "\n"
 EMPTY_VALUE_STR = "---"
+
 
 ###############################################################################
 # Generate an animation from an output dataset.                               #
@@ -37,10 +35,9 @@ dx = 0.75
 dy = 0.1
 # GLOBAL VARIABLES NEEDED FOR ANIMATION
 # - PLG object
-PLG_ = g.load_pickled_data(PLG_SAVE_LOC+"PLG")
+PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
 # - Load vehicle data
-data = np.loadtxt(SIM_DATA_SAVE_LOC+"test_data")
-v_list = g.load_pickled_data(SIM_DATA_SAVE_LOC+"test_list")
+v_list = g.load_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME)
 len_of_sim = v_list[0].trajectory_length
 # - Store the plotted vehicles so we can delete them before we plot them again
 v_plot = []
@@ -140,16 +137,9 @@ def main():
     plt.tight_layout(h_pad=0.1, w_pad=0.1)
 
     # Save the animation
-    anim.save(SIM_DATA_SAVE_LOC+'test.gif', writer='pillow', fps=FPS)
+    anim.save(TEST_SIM_SAVE_LOC+SIM_ANIM_NAME, writer='pillow', fps=FPS)
 
     # TODO: Sometimes this script fails. Will fix...
-
-    # Plot one of the vehicles trajectories
-    #V = v_list[0]
-    #plt.scatter(V.trajectory[:,II_X], V.trajectory[:,II_Y], s=10, color="skyblue", zorder=20)
-    #plt.xlim([V.current_state.x-SCREEN_WIDTH/2, V.current_state.x+SCREEN_WIDTH/2])
-    #plt.ylim([V.current_state.y-SCREEN_HEIGHT/2, V.current_state.y+SCREEN_HEIGHT/2])
-    #plt.show()
 
 
 if __name__=="__main__":

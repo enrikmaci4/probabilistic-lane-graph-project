@@ -280,6 +280,7 @@ PLOT_ARTIFICIAL_CONNECTIONS = False
 ###############################################################################
 dt = 0.025
 SIM_LENGTH = 5
+NUM_BVS = 5
 V_LENGTH = 2.5
 V_WIDTH = 1.5
 SPEED_LIMIT = 15

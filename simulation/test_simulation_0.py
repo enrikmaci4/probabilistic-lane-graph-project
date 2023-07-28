@@ -12,14 +12,12 @@ import time
 import matplotlib.pyplot as plt
 import random
 from inputs import *
+from fnames import *
 import numpy as np
 from classes.PLG import *
 from classes.vehicle import *
 import models.acceleration as acc_models
 
-
-DATA_LOC = "data/"+DATASET+"/cleaned/"
-PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
 
 ###############################################################################
 # ABOUT THIS SCRIPT:                                                          #
@@ -219,11 +217,11 @@ def main():
     print(date_time.get_current_time(), "Program started")
 
     # Load the cleaned data
-    data = g.load_pickled_data(DATA_LOC+"clean_data_v2")
+    data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
     print(date_time.get_current_time(), "Loaded clean data")
 
     # Create a PLG object
-    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+"PLG")
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Print time take

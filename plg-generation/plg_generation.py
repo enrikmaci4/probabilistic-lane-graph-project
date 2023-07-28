@@ -10,6 +10,7 @@ import functions.date_time as date_time
 import classes.PLG as plg
 import time
 from inputs import *
+from fnames import *
 
 # Import functions for PLG generation
 from node_generation import node_generation
@@ -20,17 +21,13 @@ from travel_dict_generation import travel_dict_generation
 from statistics_generation import statistics_generation
 
 
-DATA_LOC = "data/"+DATASET+"/cleaned/"
-PLG_SAVE_LOC = "data/"+DATASET+"/data-structures/"
-
-
 def main():
     # Time the script
     t_start = time.time()
     print(date_time.get_current_time(), "Program started")
 
     # Load the cleaned data
-    data = g.load_pickled_data(DATA_LOC+"clean_data_v2")
+    data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
     print(date_time.get_current_time(), "Loaded clean data")
 
     # Create a PLG object
@@ -62,8 +59,8 @@ def main():
     print(date_time.get_current_time(), "Got kinematics stats")
 
     # Save and print time take
-    g.save_pickled_data(DATA_LOC+"clean_data", data)
-    g.save_pickled_data(PLG_SAVE_LOC+"PLG", PLG)
+    g.save_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME, data)
+    g.save_pickled_data(PLG_SAVE_LOC+PLG_NAME, PLG)
     print(f"PLG generation time taken = {round(time.time() - t_start, 3)} s")
 
 
