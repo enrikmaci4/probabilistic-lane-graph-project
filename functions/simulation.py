@@ -63,7 +63,7 @@ def _initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, v
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
     initial_state.speed = random.uniform(SPEED_MEAN-SPEED_STD, SPEED_MEAN+SPEED_STD)
-    initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF, A_max=PLG_.statistics.acc_max)
+    initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
     return initial_state
@@ -135,7 +135,7 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
     initial_state.speed = random.uniform(SPEED_MEAN-SPEED_STD, SPEED_MEAN+SPEED_STD)
-    initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF, A_max=PLG_.statistics.acc_max)
+    initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
     # Create the AV
@@ -263,13 +263,16 @@ def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=300):
         # We need to break out of the outer loop too
         if terminate_simulation:
             break
+    # Print an empty line so print statements after loading bar format
+    # correctly
+    print()
 
     # Store the time taken so we can return it and calculate average time taken
     time_taken = time.time()-t_start
 
     # Smooth the x, y and heading angle columns
     for V in v_list:
-        rc = g.smooth_output_data(V, mov_avg_win=20, keep_end=True)
+        rc = g.smooth_output_data(V, mov_avg_win=15, keep_end=True)
 
     # Save data
     if is_cc:

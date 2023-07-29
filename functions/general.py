@@ -4,7 +4,8 @@ import pickle
 import math
 import cmath
 import matplotlib.pyplot as plt
-from classes.vehicle import *
+import classes.vehicle as veh
+from classes.vehicle import Vehicle
 
 
 # When we index data_vec we need to go from [index_lower:index_upper + 1]
@@ -708,7 +709,7 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
     # Intialise a matrix of zeroes which will store the new data
     smoothed_len = V.trajectory_length - mov_avg_win + 1
     assert smoothed_len > 1
-    smoothed_trajectory = np.zeros((smoothed_len, NUM_COLS_IN_DATA_MATRIX))
+    smoothed_trajectory = np.zeros((smoothed_len, veh.NUM_COLS_IN_DATA_MATRIX))
 
     # If mov_avg_win-1 is even we're going to throw away the last and first
     # (mov_avg_win-1)/2 number of data points i.e:
@@ -723,25 +724,25 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
     right_end_ii = math.floor((mov_avg_win-1)/2)
     
     # Fill in the columns that we will not be smoothing
-    smoothed_trajectory[:, II_VEHICLE_ID] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_VEHICLE_ID]
-    smoothed_trajectory[:, II_TIME] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_TIME]
-    smoothed_trajectory[:, II_NODE] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_NODE]
-    smoothed_trajectory[:, II_LANE_ID] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_LANE_ID]
-    smoothed_trajectory[:, II_SPEED] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_SPEED]
-    smoothed_trajectory[:, II_ACC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_ACC]
-    smoothed_trajectory[:, II_TTC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_TTC]
-    smoothed_trajectory[:, II_DTC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, II_DTC]
+    smoothed_trajectory[:, veh.II_VEHICLE_ID] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_VEHICLE_ID]
+    smoothed_trajectory[:, veh.II_TIME] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_TIME]
+    smoothed_trajectory[:, veh.II_NODE] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_NODE]
+    smoothed_trajectory[:, veh.II_LANE_ID] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_LANE_ID]
+    smoothed_trajectory[:, veh.II_SPEED] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_SPEED]
+    smoothed_trajectory[:, veh.II_ACC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_ACC]
+    smoothed_trajectory[:, veh.II_TTC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_TTC]
+    smoothed_trajectory[:, veh.II_DTC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_DTC]
 
     # Now smooth the x,y and heading angle columns
-    x_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_X], n=mov_avg_win)
-    y_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_Y], n=mov_avg_win)
-    head_ang_smoothed, _ = g.moving_average_centred(V.trajectory[:,II_HEAD_ANG], n=mov_avg_win, phase=True)
+    x_smoothed, _ = moving_average_centred(V.trajectory[:,veh.II_X], n=mov_avg_win)
+    y_smoothed, _ = moving_average_centred(V.trajectory[:,veh.II_Y], n=mov_avg_win)
+    head_ang_smoothed, _ = moving_average_centred(V.trajectory[:,veh.II_HEAD_ANG], n=mov_avg_win, phase=True)
 
     # Set the smoothed versions of the columns into the smoothed_trajectory
     # matrix
-    smoothed_trajectory[:, II_X] = x_smoothed
-    smoothed_trajectory[:, II_Y] = y_smoothed
-    smoothed_trajectory[:, II_HEAD_ANG] = head_ang_smoothed
+    smoothed_trajectory[:, veh.II_X] = x_smoothed
+    smoothed_trajectory[:, veh.II_Y] = y_smoothed
+    smoothed_trajectory[:, veh.II_HEAD_ANG] = head_ang_smoothed
 
     # Take back the final part of the matrices so that we can see any
     # collisions that have occurred
@@ -752,18 +753,18 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
             left_start_jj = left_start_ii-ii-1
 
             # Get lists of x,y and head ang
-            x_list = V.trajectory[-jj-left_start_jj::, II_X]
-            y_list = V.trajectory[-jj-left_start_jj::, II_Y]
-            head_ang_list = V.trajectory[-jj-left_start_jj::, II_HEAD_ANG]
+            x_list = V.trajectory[-jj-left_start_jj::, veh.II_X]
+            y_list = V.trajectory[-jj-left_start_jj::, veh.II_Y]
+            head_ang_list = V.trajectory[-jj-left_start_jj::, veh.II_HEAD_ANG]
 
             # Append an extra row
             smoothed_trajectory = np.vstack((smoothed_trajectory, V.trajectory[-jj, :]))
             smoothed_len += 1
 
             # Modify the x,y and head_ang columns
-            smoothed_trajectory[-1, II_X] = np.mean(x_list)
-            smoothed_trajectory[-1, II_Y] = np.mean(y_list)
-            smoothed_trajectory[-1, II_HEAD_ANG] = mean_phase(head_ang_list)
+            smoothed_trajectory[-1, veh.II_X] = np.mean(x_list)
+            smoothed_trajectory[-1, veh.II_Y] = np.mean(y_list)
+            smoothed_trajectory[-1, veh.II_HEAD_ANG] = mean_phase(head_ang_list)
 
     # Update the trajectory matrix and trajectory length in the vehicle, V
     V.trajectory = smoothed_trajectory

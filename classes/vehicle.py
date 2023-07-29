@@ -96,14 +96,16 @@ class Decision:
         self.path = graph.EMPTY_ENTRY
         self.ttc = graph.EMPTY_ENTRY
         self.dtc = graph.EMPTY_ENTRY
+        self.prev_acc = graph.EMPTY_ENTRY
         self.acc = graph.EMPTY_ENTRY
+        self.speed = graph.EMPTY_ENTRY
         self.num_lane_changes_in_path = graph.EMPTY_ENTRY
 
 
 ###############################################################################
 # A class used to represent the vehicles in our simulation.                   #
 ###############################################################################
-class Vehicle():
+class Vehicle:
     ###########################################################################
     # Initialisation.                                                         #
     ###########################################################################
@@ -143,6 +145,10 @@ class Vehicle():
         # what our next node is we can traverse this distance in the direction
         # of that node.
         self.overshoot = 0
+        # Force CC - Set this to True if you want to forcefully generate a
+        # collision. This option is only compatible with 5 second simulation
+        # lengths right now.
+        self._force_cc = False
 
     ###########################################################################
     # Initialisation functions.                                               #
@@ -367,22 +373,18 @@ class Vehicle():
                 decision_option.ttc = ttc
                 decision_option.dtc = dtc
                 decision_option.num_lane_changes_in_path = graph.calculate_num_lane_changes(self.PLG, path)
+                decision_option.prev_acc = self.current_state.acc
                 decision_option.acc = acc_models.linear(ttc=ttc, dtc=dtc)
+                decision_option.speed = self.current_state.speed + dt*decision_option.acc
 
                 # Append this decision_option to the list of possible decisions
                 self.decision_list.append(decision_option)
 
             # Now choose an action from the list of possible decisions
-            # !!! Corner case generation code
-            #     CC  - ZZ = 1
-            #     NCC - ZZ = 10
-            ZZ=1
-            if self.trajectory_length <= 100*ZZ:
-                self.decision = rules.rule_2(self.decision_list)
-            elif self.trajectory_length <= 150*ZZ:
-                self.decision = rules.rule_3(self.decision_list)
+            if self._force_cc:
+                self.decision = rules.rule_force_cc(self.decision_list, trajectory_length=self.trajectory_length)
             else:
-                self.decision = rules.rule_4(self.decision_list)
+                self.decision = rules.rule_5(self.decision_list)
 
             # Update the path in the current state
             self.current_state.most_likely_path = self.decision.path
