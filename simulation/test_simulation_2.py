@@ -182,10 +182,11 @@ def main():
             v_plot = []
             annotation_plot = []
             # Save the animation
+            plt.cla()
             save_animation()
             II += 1
 
-        except AssertionError or ValueError:
+        except Exception:
             pass
 
 

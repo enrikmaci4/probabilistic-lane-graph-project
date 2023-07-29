@@ -269,7 +269,7 @@ def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=300):
 
     # Smooth the x, y and heading angle columns
     for V in v_list:
-        rc = g.smooth_output_data(V, mov_avg_win=20, keep_end=False)
+        rc = g.smooth_output_data(V, mov_avg_win=20, keep_end=True)
 
     # Save data
     if is_cc:

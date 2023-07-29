@@ -98,7 +98,7 @@ def main():
 
     # Smooth the x, y and heading angle columns
     for V in v_list:
-        rc = g.smooth_output_data(V, mov_avg_win=20, keep_end=False)
+        rc = g.smooth_output_data(V, mov_avg_win=20, keep_end=True)
 
     # TODO: Sometimes this script fails. Will fix...
 

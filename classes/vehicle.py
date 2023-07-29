@@ -376,7 +376,7 @@ class Vehicle():
             # !!! Corner case generation code
             #     CC  - ZZ = 1
             #     NCC - ZZ = 10
-            ZZ=10
+            ZZ=1
             if self.trajectory_length <= 100*ZZ:
                 self.decision = rules.rule_2(self.decision_list)
             elif self.trajectory_length <= 150*ZZ:
