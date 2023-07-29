@@ -755,7 +755,6 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
             x_list = V.trajectory[-jj-left_start_jj::, II_X]
             y_list = V.trajectory[-jj-left_start_jj::, II_Y]
             head_ang_list = V.trajectory[-jj-left_start_jj::, II_HEAD_ANG]
-            print(len(head_ang_list))
 
             # Append an extra row
             smoothed_trajectory = np.vstack((smoothed_trajectory, V.trajectory[-jj, :]))
