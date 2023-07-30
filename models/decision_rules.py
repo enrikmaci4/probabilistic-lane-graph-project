@@ -236,7 +236,7 @@ def _cost_5(decision):
     v = decision.speed
 
     # Calculate cost
-    C = _cost_ttc(ttc) + _cost_dtc(dtc) + _cost_acc(da) + _cost_speed(v)
+    C = a_ttc*_cost_ttc(ttc) + a_dtc*_cost_dtc(dtc) + a_acc*_cost_acc(da) + a_speed*_cost_speed(v)
 
     return C
 
@@ -245,13 +245,13 @@ def rule_5(decision_list: list):
     """Rule: Minimise the cost function
     """
     # Initialise a list to store the TTC for each decision option
-    ttc_list = []
+    L_ = []
 
     # Cycle through the decision options and store the TTC
     for decision_option in decision_list:
-        ttc_list.append(_cost_5(decision_option))
+        L_.append(_cost_5(decision_option))
 
     # Get the path which minimises cost
-    ii = np.argmin(ttc_list)
+    ii = np.argmin(L_)
 
     return decision_list[ii]
