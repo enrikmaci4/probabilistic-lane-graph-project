@@ -229,7 +229,7 @@ def generate_random_initial_platoon_state(PLG_: PLG):
 # the ncc directories.                                                        #
 #                                                                             #
 ###############################################################################
-def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=300):
+def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500):
     # Generate a platoon of vehicles
     v_list = generate_random_initial_platoon_state(PLG_)
 

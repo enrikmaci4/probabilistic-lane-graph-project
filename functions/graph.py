@@ -257,10 +257,13 @@ def fast_path_tree_generation(PLG: PLG, start_node: int, target_cluster: int, de
     num_lanes_in_map = len(set(PLG.node_lane_ids))
     path = [start_node]
     paths = {}
-    ii = 0
 
     # Call _fast_path_generation until we generate enough paths, or until we
     # can't call it anymore.
+    # - First we constrain the algorithm to generate ONLY paths with less lane
+    #   changes than a specified threshold, max_lane_change.
+    # - If we cannot generate enough paths to meet our minimum path requirement
+    #   increase this max allwoed threshold and try again.
     while (len(paths) < min_num_paths) and (max_lane_change <= num_lanes_in_map):
         # Initialisions. Yes - we initialise these two variables above aswell.
         # This is because we need the length in the while-statement so we have
@@ -721,6 +724,45 @@ def calculate_ttc_and_dtc(PLG_: PLG, path_av: list, speed_av: float, acc_av: flo
 
 def calculate_num_lane_changes(PLG_: PLG, path: list):
     """Calculate the number of lane changes in the path.
+    """
+    # Initialisations
+    num_lane_change = 0
+
+    # Get the length of the path and check that it's atleast length 2 otherwise
+    # we can't do anything here.
+    path_length = len(path)
+    if path_length < 2:
+        return 1
+
+    # Now iterate over the path and count the number of lane changes
+    for ii in range(path_length-1):
+        # Get current lane ID and previous lane ID
+        current_lid = PLG_.node_lane_ids[ii+1]
+        previous_lid = PLG_.node_lane_ids[ii]
+        
+        # Check for a lane change
+        if current_lid != previous_lid:
+            num_lane_change += 1
+
+    return num_lane_change
+
+
+def check_for_jaggy_lane_changes(PLG_: PLG, path: list):
+    """We want to avoid generating "jaggy" paths where we switch lanes twice
+    within 3 nodes. These aren't realistic paths and are a waste of computation
+    if we generate many of them. E.g.
+
+    We don't want:    
+        o o
+        | |
+        o o
+        |/|
+        o o
+        |\|
+        o o
+        | |
+        o o
+
     """
     # Initialisations
     num_lane_change = 0
