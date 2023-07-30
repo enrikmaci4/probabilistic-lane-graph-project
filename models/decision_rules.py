@@ -224,10 +224,10 @@ def _cost_speed(v: float):
 ###############################################################################
 def _cost_5(decision):
     # Linear combination constants
-    a_ttc = 0.3
+    a_ttc = 0.4
     a_dtc = 0.3
-    a_acc = 0.2
-    a_speed = 0.2
+    a_acc = 0.15
+    a_speed = 0.15
 
     # Get variables of interest
     ttc = decision.ttc

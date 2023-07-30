@@ -53,6 +53,7 @@ v_list = False
 len_of_sim = False
 v_plot = False
 annotation_plot = False
+time_plot = [False]
 
 # Initializing a figure in which the graph will be plotted
 fig = plt.figure() 
@@ -86,6 +87,11 @@ def animate(ii):
             v_plot.pop(jj)
             annotation_plot.pop(jj)
 
+            # There's only 1 time plot so remove it on the final iteration
+            if jj == 0:
+                # Delete time in top right corner
+                time_plot[0].remove()
+
         # Cycle through vehicle list and plot the vehicle
         for V in v_list:
             num_dp = 1
@@ -110,10 +116,19 @@ def animate(ii):
             annot_string = rf"ttc={ttc}{NEWLINE_CHAR}dtc={dtc}{NEWLINE_CHAR}v={speed}{NEWLINE_CHAR}id={id}{NEWLINE_CHAR}"
             annotation_plot.append(plt.annotate(annot_string, (x+dx, y+dx), size=6.5, fontweight="bold", zorder=20, color="indigo"))
     
-            # Set the axes
+            # Set the axes + print time
             if V.current_state.vehicle_id == CENTRE_V_ID:
+                # Set axes
                 plt.xlim([x-SCREEN_WIDTH/2, x+SCREEN_WIDTH/2])
                 plt.ylim([y-SCREEN_HEIGHT/2, y+SCREEN_HEIGHT/2])
+
+                # Get x,y coordinates of the current time and plot it in the
+                # top right side of the screen
+                x_time = x+SCREEN_WIDTH/2
+                y_time = y+SCREEN_HEIGHT/2
+                T = round(((ii+1)/len_of_sim)*SIM_LENGTH, 1)
+                time_plot[0] = plt.annotate(f"T={T}s", (x_time, y_time), size=10, color="black")
+
 
         # Progress bar
         progressbar_anim(len_of_sim, ii+1, prefix=f"Saving: {II} ")
