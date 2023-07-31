@@ -84,7 +84,7 @@ PLG_NAME = "PLG"
 #                                      matrix is every vehicle's trajectory   #
 #                                      matrices concatenated on top of each   #
 #                                      other.                                 #
-#                  - CC_STATS_NAME   = "stats". Write some statistics about   #
+#                  - STATS_NAME      = "stats". Write some statistics about   #
 #                                      this simulation run.                   #
 #                                                                             #
 #                  FILE NAME SUFFIXES:                                        #
@@ -111,7 +111,7 @@ SET2_SAVE_LOC = "output/set2/"
 SIM_ANIM_NAME = "anim"
 SIM_DATA_PKL_NAME = "simdata_pkl"
 SIM_DATA_TXT_NAME = "simdata_txt"
-CC_STATS_NAME = "stats"
+STATS_NAME = "stats"
 
 CC_SUFF = "_cc"
 NCC_SUFF = "_ncc"

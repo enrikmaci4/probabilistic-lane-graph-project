@@ -24,9 +24,6 @@ import models.acceleration as acc_models
 from animation.animation import animate
 
 
-NUM_SIMULATIONS = 50
-
-
 ###############################################################################
 # ABOUT THIS SCRIPT:                                                          #
 #                                                                             #
@@ -194,6 +191,10 @@ def main():
     num_cc = 0
     num_ncc = 0
 
+    # Use lists to store the corner cases/non corner cases
+    cc_list = []
+    ncc_list = []
+
     # Load the cleaned data
     data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
     print(date_time.get_current_time(), "Loaded clean data")
@@ -211,9 +212,11 @@ def main():
             is_cc = sim.generate_single_simulation(PLG_, SAVE_LOC=SAVE_LOC, II=str(II))
             if is_cc:
                 SAVE_SUFF = CC_SUFF
+                cc_list.append(II)
                 num_cc += 1
             else:
                 SAVE_SUFF = NCC_SUFF
+                ncc_list.append(II)
                 num_ncc += 1
             # Re-assign global variables
             load_loc = f"{SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{SAVE_SUFF}"
@@ -227,9 +230,30 @@ def main():
             save_animation()
             II += 1
 
+        # We're tired of this - break!
+        except KeyboardInterrupt:
+            break
+
         # Woops. There was an assert we were too lazy to handle. Try again :)
         except Exception:
             pass
+
+    # Finished generating simulations - write stats to text file
+    with open(f"{SAVE_LOC}{STATS_NAME}", 'w+') as stats_file:
+        # First write the corner case stats
+        stats_file.write(f"Num CCs: {num_cc} out of Total: {num_cc+num_ncc}\n\n")
+
+        # Now write the corner cases:
+        stats_file.write(f"Corner cases:\n")
+        for cc in cc_list:
+            stats_file.write(f"{cc}\n")
+        stats_file.write(f"\n")        
+
+        # Now write the no corner cases:
+        stats_file.write(f"No corner cases:\n")
+        for ncc in ncc_list:
+            stats_file.write(f"{ncc}\n")
+        stats_file.write(f"\n")   
 
 
 if __name__=="__main__":
