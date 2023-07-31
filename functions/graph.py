@@ -339,7 +339,10 @@ def _fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths:
 
         # Only add the generated path to our set of possible list of paths if
         # it satisifies our lane changing constraints
-        if (num_lane_changes <= max_lane_change) and (not last_element_is_none) and (num_unique_nodes == len_of_path):
+        if (num_lane_changes <= max_lane_change) and \
+           (not last_element_is_none) and \
+           (num_unique_nodes == len_of_path) and \
+           (not _check_for_jaggy_path(PLG, path)):
             paths[len(paths)] = path
 
     else:
@@ -747,7 +750,7 @@ def calculate_num_lane_changes(PLG_: PLG, path: list):
     return num_lane_change
 
 
-def check_for_jaggy_lane_changes(PLG_: PLG, path: list):
+def _check_for_jaggy_path(PLG_: PLG, path: list):
     """We want to avoid generating "jaggy" paths where we switch lanes twice
     within 3 nodes. These aren't realistic paths and are a waste of computation
     if we generate many of them. E.g.
@@ -763,24 +766,25 @@ def check_for_jaggy_lane_changes(PLG_: PLG, path: list):
         | |
         o o
 
+    Returns True if the path is jaggy and False otherwise.
     """
     # Initialisations
-    num_lane_change = 0
-
-    # Get the length of the path and check that it's atleast length 2 otherwise
-    # we can't do anything here.
     path_length = len(path)
-    if path_length < 2:
-        return 1
+    return False
+    # This function only applies to pahts which have a length of atleast 3
+    # nodes, if this isn't True return False
+    if len(path) < 3:
+        return False
 
     # Now iterate over the path and count the number of lane changes
-    for ii in range(path_length-1):
+    for ii in range(path_length-2):
         # Get current lane ID and previous lane ID
-        current_lid = PLG_.node_lane_ids[ii+1]
-        previous_lid = PLG_.node_lane_ids[ii]
+        lid_0 = PLG_.node_lane_ids[ii]
+        lid_1 = PLG_.node_lane_ids[ii+1]
+        lid_2 = PLG_.node_lane_ids[ii+2]
         
-        # Check for a lane change
-        if current_lid != previous_lid:
-            num_lane_change += 1
+        # If this path is jaggy
+        if (lid_0 != lid_1) and (lid_0 == lid_2) and (lid_1 != lid_2):
+            return True
 
-    return num_lane_change
+    return False 

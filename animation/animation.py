@@ -37,15 +37,17 @@ CENTRE_V_ID = 0
 # GLOBAL VARIABLES NEEDED FOR ANIMATION
 # - PLG object
 PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
-# - Load vehicle data
+# - Load vehicle data + simulation length
 v_list = g.load_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME)
 len_of_sim = v_list[0].trajectory_length
-# - Store the plotted vehicles so we can delete them before we plot them again
+# - Store the plotted vehicles so we can delete them before we plot them
+#   again
 v_plot = []
 # - Annotation
 annotation_plot = []
 # - Time plot
-time_plot = [False]
+time_plot = [None]
+
 
 # Animation function
 def animate(ii):
@@ -117,7 +119,7 @@ def animate(ii):
                 time_plot[0] = plt.annotate(f"T={T}s", (x_time, y_time), size=10, color="black")
 
         # Progress bar
-        progressbar_anim(len_of_sim, ii+1, prefix="Saving: ")
+        progressbar_anim(len_of_sim, ii+1, prefix=f"Saving: ")
         
     elif ii == len_of_sim:
         # Animation as finished, check if there are any collisions and
@@ -134,7 +136,7 @@ plt.gca().set_aspect("equal", adjustable="box")
 
 def main():
     # Global variabls
-    global PLG_, v_list, len_of_sim
+    global PLG_, v_list, len_of_sim, v_plot, annotation_plot
 
     # Plot PLG
     graph.draw(PLG_)

@@ -47,13 +47,13 @@ def main():
 
     # Save platoon incase we want to re-use it
     load_platoon = False
-    name_suffix = "is" # is = initial state
+    save_loc_name = TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME+IS_SUFF
     if load_platoon:
         # Load vehicle list
-        v_list = g.load_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME+name_suffix)
+        v_list = g.load_pickled_data(save_loc_name)
     else:
         # Save his initial state incase we want to use it again
-        g.save_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME+name_suffix, v_list)
+        g.save_pickled_data(save_loc_name, v_list)
     
     # Simulation params
     sim_frame_length = int(round(SIM_LENGTH/dt, 0))

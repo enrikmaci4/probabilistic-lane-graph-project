@@ -21,7 +21,11 @@ A_MIN = -10
 def linear(ttc: float, dtc: float, T=5, D=10):
     a_ttc = _linear_ttc(ttc=ttc, T=T)
     a_dtc = _linear_dtc(dtc=dtc, D=D)
-    return min(a_ttc, a_dtc)
+    # Return the higher magnitude action
+    if abs(a_ttc) > abs(a_dtc):
+        return a_ttc
+    else:
+        return a_dtc
 
 
 ###############################################################################
@@ -29,16 +33,16 @@ def linear(ttc: float, dtc: float, T=5, D=10):
 # Looks something like this:                                                  #
 #                                                                             #
 # POSITIVE X:               NEGATIVE X:                                       #
-#  A_max _|    ____              _______|_ A_max                              #
-#         |   /|                        |                                     #
-#      0 _|__/_|___ttc      ttc ________|_ 0                                  #
-#         | /| |                        |                                     #
-# -A_min _|/ T                          |_ -A_min                             #
-#         |                             |                                     #
+#  A_max _|    ____         - Same as positive X but reflected on the         #
+#         |   /|              vertical and horizontal axis.                   #
+#      0 _|__/_|___ttc                                                        #
+#         | /| |                                                              #
+# -A_min _|/ T                                                                #
+#         |                                                                   #
 #                                                                             #
 # To get the graph shown above we need f(ttc) = m*ttc + c where:              #
 #                                                                             #
-# => m = (0-A_min)/T                                                             #
+# => m = (0-A_min)/T                                                          #
 # => c = A_min                                                                #
 ###############################################################################
 def _linear_ttc(ttc: float, T=5): 
@@ -49,7 +53,7 @@ def _linear_ttc(ttc: float, T=5):
 
 
 def _negative_x_linear(ttc: float, T=5):
-    return A_MAX
+    return -_positive_x_linear(ttc=-ttc, T=T)
 
 
 def _positive_x_linear(ttc: float, T=5):
@@ -64,16 +68,16 @@ def _positive_x_linear(ttc: float, T=5):
 # Looks something like this:                                                  #
 #                                                                             #
 # POSITIVE X:               NEGATIVE X:                                       #
-#  A_max _|    ____              _______|_ A_max                              #
-#         |   /|                        |                                     #
-#      0 _|__/_|___dtc      dtc ________|_ 0                                  #
-#         | /| |                        |                                     #
-# -A_min _|/ D                          |_ -A_min                             #
-#         |                             |                                     #
+#  A_max _|    ____         - Same as positive X but reflected on the         #
+#         |   /|              vertical and horizontal axis.                   #
+#      0 _|__/_|___dtc                                                        #
+#         | /| |                                                              #
+# -A_min _|/ D                                                                #
+#         |                                                                   #
 #                                                                             #
 # To get the graph shown above we need f(dtc) = m*dtc + c where:              #
 #                                                                             #
-# => m = (0-A_min)/D                                                             #
+# => m = (0-A_min)/D                                                          #
 # => c = A_min                                                                #
 ###############################################################################
 def _linear_dtc(dtc: float, D=10): 

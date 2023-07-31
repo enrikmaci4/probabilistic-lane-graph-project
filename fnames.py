@@ -53,11 +53,11 @@ PLG_NAME = "PLG"
 #                  test_simulation_1.py will be saved here. This script is    #
 #                  typically used to generate a single animation to evaluate  #
 #                  (by eye) minor changes to the models.                      #
-#
-#                  FILE NAMES:
-#                  - Described below.
-#
-# SET(1/2)_(N)CC_ANIM_SAVE_LOC                                                #
+#                                                                             #
+#                  FILE NAMES:                                                #
+#                  - Described below.                                         #
+#                                                                             #
+# SET(1/2)_SAVE_LOC                                                           #
 #                - When we run automated simulations (i.e. run 100            #
 #                  simulations) to gauge the effectiveness of a method across #
 #                  a large number of attempts, the outputs will be classified #
@@ -67,12 +67,6 @@ PLG_NAME = "PLG"
 #                  which is optimised to generate realistic corner cases. The #
 #                  outputs from the "safe" model will be in SET1 and the      #
 #                  outputs from the "corner case" model will be in SET 2.     #
-#                - CC/NCC: CC are the scenrios whic terminate with a          #
-#                  collision and NCC do not (where NCC is "no corner case").  #
-#                - ANIM/DATA: ANIM is where the GIFs are saves so we can      #
-#                  assess at the animations by eye. DATA is where the data    #
-#                  structures are saved so we can process the data/produce    #
-#                  visualisations post simulation.                            #
 #                                                                             #
 #                  FILE NAMES:                                                #
 #                  - SIM_ANIM_NAME   = "anim_ii". Saved as a GIF.             #
@@ -90,6 +84,16 @@ PLG_NAME = "PLG"
 #                                      matrix is every vehicle's trajectory   #
 #                                      matrices concatenated on top of each   #
 #                                      other.                                 #
+#                  - CC_STATS_NAME   = "stats". Write some statistics about   #
+#                                      this simulation run.                   #
+#                                                                             #
+#                  FILE NAME SUFFIXES:                                        #
+#                  - (N)CC           = "_cc/_ncc". cc are the scenrios which  #
+#                                      terminate with a collision and ncc do  #
+#                                      not (where ncc is "no corner case").   #
+#                  - IS              = "_is". If a file ends in "is" then it  #
+#                                      is an initial state file used to seed  #
+#                                      a simulation.                          #
 #                                                                             #
 #                  - NOTE: ii is the simulation index and it will be appended #
 #                    to the save name by the script which is saving the       #
@@ -97,21 +101,20 @@ PLG_NAME = "PLG"
 #                    we're only generating a single simulation for test       #
 #                    purposes then these files with be saved in               #
 #                    TEST_SIM_SAVE_LOC without the "ii" part. I.e. just       #
-#                    "anim_" for the GIF.                                     #
+#                    "anim" for the GIF.                                      #
 #                                                                             #
 # #############################################################################
 TEST_SIM_SAVE_LOC = "output/test/"
-SET1_CC_ANIM_SAVE_LOC = "output/set1/cc/animations/"
-SET1_CC_DATA_SAVE_LOC = "output/set1/cc/data/"
-SET1_NCC_ANIM_SAVE_LOC = "output/set1/ncc/animations/"
-SET1_NCC_DATA_SAVE_LOC = "output/set1/ncc/data/"
-SET2_CC_ANIM_SAVE_LOC = "output/set2/cc/animations/"
-SET2_CC_DATA_SAVE_LOC = "output/set2/cc/data/"
-SET2_NCC_ANIM_SAVE_LOC = "output/set2/ncc/animations/"
-SET2_NCC_DATA_SAVE_LOC = "output/set2/ncc/data/"
+SET1_SAVE_LOC = "output/set1/"
+SET2_SAVE_LOC = "output/set2/"
 
-SIM_ANIM_NAME = "anim_"
-SIM_DATA_PKL_NAME = "simdata_pkl_"
-SIM_DATA_TXT_NAME = "simdata_txt_"
+SIM_ANIM_NAME = "anim"
+SIM_DATA_PKL_NAME = "simdata_pkl"
+SIM_DATA_TXT_NAME = "simdata_txt"
+CC_STATS_NAME = "stats"
+
+CC_SUFF = "_cc"
+NCC_SUFF = "_ncc"
+IS_SUFF = "_is"
 
 

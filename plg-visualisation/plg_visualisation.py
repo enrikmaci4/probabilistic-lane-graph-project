@@ -186,6 +186,9 @@ def main():
         start_cluster = int(np.random.choice(list(PLG.start_clusters.keys())))
         start_node = int(np.random.choice(PLG.start_clusters[start_cluster]))
         target_cluster = int(np.random.choice(list(PLG.target_clusters.keys())))
+        #start_cluster = 3
+        #start_node = 101
+        #target_cluster = 7
         print(date_time.get_current_time(), "start_cluster =", start_cluster)
         print(date_time.get_current_time(), "start_node =", start_node)
         print(date_time.get_current_time(), "target_cluster =", target_cluster)

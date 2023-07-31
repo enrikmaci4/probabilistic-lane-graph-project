@@ -21,6 +21,7 @@ import numpy as np
 from classes.PLG import *
 from classes.vehicle import *
 import models.acceleration as acc_models
+from animation.animation import animate
 
 
 NUM_SIMULATIONS = 50
@@ -44,16 +45,24 @@ dx = 0.75
 dy = 0.1
 CENTRE_V_ID = 0
 # GLOBAL VARIABLES NEEDED FOR ANIMATION
-II = 0
-START_ANIMATION = False
-PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
-save_loc_name = None
-load_loc_name = None
-v_list = False
-len_of_sim = False
-v_plot = False
-annotation_plot = False
-time_plot = [False]
+# - PLG object
+PLG_ = None
+# - Load vehicle data
+v_list = None
+len_of_sim = None
+# - Store the plotted vehicles so we can delete them before we plot them again
+v_plot = None
+# - Annotation
+annotation_plot = None
+# - Time plot
+time_plot = [None]
+# - File locations to load/save data to
+SAVE_LOC = None
+SAVE_SUFF = None
+# - Counter variables
+II = None
+num_cc = None
+num_ncc = None
 
 # Initializing a figure in which the graph will be plotted
 fig = plt.figure() 
@@ -62,7 +71,7 @@ plt.gca().set_aspect("equal", adjustable="box")
 # Animation function
 def animate(ii):
     # Global vars
-    global II, PLG_, START_ANIMATION, save_loc_name, load_loc_name, v_list, len_of_sim, v_plot, annotation_plot
+    global START_ANIMATION, PLG_, v_list, len_of_sim
 
     if not START_ANIMATION:
         START_ANIMATION = True
@@ -116,9 +125,8 @@ def animate(ii):
             annot_string = rf"ttc={ttc}{NEWLINE_CHAR}dtc={dtc}{NEWLINE_CHAR}v={speed}{NEWLINE_CHAR}id={id}{NEWLINE_CHAR}"
             annotation_plot.append(plt.annotate(annot_string, (x+dx, y+dx), size=6.5, fontweight="bold", zorder=20, color="indigo"))
     
-            # Set the axes + print time
+            # Set the axes
             if V.current_state.vehicle_id == CENTRE_V_ID:
-                # Set axes
                 plt.xlim([x-SCREEN_WIDTH/2, x+SCREEN_WIDTH/2])
                 plt.ylim([y-SCREEN_HEIGHT/2, y+SCREEN_HEIGHT/2])
 
@@ -129,10 +137,9 @@ def animate(ii):
                 T = round(((ii+1)/len_of_sim)*SIM_LENGTH, 1)
                 time_plot[0] = plt.annotate(f"T={T}s", (x_time, y_time), size=10, color="black")
 
-
         # Progress bar
         progressbar_anim(len_of_sim, ii+1, prefix=f"Saving: {II} ")
-
+        
     elif ii == len_of_sim:
         # Animation as finished, check if there are any collisions and
         # highlight them
@@ -143,7 +150,7 @@ def animate(ii):
 
 def save_animation():
     # Global variabls
-    global PLG_, v_list, len_of_sim, save_loc
+    global PLG_, v_list, len_of_sim
 
     # Plot PLG
     graph.draw(PLG_)
@@ -161,12 +168,31 @@ def save_animation():
     plt.tight_layout(h_pad=0.1, w_pad=0.1)
 
     # Save the animation
-    anim.save(save_loc_name+".gif", writer='pillow', fps=FPS)
+    anim.save(f"{SAVE_LOC}anim_{II}{SAVE_SUFF}.gif", writer='pillow', fps=FPS)
 
 
 def main():
     # Initialisations
-    global II, PLG_, START_ANIMATION, save_loc_name, load_loc_name, v_list, len_of_sim, v_plot, annotation_plot
+    global II, PLG_, START_ANIMATION, v_list, len_of_sim, v_plot, annotation_plot, time_plot, SAVE_LOC, SAVE_SUFF, num_cc, num_ncc
+
+    # GLOBAL VARIABLES NEEDED FOR ANIMATION
+    # - PLG object
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+    # - Load vehicle data
+    v_list = g.load_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME)
+    len_of_sim = v_list[0].trajectory_length
+    # - Store the plotted vehicles so we can delete them before we plot them
+    #   again
+    v_plot = []
+    # - Annotation
+    annotation_plot = []
+    # - File locations to load/save data to
+    SAVE_LOC = SET1_SAVE_LOC
+    SAVE_SUFF = ""
+    # - Counter variables
+    II = 0
+    num_cc = 0
+    num_ncc = 0
 
     # Load the cleaned data
     data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
@@ -182,25 +208,26 @@ def main():
         try:
             # Generate the simulation
             print()
-            is_cc = sim.generate_single_simulation(PLG_, II=str(II))
-            # Re-assign global variables
-            START_ANIMATION = False
-            PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+            is_cc = sim.generate_single_simulation(PLG_, SAVE_LOC=SAVE_LOC, II=str(II))
             if is_cc:
-                load_loc_name = SET1_CC_DATA_SAVE_LOC+SIM_DATA_PKL_NAME+str(II)
-                save_loc_name = SET1_CC_ANIM_SAVE_LOC+SIM_ANIM_NAME+str(II)
+                SAVE_SUFF = CC_SUFF
+                num_cc += 1
             else:
-                load_loc_name = SET1_NCC_DATA_SAVE_LOC+SIM_DATA_PKL_NAME+str(II)
-                save_loc_name = SET1_NCC_ANIM_SAVE_LOC+SIM_ANIM_NAME+str(II)
-            v_list = g.load_pickled_data(load_loc_name)
+                SAVE_SUFF = NCC_SUFF
+                num_ncc += 1
+            # Re-assign global variables
+            load_loc = f"{SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{SAVE_SUFF}"
+            v_list = g.load_pickled_data(load_loc)
             len_of_sim = v_list[0].trajectory_length
             v_plot = []
             annotation_plot = []
+            START_ANIMATION = False
             # Save the animation
             plt.cla()
             save_animation()
             II += 1
 
+        # Woops. There was an assert we were too lazy to handle. Try again :)
         except Exception:
             pass
 

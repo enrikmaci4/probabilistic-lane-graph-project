@@ -5,6 +5,7 @@ import os
 # trying to import the other modules I have written within this directory.
 sys.path.append(os.getcwd())
 
+import copy
 import functions.general as g
 from functions.general import progressbar
 import functions.date_time as date_time
@@ -229,9 +230,12 @@ def generate_random_initial_platoon_state(PLG_: PLG):
 # the ncc directories.                                                        #
 #                                                                             #
 ###############################################################################
-def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500):
+def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500, SAVE_LOC=None):
     # Generate a platoon of vehicles
     v_list = generate_random_initial_platoon_state(PLG_)
+
+    # Create a copy of the initial state
+    v_list_is = copy.deepcopy(v_list)
 
     # Simulation params
     sim_frame_length = int(round(SIM_LENGTH/dt, 0))
@@ -276,8 +280,11 @@ def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500):
 
     # Save data
     if is_cc:
-        g.save_pickled_data(SET1_CC_DATA_SAVE_LOC+SIM_DATA_PKL_NAME+II, v_list)
+        g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+CC_SUFF, v_list)
     else:
-        g.save_pickled_data(SET1_NCC_DATA_SAVE_LOC+SIM_DATA_PKL_NAME+II, v_list)
+        g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+NCC_SUFF, v_list)
+
+    # There were no errors, save the initial state too
+    g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+IS_SUFF, v_list)
 
     return is_cc

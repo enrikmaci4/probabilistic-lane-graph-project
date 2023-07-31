@@ -153,14 +153,8 @@ dmypy.json
 /data/newdataset/structs/*
 /data/newdataset/original/*
 # Outputs directory
-/output/set1/cc/animations/*
-/output/set1/cc/data/*
-/output/set1/ncc/animations/*
-/output/set1/ncc/data/*
-/output/set2/cc/animations/*
-/output/set2/cc/data/*
-/output/set2/ncc/animations/*
-/output/set2/ncc/data/*
+/output/set1/*
+/output/set2/*
 /output/test/*
 # Folder with original carla videos
 /videos/*
