@@ -205,6 +205,12 @@ def main():
 
     # Generate and save simulations
     while II < NUM_SIMULATIONS:
+        # Keyboard interrupt was interrupting as it should
+        try:
+            pass
+        except KeyboardInterrupt:
+            quit()
+
         # Load vehicle file
         v_list = g.load_pickled_data(f"{SET1_SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{IS_SUFF}")
 

@@ -287,6 +287,6 @@ def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500, SAVE_
 
     # There were no errors, save the initial state too
     if save_initial_state:
-        g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+IS_SUFF, v_list)
+        g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+IS_SUFF, v_list_is)
 
     return is_cc
