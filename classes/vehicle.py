@@ -238,7 +238,6 @@ class Vehicle:
         # Get the node and next node as complex numbers so
         # that we can use 2D vector algebra with these coordinates. Note that
         # this vehicle is currently traversing the edge from node to next_node
-        assert self.future_nodes[0] != self.future_nodes[1]
         node_pos = complex(self.PLG.nodes[self.future_nodes[0], 0], self.PLG.nodes[self.future_nodes[0], 0])
         next_node_pos = complex(self.PLG.nodes[self.future_nodes[1], 0], self.PLG.nodes[self.future_nodes[1], 0])
 

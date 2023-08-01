@@ -230,9 +230,10 @@ def generate_random_initial_platoon_state(PLG_: PLG):
 # the ncc directories.                                                        #
 #                                                                             #
 ###############################################################################
-def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500, SAVE_LOC=None):
-    # Generate a platoon of vehicles
-    v_list = generate_random_initial_platoon_state(PLG_)
+def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500, SAVE_LOC=None, save_initial_state=True, v_list=None):
+    # Generate a platoon of vehicles if one has not been provided
+    if v_list == None:
+        v_list = generate_random_initial_platoon_state(PLG_)
 
     # Create a copy of the initial state
     v_list_is = copy.deepcopy(v_list)
@@ -285,6 +286,7 @@ def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500, SAVE_
         g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+NCC_SUFF, v_list)
 
     # There were no errors, save the initial state too
-    g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+IS_SUFF, v_list)
+    if save_initial_state:
+        g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+IS_SUFF, v_list)
 
     return is_cc
