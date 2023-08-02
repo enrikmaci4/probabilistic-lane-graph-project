@@ -257,7 +257,9 @@ def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500, SAVE_
             if rc == SIGNAL_TERM_SIM:
                 terminate_simulation = True
 
-            assert time.time()-t_start < MAX_WAIT_TIME
+            # If this is taking too long then break
+            if time.time()-t_start > MAX_WAIT_TIME:
+                terminate_simulation = True
 
         # Now check for collisions and print log
         if g.check_for_collision(v_list, store_collision=True):

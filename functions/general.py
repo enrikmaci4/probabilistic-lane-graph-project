@@ -708,8 +708,11 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
     """
     # Intialise a matrix of zeroes which will store the new data
     smoothed_len = V.trajectory_length - mov_avg_win + 1
-    assert smoothed_len > 1
     smoothed_trajectory = np.zeros((smoothed_len, veh.NUM_COLS_IN_DATA_MATRIX))
+
+    # If the length of the input isn't long enough - don't do any smoothing.
+    if smoothed_len < 1:
+        return True
 
     # If mov_avg_win-1 is even we're going to throw away the last and first
     # (mov_avg_win-1)/2 number of data points i.e:
