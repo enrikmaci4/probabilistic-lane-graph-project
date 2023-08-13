@@ -131,7 +131,7 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     a_upp = 0.75
     a_low_ind = int(a_low*len(path))
     a_upp_ind = int(a_upp*len(path))
-    if initial_node != None:
+    if initial_node == None:
         initial_node = np.random.choice(path[a_low_ind:a_upp_ind])
     initial_node_index = path.index(initial_node)
 
