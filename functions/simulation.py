@@ -100,6 +100,13 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     # point and the end in a list ordered from lowest to highest (or vice
     # versa).
     target_cluster = np.argmax(distance_from_start_to_targets)
+    # If you want to set your own values, uncomment the following lines and
+    # define them here
+    #start_node = 1245
+    #target_cluster = 0
+    print(date_time.get_current_time(), f"start_node = {start_node}") 
+    print(date_time.get_current_time(), f"target_cluster = {target_cluster}") 
+
 
     # Generate a path
     path = graph.path_generation(PLG_, start_node, target_cluster)
