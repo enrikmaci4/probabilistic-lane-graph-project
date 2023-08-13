@@ -280,6 +280,7 @@ PLOT_ARTIFICIAL_CONNECTIONS = False
 ###############################################################################
 dt = 0.025
 SIM_LENGTH = 5
+MOV_AVG_WIN = 20
 NUM_SIMULATIONS = 50
 NUM_BVS = 8
 V_LENGTH = 2.5

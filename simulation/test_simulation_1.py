@@ -29,6 +29,24 @@ import models.acceleration as acc_models
 #   each with the same "trajectory" length.                                   #
 #                                                                             #
 ###############################################################################
+
+# If you would like to load the IS which is located in output/test then set
+# 
+#   II = None
+# 
+# Otherwise, if you would like to load an output from output/set1 then set this
+# variable to the index of the initial state you would like to load. I.e. if
+# you would like to load output/set1/simdata_pkl_10_is then set:
+#
+#   II = 10
+II = 15
+
+if II == None:
+    LOAD_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}{IS_SUFF}"
+else:
+    LOAD_DATA_LOC = f"{SET1_SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{IS_SUFF}"
+
+
 def main():
     # Time the script
     t_start = time.time()
@@ -46,8 +64,9 @@ def main():
     print(date_time.get_current_time(), f"Generated platoon with {len(v_list)} vehicles")
 
     # Save platoon incase we want to re-use it
-    load_platoon = False
-    save_loc_name = TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME+IS_SUFF
+    load_platoon = True
+    save_loc_name = LOAD_DATA_LOC
+    print(date_time.get_current_time(), f"File = {save_loc_name}")
     if load_platoon:
         # Load vehicle list
         v_list = g.load_pickled_data(save_loc_name)
@@ -98,7 +117,7 @@ def main():
 
     # Smooth the x, y and heading angle columns
     for V in v_list:
-        rc = g.smooth_output_data(V, mov_avg_win=20, keep_end=True)
+        rc = g.smooth_output_data(V, mov_avg_win=MOV_AVG_WIN, keep_end=True)
 
     # TODO: Sometimes this script fails. Will fix...
 

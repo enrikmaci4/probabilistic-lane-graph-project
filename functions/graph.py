@@ -564,8 +564,9 @@ def _calculate_1d_ttc(ds: float, dv: float, da:float):
 
 
 def calculate_ttc_and_dtc(PLG_: PLG, path_av: list, speed_av: float, acc_av: float, path_bv: list, speed_bv: float, acc_bv: float):
-    """Calculate the TTC and DTC between two vehicles with the future trajectories and
-    speeds specified. This calculates the time-to-collision for the "AV".
+    """Calculate the TTC and DTC between two vehicles with the future
+    trajectories and speeds specified. This calculates the time-to-collision
+    for the "AV".
 
     There are 3 unique cases here:
 
@@ -770,7 +771,7 @@ def _check_for_jaggy_path(PLG_: PLG, path: list):
     """
     # Initialisations
     path_length = len(path)
-    return False
+
     # This function only applies to pahts which have a length of atleast 3
     # nodes, if this isn't True return False
     if len(path) < 3:
