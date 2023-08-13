@@ -105,8 +105,7 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     # versa).
     target_cluster = np.argmax(distance_from_start_to_targets)
     # If you want to set your own values, uncomment the following lines and
-    # define them here. NOTE: There is an initial_node below which needs to be
-    # uncommented as well.
+    # define them here.
     start_node = 1391
     target_cluster = 2
     initial_node = 976
