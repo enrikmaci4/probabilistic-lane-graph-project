@@ -103,8 +103,8 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     # If you want to set your own values, uncomment the following lines and
     # define them here. NOTE: There is an initial_node below which needs to be
     # uncommented as well.
-    #start_node = 1245
-    #target_cluster = 0
+    start_node = 1391
+    target_cluster = 2
     print(date_time.get_current_time(), f"start_node = {start_node}") 
     print(date_time.get_current_time(), f"target_cluster = {target_cluster}") 
 
@@ -132,7 +132,7 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     # If you want to set your own values, uncomment the following lines and
     # define them here. NOTE: There is a start_node above which needs to be
     # uncommented as well.
-    #initial_node = 1245
+    initial_node = 976
     print(date_time.get_current_time(), f"initial_node = {initial_node}") 
 
     # Get an "output_data" data structure. This data structure converts a node
