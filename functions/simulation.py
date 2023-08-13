@@ -80,6 +80,10 @@ def _initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, v
 #                                                                             #
 ###############################################################################
 def _initialise_av_position(PLG_: PLG) -> Vehicle:
+    # Initialisations
+    start_node = None
+    target_cluster = None
+    initial_node = None
     # First we're going to generate a single vehicle path from an entry point
     # to an exit. We will then choose a random node, somewhere in the middle
     # of the path, and choose this as the initial state of the AV. There are a
@@ -105,9 +109,10 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     # uncommented as well.
     start_node = 1391
     target_cluster = 2
+    initial_node = 976
     print(date_time.get_current_time(), f"start_node = {start_node}") 
     print(date_time.get_current_time(), f"target_cluster = {target_cluster}") 
-
+    print(date_time.get_current_time(), f"initial_node = {initial_node}")
 
     # Generate a path
     path = graph.path_generation(PLG_, start_node, target_cluster)
@@ -126,7 +131,8 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     a_upp = 0.75
     a_low_ind = int(a_low*len(path))
     a_upp_ind = int(a_upp*len(path))
-    initial_node = np.random.choice(path[a_low_ind:a_upp_ind])
+    if initial_node != None:
+        initial_node = np.random.choice(path[a_low_ind:a_upp_ind])
     initial_node_index = path.index(initial_node)
 
     # If you want to set your own values, uncomment the following lines and
