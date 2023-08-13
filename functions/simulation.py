@@ -101,7 +101,8 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     # versa).
     target_cluster = np.argmax(distance_from_start_to_targets)
     # If you want to set your own values, uncomment the following lines and
-    # define them here
+    # define them here. NOTE: There is an initial_node below which needs to be
+    # uncommented as well.
     #start_node = 1245
     #target_cluster = 0
     print(date_time.get_current_time(), f"start_node = {start_node}") 
@@ -127,6 +128,12 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     a_upp_ind = int(a_upp*len(path))
     initial_node = np.random.choice(path[a_low_ind:a_upp_ind])
     initial_node_index = path.index(initial_node)
+
+    # If you want to set your own values, uncomment the following lines and
+    # define them here. NOTE: There is a start_node above which needs to be
+    # uncommented as well.
+    #initial_node = 1245
+    print(date_time.get_current_time(), f"initial_node = {initial_node}") 
 
     # Get an "output_data" data structure. This data structure converts a node
     # path into a 2D matrix with columns [x, y, heading angle]. We're mainly

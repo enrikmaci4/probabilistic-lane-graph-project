@@ -53,6 +53,8 @@ def main():
     # Do some plots
     graph.draw(PLG_)
     ii_random = random.randint(0, len(paths)-1)
+    #ii_random = 
+    print(date_time.get_current_time(), f"ii_random = {ii_random}")
     for ii in paths:
         graph.plot_node_path(PLG_, paths[ii], color="orange")
 
@@ -60,7 +62,7 @@ def main():
     graph.plot_node_path(PLG_, paths[ii_random], color="yellow")
     graph.scatter_vehicles(v_list, color="red")
     g.plot_rectangle(AV.get_rectangle(), color="skyblue")
-    g.plot_rectangle(xc=AV.current_state.x, yc=AV.current_state.y, Rx=BV_DETECTION_RX, Ry=BV_DETECTION_RY, alpha=AV.current_state.head_ang, color="grey")    
+    #g.plot_rectangle(xc=AV.current_state.x, yc=AV.current_state.y, Rx=BV_DETECTION_RX, Ry=BV_DETECTION_RY, alpha=AV.current_state.head_ang, color="grey")    
 
     # Set the aspect ratio to be equal
     plt.xlim([AV.current_state.x-SCREEN_WIDTH/2, AV.current_state.x+SCREEN_WIDTH/2])
