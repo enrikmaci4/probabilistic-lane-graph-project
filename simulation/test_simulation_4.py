@@ -34,6 +34,17 @@ from animation.animation import animate
 ###############################################################################
 
 ###############################################################################
+# Vehicle initialisation information.                                         #
+###############################################################################
+# Vehicle 1
+INITIAL_NODE_1 = 514
+TARGET_CLUSTER_1 = 0
+
+# Vehicle 2
+INITIAL_NODE_2 = 1242
+TARGET_CLUSTER_2 = 7
+
+###############################################################################
 # Animation functions.                                                        #
 ###############################################################################
 # Recommended FPS for smooth animations: 10
@@ -202,14 +213,28 @@ def main():
 
     # Generate and save simulations
     while II < NUM_SIMULATIONS:
-        # First generate the vehicle state
-        
+        # Re-assign global variables
+        load_loc = f"{SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{SAVE_SUFF}"
+        v_list = g.load_pickled_data(load_loc)
+        len_of_sim = v_list[0].trajectory_length
+        v_plot = []
+        annotation_plot = []
+        START_ANIMATION = False
+
+        # Generate vehicle 1
+        v_list.append(sim.initialise_av_position(PLG_, start_node=INITIAL_NODE_1, target_cluster=TARGET_CLUSTER_1, initial_node=INITIAL_NODE_1))
+
+        # Generate vehicle 2
+        v_list.append(sim.initialise_av_position(PLG_, start_node=INITIAL_NODE_2, target_cluster=TARGET_CLUSTER_2, initial_node=INITIAL_NODE_2))
+
+        # Get v_list and AV
+        v_list = sim.generate_platoon(PLG_, v_list[0], v_list=v_list)
 
         # Try, if fail try again with another
         try:
             # Generate the simulation
             print()
-            is_cc = sim.generate_single_simulation(PLG_, SAVE_LOC=SAVE_LOC, II=str(II))
+            is_cc = sim.generate_single_simulation(PLG_, SAVE_LOC=SAVE_LOC, II=str(II), v_list=v_list)
             if is_cc:
                 SAVE_SUFF = CC_SUFF
                 cc_list.append(II)
@@ -218,14 +243,6 @@ def main():
                 SAVE_SUFF = NCC_SUFF
                 ncc_list.append(II)
                 num_ncc += 1
-
-            # Re-assign global variables
-            load_loc = f"{SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{SAVE_SUFF}"
-            v_list = g.load_pickled_data(load_loc)
-            len_of_sim = v_list[0].trajectory_length
-            v_plot = []
-            annotation_plot = []
-            START_ANIMATION = False
             
             # Save the animation
             plt.cla()
