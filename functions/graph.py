@@ -263,7 +263,7 @@ def fast_path_tree_generation(PLG: PLG, start_node: int, target_cluster: int, de
     # - First we constrain the algorithm to generate ONLY paths with less lane
     #   changes than a specified threshold, max_lane_change.
     # - If we cannot generate enough paths to meet our minimum path requirement
-    #   increase this max allwoed threshold and try again.
+    #   increase this max allowed threshold and try again.
     while (len(paths) < min_num_paths) and (max_lane_change <= num_lanes_in_map):
         # Initialisions. Yes - we initialise these two variables above aswell.
         # This is because we need the length in the while-statement so we have
@@ -316,16 +316,14 @@ def _fast_path_tree_generation(PLG: PLG, target_cluster: int, path: list, paths:
     # Now check the number of lane changes
     len_of_path = len(path)
     min_path_length_for_n_lane_changes = max_lane_change+1
-    num_lane_changes = 0
     if len_of_path > min_path_length_for_n_lane_changes:
         # There has to be more than max_lane_change+1 nodes in the path for
-        # the number of lane changes to exceed max_lane_change
-        lane_ids = [PLG.node_lane_ids[path[ii]] for ii in range(len_of_path)]
-
-        # Now cycle through the path and count the number of lane changes
-        for ii in range(len_of_path-1):
-            if lane_ids[ii] != lane_ids[ii+1]:
-                num_lane_changes += 1
+        # the number of lane changes to exceed max_lane_change. This check
+        # saves us calling count_num_lane_changes unnecessarily.
+        num_lane_changes = count_num_lane_changes(PLG, path)
+    else:
+        # If we can't exceed the maximum anyways then just set this value to 0.
+        num_lane_changes = 0
 
     # Check if we can terminate this path, otherwise add a node
     if (path[-1] in PLG.target_clusters[target_cluster]) or \
@@ -751,6 +749,29 @@ def calculate_num_lane_changes(PLG_: PLG, path: list):
     return num_lane_change
 
 
+def count_num_lane_changes(PLG_: PLG, path: list):
+    """Counts the number of lane changes in the nodal path specified. Returns
+    an integer value.
+    """
+    # Initialisations
+    num_lane_changes = 0
+    path_length = len(path)
+    lane_ids = [PLG_.node_lane_ids[path[ii]] for ii in range(path_length)]
+
+
+    # If the length of the path is less than or equal to 1 then there can be no
+    # lane changes so return 0
+    if path_length <= 1:
+        return num_lane_changes
+
+    # Loop through the path and count the lane changes
+    for ii in range(path_length-1):
+        if lane_ids[ii] != lane_ids[ii+1]:
+            num_lane_changes += 1
+
+    return num_lane_changes
+
+
 def _check_for_jaggy_path(PLG_: PLG, path: list):
     """We want to avoid generating "jaggy" paths where we switch lanes twice
     within 3 nodes. These aren't realistic paths and are a waste of computation
@@ -780,9 +801,9 @@ def _check_for_jaggy_path(PLG_: PLG, path: list):
     # Now iterate over the path and count the number of lane changes
     for ii in range(path_length-2):
         # Get current lane ID and previous lane ID
-        lid_0 = PLG_.node_lane_ids[ii]
-        lid_1 = PLG_.node_lane_ids[ii+1]
-        lid_2 = PLG_.node_lane_ids[ii+2]
+        lid_0 = PLG_.node_lane_ids[path[ii]]
+        lid_1 = PLG_.node_lane_ids[path[ii+1]]
+        lid_2 = PLG_.node_lane_ids[path[ii+2]]
         
         # If this path is jaggy
         if (lid_0 != lid_1) and (lid_0 == lid_2) and (lid_1 != lid_2):

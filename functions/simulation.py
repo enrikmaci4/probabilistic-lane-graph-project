@@ -106,9 +106,9 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     target_cluster = np.argmax(distance_from_start_to_targets)
     # If you want to set your own values, uncomment the following lines and
     # define them here.
-    start_node = 1391
-    target_cluster = 2
-    initial_node = 976
+    #start_node = 374
+    #target_cluster = 0
+    #initial_node = 341
     print(date_time.get_current_time(), f"start_node = {start_node}") 
     print(date_time.get_current_time(), f"target_cluster = {target_cluster}") 
     print(date_time.get_current_time(), f"initial_node = {initial_node}")
@@ -137,7 +137,6 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     # If you want to set your own values, uncomment the following lines and
     # define them here. NOTE: There is a start_node above which needs to be
     # uncommented as well.
-    initial_node = 976
     print(date_time.get_current_time(), f"initial_node = {initial_node}") 
 
     # Get an "output_data" data structure. This data structure converts a node
