@@ -196,7 +196,7 @@ def main():
     # - Annotation
     annotation_plot = []
     # - File locations to load/save data to
-    SAVE_LOC = SET1_SAVE_LOC
+    SAVE_LOC = SET3_SAVE_LOC
     SAVE_SUFF = ""
     # - Counter variables
     II = 0

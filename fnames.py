@@ -110,7 +110,7 @@ PLG_NAME = "PLG"
 TEST_SIM_SAVE_LOC = "output/test/"
 SET1_SAVE_LOC = "output/set1/"
 SET2_SAVE_LOC = "output/set2/"
-SET3_SAVE_LOC = "output/set2/"
+SET3_SAVE_LOC = "output/set3/"
 
 SIM_ANIM_NAME = "anim"
 SIM_DATA_PKL_NAME = "simdata_pkl"
