@@ -57,7 +57,7 @@ PLG_NAME = "PLG"
 #                  FILE NAMES:                                                #
 #                  - Described below.                                         #
 #                                                                             #
-# SET(1/2)_SAVE_LOC                                                           #
+# SET(1/2/3)_SAVE_LOC                                                         #
 #                - When we run automated simulations (i.e. run 100            #
 #                  simulations) to gauge the effectiveness of a method across #
 #                  a large number of attempts, the outputs will be classified #
@@ -67,6 +67,9 @@ PLG_NAME = "PLG"
 #                  which is optimised to generate realistic corner cases. The #
 #                  outputs from the "safe" model will be in SET1 and the      #
 #                  outputs from the "corner case" model will be in SET 2.     #
+#                - SET3: Is similar to set1 but it will contain funky cases   #
+#                  where the initial state is customised (set by the          #
+#                  designer) rather than randomly generated.                  #
 #                                                                             #
 #                  FILE NAMES:                                                #
 #                  - SIM_ANIM_NAME   = "anim_ii". Saved as a GIF.             #
@@ -107,6 +110,7 @@ PLG_NAME = "PLG"
 TEST_SIM_SAVE_LOC = "output/test/"
 SET1_SAVE_LOC = "output/set1/"
 SET2_SAVE_LOC = "output/set2/"
+SET3_SAVE_LOC = "output/set2/"
 
 SIM_ANIM_NAME = "anim"
 SIM_DATA_PKL_NAME = "simdata_pkl"
