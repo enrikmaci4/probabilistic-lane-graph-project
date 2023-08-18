@@ -205,10 +205,6 @@ def main():
     cc_list = []
     ncc_list = []
 
-    # Load the cleaned data
-    data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
-    print(date_time.get_current_time(), "Loaded clean data")
-
     # Create a PLG object
     PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
     print(date_time.get_current_time(), "Loaded PLG")

@@ -79,11 +79,7 @@ def _initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, v
 # Returns: av - A "Vehicle" type object with an initial state.                #
 #                                                                             #
 ###############################################################################
-def _initialise_av_position(PLG_: PLG) -> Vehicle:
-    # Initialisations
-    start_node = None
-    target_cluster = None
-    initial_node = None
+def initialise_av_position(PLG_: PLG, start_node=None, target_cluster=None, initial_node=None) -> Vehicle:
     # First we're going to generate a single vehicle path from an entry point
     # to an exit. We will then choose a random node, somewhere in the middle
     # of the path, and choose this as the initial state of the AV. There are a
@@ -94,7 +90,8 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     # - We don't really want vehicle's to suddenly disappear from the map which
     #   is what will happen if a vehicle reaches it's target destination.
     start_cluster = int(np.random.choice(list(PLG_.start_clusters.keys())))
-    start_node = int(np.random.choice(PLG_.start_clusters[start_cluster]))
+    if start_node == None:
+        start_node = int(np.random.choice(PLG_.start_clusters[start_cluster]))
     # We want kind of long paths to get a nice long simulation so choose 
     # one of the target clusters which is further away.
     start_coords = PLG_.nodes[start_node,:]
@@ -103,7 +100,8 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
     # variation in target clusters. E.g. randomly choose one between the mid-
     # point and the end in a list ordered from lowest to highest (or vice
     # versa).
-    target_cluster = np.argmax(distance_from_start_to_targets)
+    if target_cluster == None:
+        target_cluster = np.argmax(distance_from_start_to_targets)
     # If you want to set your own values, uncomment the following lines and
     # define them here.
     #start_node = 374
@@ -167,17 +165,23 @@ def _initialise_av_position(PLG_: PLG) -> Vehicle:
 # Generate vehicles to surround the AV. I.e. a platoon of vehicles. We are    #
 # going to use this platoon to generate traffic simulations.                  #
 #                                                                             #
-# Params: IN  PLG_   - A PLG object describing the map.                       #
-#         IN  AV     - A data structure of type classes.vehicle.Vehicle with  #
-#                      an initial state but no further trajectory data.       #
-#         OUT v_list - A list of Vehicle type data structures. This list      #
-#                      describes the platoon of vehicles we're simulating.    #
+# Params: IN     PLG_   - A PLG object describing the map.                    #
+#         IN     AV     - A data structure of type classes.vehicle.Vehicle    #
+#                         with an initial state but no further trajectory     #
+#                         data.                                               #
+#         IN/OUT v_list - A list of Vehicle type data structures. This list   #
+#                         describes the platoon of vehicles we're simulating. #
+#                         If this list is provided, then the first element    #
+#                         should be the AV/ego vehicle.                       #
 #                                                                             #
 ###############################################################################
-def _generate_platoon(PLG_:PLG, AV: Vehicle):
+def generate_platoon(PLG_:PLG, AV: Vehicle, v_list=None):
     # Initialisations
     num_bvs = NUM_BVS
-    v_list = [AV]
+    if v_list == None:
+        v_list = [AV]
+    else:
+        AV = v_list[0]
 
     # First we're going to get a list of nodes which we know are within the AV
     # detection zone of the AV.
@@ -235,10 +239,10 @@ def _generate_platoon(PLG_:PLG, AV: Vehicle):
 ###############################################################################
 def generate_random_initial_platoon_state(PLG_: PLG):
     # Create an AV/ego vehicle
-    AV = _initialise_av_position(PLG_)
+    AV = initialise_av_position(PLG_)
 
     # Generate BVs randomly around the AV and this will be our v_list
-    v_list = _generate_platoon(PLG_, AV)
+    v_list = generate_platoon(PLG_, AV)
 
     return v_list
 
