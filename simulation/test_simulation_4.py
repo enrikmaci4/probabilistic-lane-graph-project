@@ -188,8 +188,8 @@ def main():
     # - PLG object
     PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
     # - Load vehicle data
-    v_list = g.load_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME)
-    len_of_sim = v_list[0].trajectory_length
+    v_list = []
+    len_of_sim = 0
     # - Store the plotted vehicles so we can delete them before we plot them
     #   again
     v_plot = []
@@ -215,11 +215,7 @@ def main():
     while II < NUM_SIMULATIONS:
         # Re-assign global variables
         load_loc = f"{SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{SAVE_SUFF}"
-        v_list = g.load_pickled_data(load_loc)
-        len_of_sim = v_list[0].trajectory_length
-        v_plot = []
-        annotation_plot = []
-        START_ANIMATION = False
+        v_list = []
 
         # Generate vehicle 1
         v_list.append(sim.initialise_av_position(PLG_, start_node=INITIAL_NODE_1, target_cluster=TARGET_CLUSTER_1, initial_node=INITIAL_NODE_1))
@@ -243,6 +239,12 @@ def main():
                 SAVE_SUFF = NCC_SUFF
                 ncc_list.append(II)
                 num_ncc += 1
+
+            # Re-assign global variables
+            len_of_sim = v_list[0].trajectory_length
+            v_plot = []
+            annotation_plot = []
+            START_ANIMATION = False
             
             # Save the animation
             plt.cla()

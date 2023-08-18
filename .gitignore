@@ -155,6 +155,7 @@ dmypy.json
 # Outputs directory
 /output/set1/*
 /output/set2/*
+/output/set3/*
 /output/test/*
 # Folder with original carla videos
 /videos/*
