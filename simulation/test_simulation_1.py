@@ -39,7 +39,8 @@ import models.acceleration as acc_models
 # you would like to load output/set1/simdata_pkl_10_is then set:
 #
 #   II = 10
-II = 15
+LOAD_PLATOON = False
+II = None
 
 if II == None:
     LOAD_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}{IS_SUFF}"
@@ -64,7 +65,7 @@ def main():
     print(date_time.get_current_time(), f"Generated platoon with {len(v_list)} vehicles")
 
     # Save platoon incase we want to re-use it
-    load_platoon = True
+    load_platoon = LOAD_PLATOON
     save_loc_name = LOAD_DATA_LOC
     print(date_time.get_current_time(), f"File = {save_loc_name}")
     if load_platoon:

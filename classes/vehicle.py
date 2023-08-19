@@ -149,6 +149,10 @@ class Vehicle:
         # collision. This option is only compatible with 5 second simulation
         # lengths right now.
         self._force_cc = False
+        # Create a pre-defined path for the vehicle to follow. This should be
+        # externally set to a list of nodes in order to set the pre-defined
+        # path.
+        self.predefined_path = [None]
 
     ###########################################################################
     # Initialisation functions.                                               #
@@ -189,7 +193,11 @@ class Vehicle:
         # Get the node and next node as complex numbers so
         # that we can use 2D vector algebra with these coordinates. Note that
         # this vehicle is currently traversing the edge from node to next_node
-        assert self.future_nodes[0] != self.future_nodes[1]
+        if self.future_nodes[0] == self.future_nodes[1]:
+            # NOTE: If a vehicle is stationary in the simulaiton it may be
+            # because we've entered this if-statement.
+            self.current_state.speed = 0
+            return True
         node_pos = complex(self.PLG.nodes[self.future_nodes[0], 0], self.PLG.nodes[self.future_nodes[0], 1])
         next_node_pos = complex(self.PLG.nodes[self.future_nodes[1], 0], self.PLG.nodes[self.future_nodes[1], 1])
 
@@ -337,26 +345,66 @@ class Vehicle:
             # Check if we've reached the target destination
             if current_node in self.PLG.target_clusters[self.target_destination]:
                 rc_signal = SIGNAL_TERM_SIM
-            
-            # First generate a tree of paths
-            path_tree = graph.fast_path_tree_generation(self.PLG, current_node, self.target_destination)
 
-            # Create a list of possible decisions
-            self.decision_list = []
-            for ii in path_tree:
-                # Initialse
-                path = path_tree[ii]
-                decision_option = Decision()
-                ttc = graph.INF
-                dtc = graph.INF
-                
+            # If there is no pre-defined path then we need to generate the tree
+            # of possible trajectories and choose one using our decision rule
+            if self.predefined_path[0] == None:
+                # First generate a tree of paths
+                path_tree = graph.fast_path_tree_generation(self.PLG, current_node, self.target_destination)
+
+                # Create a list of possible decisions
+                self.decision_list = []
+                for ii in path_tree:
+                    # Initialse
+                    path = path_tree[ii]
+                    decision_option = Decision()
+                    ttc = graph.INF
+                    dtc = graph.INF
+
+                    # Now calculate the TTC between this path and the background
+                    # vehicles. We will take the minimum TTC as this is what will
+                    # have the highest risk.
+                    for bv in self.bv_list:
+                        # Calculate TTC to this BV
+                        ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(self.PLG, path, self.current_state.speed, self.current_state.acc, bv.most_likely_path, bv.speed, bv.acc)
+
+                        if (abs(ttc_for_this_bv) < abs(ttc)):
+                            ttc = ttc_for_this_bv
+
+                        if (abs(dtc_for_this_bv) < abs(dtc)):
+                            dtc = dtc_for_this_bv
+
+                    # Now calculate/set the rest of decision data
+                    decision_option.path = path
+                    decision_option.ttc = ttc
+                    decision_option.dtc = dtc
+                    decision_option.num_lane_changes_in_path = graph.calculate_num_lane_changes(self.PLG, path)
+                    decision_option.prev_acc = self.current_state.acc
+                    decision_option.acc = acc_models.linear(ttc=ttc, dtc=dtc)
+                    decision_option.speed = self.current_state.speed + dt*decision_option.acc
+
+                    # Append this decision_option to the list of possible decisions
+                    self.decision_list.append(decision_option)
+
+                # Now choose an action from the list of possible decisions
+                if self._force_cc:
+                    self.decision = rules.rule_force_cc(self.decision_list, trajectory_length=self.trajectory_length)
+                else:
+                    self.decision = rules.rule_5(self.decision_list)
+
+            # There is a pre-defined path. We need to generate accelerations
+            # and update the future nodes using this pre-defined path.
+            else:
+                # Remove the first element of predefined_path
+                if len(self.predefined_path) > 2:
+                    self.predefined_path.pop(0)
+
+                # Set path to the predefined path
+                path = self.predefined_path
+
                 # Now calculate the TTC between this path and the background
                 # vehicles. We will take the minimum TTC as this is what will
                 # have the highest risk.
-                #
-                # NOTE: We are ignoring negative TTCs for now because we
-                # shouldn't really be responding to vehicles speeding behind us
-                # anyway. That's a bit dangerous...
                 for bv in self.bv_list:
                     # Calculate TTC to this BV
                     ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(self.PLG, path, self.current_state.speed, self.current_state.acc, bv.most_likely_path, bv.speed, bv.acc)
@@ -367,23 +415,16 @@ class Vehicle:
                     if (abs(dtc_for_this_bv) < abs(dtc)):
                         dtc = dtc_for_this_bv
 
-                # Now calculate/set the rest of decision data
-                decision_option.path = path
-                decision_option.ttc = ttc
-                decision_option.dtc = dtc
-                decision_option.num_lane_changes_in_path = graph.calculate_num_lane_changes(self.PLG, path)
-                decision_option.prev_acc = self.current_state.acc
-                decision_option.acc = acc_models.linear(ttc=ttc, dtc=dtc)
-                decision_option.speed = self.current_state.speed + dt*decision_option.acc
-
-                # Append this decision_option to the list of possible decisions
-                self.decision_list.append(decision_option)
-
-            # Now choose an action from the list of possible decisions
-            if self._force_cc:
-                self.decision = rules.rule_force_cc(self.decision_list, trajectory_length=self.trajectory_length)
-            else:
-                self.decision = rules.rule_5(self.decision_list)
+                    # Now calculate/set the rest of decision data
+                    self.decision.ttc = ttc
+                    self.decision.dtc = dtc
+                    self.decision.num_lane_changes_in_path = graph.calculate_num_lane_changes(self.PLG, path)
+                    self.decision.prev_acc = self.current_state.acc
+                    self.decision.acc = acc_models.linear(ttc=ttc, dtc=dtc)
+                    self.decision.speed = self.current_state.speed + dt*decision_option.acc
+                
+                # Set the path - this is independent of the BVs
+                self.decision.path = self.predefined_path
 
             # Update the path in the current state
             self.current_state.most_likely_path = self.decision.path
@@ -402,6 +443,8 @@ class Vehicle:
             # Don't forget to add the overshoot!
             self.add_overshoot()
 
+        # We haven't entered a new node therefore there is no need to
+        # re-generate paths. We just need to re=generate the acceleration.
         else:
             # Calculate TTC
             ttc = graph.INF

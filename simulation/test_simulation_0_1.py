@@ -31,10 +31,12 @@ from classes.vehicle import *
 # Vehicle 1
 INITIAL_NODE_1 = 514
 TARGET_CLUSTER_1 = 0
+PATH_1 = None
 
 # Vehicle 2
 INITIAL_NODE_2 = 1242
 TARGET_CLUSTER_2 = 7
+PATH_2 = None
 
 def main():
     # Initialisations

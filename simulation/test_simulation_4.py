@@ -39,10 +39,12 @@ from animation.animation import animate
 # Vehicle 1
 INITIAL_NODE_1 = 514
 TARGET_CLUSTER_1 = 0
+PATH_1 = [None]
 
 # Vehicle 2
 INITIAL_NODE_2 = 1242
 TARGET_CLUSTER_2 = 7
+PATH_2 = [1242, 40, 307, 306, 305, 304, 36, 1428, 641, 642]
 
 ###############################################################################
 # Animation functions.                                                        #
@@ -219,9 +221,11 @@ def main():
 
         # Generate vehicle 1
         v_list.append(sim.initialise_av_position(PLG_, start_node=INITIAL_NODE_1, target_cluster=TARGET_CLUSTER_1, initial_node=INITIAL_NODE_1))
+        #v_list[0].predefined_path = PATH_1
 
         # Generate vehicle 2
         v_list.append(sim.initialise_av_position(PLG_, start_node=INITIAL_NODE_2, target_cluster=TARGET_CLUSTER_2, initial_node=INITIAL_NODE_2))
+        v_list[1].predefined_path = PATH_2
 
         # Get v_list and AV
         v_list = sim.generate_platoon(PLG_, v_list[0], v_list=v_list)
@@ -256,8 +260,8 @@ def main():
             break
 
         # Woops. There was an assert we were too lazy to handle. Try again :)
-        except Exception:
-            pass
+        #except Exception:
+        #    pass
 
         # Write stats to text file every iteration so we can get live stats
         with open(f"{SAVE_LOC}{STATS_NAME}", 'w+') as stats_file:
