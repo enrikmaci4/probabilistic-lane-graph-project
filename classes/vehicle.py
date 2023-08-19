@@ -402,6 +402,10 @@ class Vehicle:
                 # Set path to the predefined path
                 path = self.predefined_path
 
+                # Initialse
+                ttc = graph.INF
+                dtc = graph.INF
+
                 # Now calculate the TTC between this path and the background
                 # vehicles. We will take the minimum TTC as this is what will
                 # have the highest risk.
@@ -421,7 +425,7 @@ class Vehicle:
                     self.decision.num_lane_changes_in_path = graph.calculate_num_lane_changes(self.PLG, path)
                     self.decision.prev_acc = self.current_state.acc
                     self.decision.acc = acc_models.linear(ttc=ttc, dtc=dtc)
-                    self.decision.speed = self.current_state.speed + dt*decision_option.acc
+                    self.decision.speed = self.current_state.speed + dt*self.decision.acc
                 
                 # Set the path - this is independent of the BVs
                 self.decision.path = self.predefined_path

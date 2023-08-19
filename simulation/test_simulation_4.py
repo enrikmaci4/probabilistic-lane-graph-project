@@ -226,6 +226,9 @@ def main():
         # Generate vehicle 2
         v_list.append(sim.initialise_av_position(PLG_, start_node=INITIAL_NODE_2, target_cluster=TARGET_CLUSTER_2, initial_node=INITIAL_NODE_2))
         v_list[1].predefined_path = PATH_2
+        # We want this vehicle to have a different ID to all other background
+        # vehicles and vehicle 1 created above.
+        v_list[1].current_state.vehicle_id = NUM_BVS+1
 
         # Get v_list and AV
         v_list = sim.generate_platoon(PLG_, v_list[0], v_list=v_list)
