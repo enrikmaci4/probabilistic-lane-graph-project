@@ -8,6 +8,7 @@ sys.path.append(os.getcwd())
 import numpy as np
 from models.acceleration import A_MAX, A_MIN
 from inputs import *
+import functions.graph as graph
 
 
 ###############################################################################
@@ -180,32 +181,56 @@ def _cost_acc(da: float):
     """Penalise large changes in acceleration
 
     Function:
-              --                     --    # da should never be above
-             |       da^2              |   # A_MAX - A_MIN anyway so we should
-    C = min <  -----------------  ,  1  >  # never hit the case when the cost
-             | (A_MAX - A_MIN)^2       |   # function is above 1 anyway.
-              --                     --    # 
+           
+              da^2           
+    C = -----------------  
+        (A_MAX - A_MIN)^2            
 
     Args:
         da (float): Acceleration change.
     """
-    return min((da/(A_MAX - A_MIN))**2, 1)
+    return (da/(A_MAX - A_MIN))**2
 
 
 def _cost_speed(v: float):
     """Penalise speed if we stray too far from the average speed.
 
     Function:
-              --                     --   
-             |   (v - v_avg)^2         |  
-    C = min <  -----------------  ,  1  > 
-             |      v_avg^2            |  
-              --                     --   
+                        
+          (v - v_avg)^2  
+    C = -----------------
+            v_avg^2     
+                        
 
     Args:
         v (float): Acceleration change.
     """
-    return min(((v - SPEED_MEAN)/SPEED_MEAN)**2, 1)
+    return ((v - SPEED_MEAN)/SPEED_MEAN)**2
+
+
+def _cost_lane_changes(decision, PLG_=None):
+    """Penalise if we keep zig-zagging between lanes.
+
+    Function:
+          N
+    C = -----
+         N_L
+
+    Args:
+        decision type data structure defined in vehicle.py.
+    """
+    assert decision.current_trajectory_length != graph.EMPTY_ENTRY
+    # Check if the trajectory is the correct length, for simplicity we don't
+    # start computing this cost until the trajectory length is atleast N_L.
+    # Get the N_L
+    if decision.current_trajectory_length >= decision.N_L:
+        # Get N_L previous nodes plus 1 next_node
+        path = decision.N_L_prev_path+[decision.path[1]]
+
+        # Return cost
+        return graph.calculate_num_lane_changes(PLG_, path)/decision.N_L
+    else:
+        return 0
 
 
 ###############################################################################
@@ -222,12 +247,13 @@ def _cost_speed(v: float):
 #    ai >= 0 for i = 1,2,3,4                                                  #
 #                                                                             #
 ###############################################################################
-def _cost_5(decision):
+def _cost_5(decision, PLG_=None):
     # Linear combination constants
     a_ttc = 0.3
     a_dtc = 0.7
     a_acc = 0
     a_speed = 0
+    a_lane_change = 0
 
     # Get variables of interest
     ttc = decision.ttc
@@ -236,12 +262,16 @@ def _cost_5(decision):
     v = decision.speed
 
     # Calculate cost
-    C = a_ttc*_cost_ttc(ttc) + a_dtc*_cost_dtc(dtc) + a_acc*_cost_acc(da) + a_speed*_cost_speed(v)
+    C = a_ttc*_cost_ttc(ttc) + \
+        a_dtc*_cost_dtc(dtc) + \
+        a_acc*_cost_acc(da) + \
+        a_speed*_cost_speed(v) + \
+        a_lane_change*_cost_lane_changes(decision, PLG_=PLG_)
 
     return C
 
 
-def rule_5(decision_list: list):
+def rule_5(decision_list: list, PLG_=None):
     """Rule: Minimise the cost function
     """
     # Initialise a list to store the TTC for each decision option
@@ -249,7 +279,7 @@ def rule_5(decision_list: list):
 
     # Cycle through the decision options and store the TTC
     for decision_option in decision_list:
-        L_.append(_cost_5(decision_option))
+        L_.append(_cost_5(decision_option, PLG_=PLG_))
 
     # Get the path which minimises cost
     ii = np.argmin(L_)

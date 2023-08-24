@@ -32,13 +32,16 @@ import models.acceleration as acc_models
 
 # If you would like to load the IS which is located in output/test then set
 # 
+#   LOAD_PLATOON = True
 #   II = None
 # 
 # Otherwise, if you would like to load an output from output/set1 then set this
 # variable to the index of the initial state you would like to load. I.e. if
 # you would like to load output/set1/simdata_pkl_10_is then set:
 #
+#   LOAD_PLATOON = True
 #   II = 10
+# 
 LOAD_PLATOON = False
 II = None
 

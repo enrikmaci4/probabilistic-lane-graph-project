@@ -100,6 +100,11 @@ class Decision:
         self.acc = graph.EMPTY_ENTRY
         self.speed = graph.EMPTY_ENTRY
         self.num_lane_changes_in_path = graph.EMPTY_ENTRY
+        # We take the previous N_L number of nodes and 1 future node. This is
+        # to count the number of lane changes in the path.
+        self.N_L = 3
+        self.N_L_prev_path = graph.EMPTY_ENTRY
+        self.current_trajectory_length = graph.EMPTY_ENTRY
 
 
 ###############################################################################
@@ -382,6 +387,9 @@ class Vehicle:
                     decision_option.prev_acc = self.current_state.acc
                     decision_option.acc = acc_models.linear(ttc=ttc, dtc=dtc)
                     decision_option.speed = self.current_state.speed + dt*decision_option.acc
+                    decision_option.current_trajectory_length = self.trajectory_length
+                    if self.trajectory_length >= decision_option.N_L:
+                        decision_option.N_L_prev_path = self.trajectory[-decision_option.N_L::, II_NODE]
 
                     # Append this decision_option to the list of possible decisions
                     self.decision_list.append(decision_option)
@@ -390,7 +398,7 @@ class Vehicle:
                 if self._force_cc:
                     self.decision = rules.rule_force_cc(self.decision_list, trajectory_length=self.trajectory_length)
                 else:
-                    self.decision = rules.rule_5(self.decision_list)
+                    self.decision = rules.rule_5(self.decision_list, PLG_=self.PLG)
 
             # There is a pre-defined path. We need to generate accelerations
             # and update the future nodes using this pre-defined path.

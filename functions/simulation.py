@@ -296,6 +296,10 @@ def generate_single_simulation(PLG_: PLG, II="1010101", MAX_WAIT_TIME=500, SAVE_
     # correctly
     print()
 
+    # Assert a minimum path length otherwise this cc was probably a
+    # result of some bad initial state
+    assert v_list[0].trajectory_length >= MOV_AVG_WIN
+
     # Store the time taken so we can return it and calculate average time taken
     time_taken = time.time()-t_start
 
