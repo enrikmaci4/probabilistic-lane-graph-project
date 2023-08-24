@@ -128,7 +128,8 @@ def main():
         # Plot the continuous path
         if vis_params.plot_continuous_path:
             plt.plot(x_cont, y_cont, color="red", linestyle="--", linewidth=1, zorder=8, label="Continuous path")
-        plt.legend()
+        if PLOT_LEGEND:
+            plt.legend()
 
     if vis_params.plot_start_and_target_clusters:
         # Plot the start and target clusters
@@ -155,7 +156,8 @@ def main():
             plt.text(PLG.start_cluster_centres[ii,0] + dx, PLG.start_cluster_centres[ii,1] + dy, str(ii), color="blue", fontsize=fontsize, fontweight="bold", zorder=25)
         for ii in range(len(PLG.target_cluster_centres[:,0])):
             plt.text(PLG.target_cluster_centres[ii,0] + dx, PLG.target_cluster_centres[ii,1] + dy, str(ii), color="magenta", fontsize=fontsize, fontweight="bold", zorder=25)
-        plt.legend()
+        if PLOT_LEGEND:
+            plt.legend()
 
     if vis_params.plot_random_generated_path:
         # Generate a random path using our path planning algorithm and plot it.
@@ -164,7 +166,11 @@ def main():
         start_cluster = np.random.choice(list(PLG.start_clusters.keys()))
         start_node = np.random.choice(PLG.start_clusters[start_cluster])
         target_cluster = np.random.choice(list(PLG.target_clusters.keys()))
+        #start_cluster = 9
+        #start_node = 1342
+        #target_cluster = 5
         print(date_time.get_current_time(), "Start cluster =", start_cluster)
+        print(date_time.get_current_time(), "Start node =", start_node)
         print(date_time.get_current_time(), "Target cluster =", target_cluster)
         
         # Now generate the path
@@ -174,9 +180,22 @@ def main():
         if not path[-1]:
             path.pop(-1)
 
+        # Smooth the path
+        x_disc = PLG.nodes[path, 0]
+        y_disc = PLG.nodes[path, 1]
+        # Get average discrete path
+        moving_avg_window = 10
+        #x_avg_disc, _ = g.moving_average_centred(x_disc, n=moving_avg_window)
+        #y_avg_disc, _ = g.moving_average_centred(y_disc, n=moving_avg_window)
+        x_avg_disc = g.smooth_output_vector(x_disc, mov_avg_win=moving_avg_window, keep_end=True)
+        y_avg_disc = g.smooth_output_vector(y_disc, mov_avg_win=moving_avg_window, keep_end=True)
+
         # Plot the path
         plt.plot(PLG.nodes[path,0], PLG.nodes[path,1], color="orange", linestyle="-", linewidth=1.5, zorder=12, label="Randomly generated path")
-        plt.legend()
+        if PLOT_SMOOTHED_GENERATED_PATH:
+            plt.plot(x_avg_disc, y_avg_disc, color="red", linestyle="-", linewidth=1.5, zorder=12, label="Smoothed generated path")
+        if PLOT_LEGEND:
+            plt.legend()
 
     if vis_params.plot_random_generated_path_tree:
         print(date_time.get_current_time(), "Generating path tree")

@@ -778,3 +778,57 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
     V.trajectory_length = smoothed_len
 
     return True
+
+
+def smooth_output_vector(x: list, mov_avg_win=10, keep_end=False):
+    """Modified version of smooth_output_data to only work on a single list
+    """
+    # If the moving average number is 1 or 0 then just return True straigth
+    # away because this indicates that we do not want to smooth.
+    if mov_avg_win <= 1:
+        return True
+    # Get length
+    trajectory_length = len(x)
+    # Intialise a matrix of zeroes which will store the new data
+    smoothed_len = trajectory_length - mov_avg_win + 1
+    # If the length of the input isn't long enough - don't do any smoothing.
+    if smoothed_len < 1:
+        return True
+    smoothed_trajectory = np.zeros((smoothed_len, 1))
+
+    # If mov_avg_win-1 is even we're going to throw away the last and first
+    # (mov_avg_win-1)/2 number of data points i.e:
+    # 
+    # [x x x o o o o o o o o o x x x]
+    # 
+    # If mov_avg_win/2 is off we're going to throw away the first
+    # ceil((mov_avg_win-1)/2) and the last floor((mov_avg_win-1)/2), i.e:
+    # 
+    # [x x x o o o o o o o o o o x x]
+    left_start_ii = math.ceil((mov_avg_win-1)/2)
+    right_end_ii = math.floor((mov_avg_win-1)/2)
+    
+    # Now smooth the x,y and heading angle columns
+    x_smoothed, _ = moving_average_centred(x, n=mov_avg_win)
+
+    # Set the smoothed versions of the columns into the smoothed_trajectory
+    # matrix
+    smoothed_trajectory[:, 0] = x_smoothed
+
+    # Take back the final part of the matrices so that we can see any
+    # collisions that have occurred
+    if keep_end:
+        for ii in range(right_end_ii):
+            # Centre index + left window
+            jj = right_end_ii-ii
+            left_start_jj = left_start_ii-ii-1
+
+            # Get lists of x,y and head ang
+            x_list = x[-jj-left_start_jj::]
+
+            # Append an extra row
+            smoothed_trajectory = np.vstack((smoothed_trajectory, np.mean(x_list)))
+            smoothed_len += 1
+
+    return smoothed_trajectory
+
