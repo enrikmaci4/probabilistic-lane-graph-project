@@ -146,19 +146,19 @@ def _cost_dtc(dtc: float, zero_cost_threshold=5):
     dtc to calculate the cost so we only need to look at the positive axis.    
     We will use a quadratic cost function which looks as follows:              
                                                                                
-    C=1 _|                                                                     
-         ||    |  |                                                            
-         | |   | |                                                             
-    C=0 _|__\ _|/____                                                          
-         |     |dtc=zero_cost_threshold                                        
+    C=1 _|__                                                                      
+         |  ||    |  |                                                            
+         |  | |   | |                                                             
+    C=0 _|__|__\__|/____                                                          
+         |  |dD   |dtc=zero_cost_threshold                                        
                                                                             
     Function description:                                                      
           --                                                                     
-         | (dtc - threshold)^2                                                    
-         | ------------------- for {x >= 0}{x =< threshold}                        
-         |     threshold^2                                                        
+         | (dtc - (threshold + dD))^2                                                    
+         | --------------------------    for {x >= 0}{x =< threshold}                        
+         |         threshold^2                                                        
     C = < 
-         |          0          for {x > threshold}                                
+         |              0                for {x > threshold}                                
          |
           --                                                                        
 
@@ -169,12 +169,13 @@ def _cost_dtc(dtc: float, zero_cost_threshold=5):
     """
     # Take the absolute value
     dtc = abs(dtc)
+    dD = 2
 
     # If the dtc is above the threshold return 0 instantly
-    if dtc > zero_cost_threshold:
+    if dtc > zero_cost_threshold + dD:
         return 0
     else:
-        return ((dtc - zero_cost_threshold)/zero_cost_threshold)**2
+        return ((dtc - (zero_cost_threshold + dD))/zero_cost_threshold)**2
     
 
 def _cost_acc(da: float):
@@ -256,8 +257,8 @@ def _cost_5(decision, PLG_=None):
     a_lane_change = 0
 
     # Get variables of interest
-    ttc = decision.ttc
-    dtc = decision.dtc
+    ttc = abs(decision.ttc)
+    dtc = abs(decision.dtc)
     da = decision.acc - decision.prev_acc
     v = decision.speed
 
