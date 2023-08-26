@@ -29,7 +29,7 @@ EMPTY_VALUE_STR = "---"
 # ANIMATION CONSTANTS
 START_ANIMATION = False
 # Recommended FPS for smooth animations: 10
-FPS = 1
+FPS = 10
 FREEZE_FOR_X_SECONDS = 3
 dx = 0.75
 dy = 0.1

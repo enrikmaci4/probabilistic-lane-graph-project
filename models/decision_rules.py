@@ -141,7 +141,7 @@ def _cost_ttc(ttc: float, zero_cost_threshold=5):
         return ((ttc - zero_cost_threshold)/zero_cost_threshold)**2
     
 
-def _cost_dtc(dtc: float, zero_cost_threshold=5):
+def _cost_dtc(dtc: float, zero_cost_threshold=20):
     """Cost function for the time to collision. We take the absolute value for 
     dtc to calculate the cost so we only need to look at the positive axis.    
     We will use a quadratic cost function which looks as follows:              
@@ -169,7 +169,7 @@ def _cost_dtc(dtc: float, zero_cost_threshold=5):
     """
     # Take the absolute value
     dtc = abs(dtc)
-    dD = 2
+    dD = 5
 
     # If the dtc is above the threshold return 0 instantly
     if dtc > zero_cost_threshold + dD:
