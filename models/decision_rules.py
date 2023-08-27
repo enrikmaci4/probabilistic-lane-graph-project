@@ -225,8 +225,10 @@ def _cost_lane_changes(decision, PLG_=None):
     # start computing this cost until the trajectory length is atleast N_L.
     # Get the N_L
     if decision.current_trajectory_length >= decision.N_L:
-        # Get N_L previous nodes plus 1 next_node
-        path = decision.N_L_prev_path+[decision.path[1]]
+        # Get N_L previous nodes
+        path = list(decision.N_L_prev_path)
+        # Append 1 next_node
+        path.append(decision.path[1])
 
         # Return cost
         return graph.calculate_num_lane_changes(PLG_, path)/decision.N_L

@@ -739,8 +739,8 @@ def calculate_num_lane_changes(PLG_: PLG, path: list):
     # Now iterate over the path and count the number of lane changes
     for ii in range(path_length-1):
         # Get current lane ID and previous lane ID
-        current_lid = PLG_.node_lane_ids[path[ii+1]]
-        previous_lid = PLG_.node_lane_ids[path[ii]]
+        current_lid = PLG_.node_lane_ids[int(path[ii+1])]
+        previous_lid = PLG_.node_lane_ids[int(path[ii])]
         
         # Check for a lane change
         if current_lid != previous_lid:
