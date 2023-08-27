@@ -23,6 +23,7 @@ from classes.vehicle import *
 import models.acceleration as acc_models
 from animation.animation import animate
 from sklearn.decomposition import PCA
+import pickle
 
 
 ###############################################################################
@@ -89,17 +90,20 @@ def main():
     # - We extract the top feature vector at multiple time steps to get the
     #   entire feature vector for the whole PCA method. We'll do this for 1
     #   second before the crash.
-    T_feature_extraction = 1
+    T_feature_extraction = 0.5
     num_time_steps = math.floor(T_feature_extraction/dt)
     num_features = num_features_per_ii*num_time_steps
     pca_feature_mat = np.zeros((0, num_features))
     # - Create a PLG object
     PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
     II = 0
+    #num_simulations = NUM_SIMULATIONS
+    num_simulations = 400
+    colors = []
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Load simulation data and build the PCA matrix
-    while II < NUM_SIMULATIONS:
+    while II < num_simulations:
         # Keyboard interrupt was interrupting as it should
         try:
             # Load vehicle file
@@ -129,6 +133,8 @@ def main():
                 ii += 1
             
             # Extract the feature vector for each time step
+            p1 = []
+            p2 = []
             for ii in range(V1.trajectory_length):
                 # Start from the final time step
                 jj = V1.trajectory_length - 1 - ii
@@ -148,12 +154,26 @@ def main():
                 feature_vector_ii[0, ii_start + 3] = h1
                 feature_vector_ii[0, ii_start + 4] = h2
 
+                # Store the paths
+                p1.append(int(V1.trajectory[jj, II_NODE]))
+                p2.append(int(V2.trajectory[jj, II_NODE]))
+
                 # Break if we've filled the feature vector
                 if ii_start + num_features_per_ii == num_features:
                     break
 
             # Stack this row onto the PCA matrix
             pca_feature_mat = np.vstack((pca_feature_mat, feature_vector_ii))
+
+            # Classify
+            N_lane_change = 10
+            num_lane_changes = graph.calculate_num_lane_changes(PLG_, p1[0:N_lane_change]) + graph.calculate_num_lane_changes(PLG_, p2[0:N_lane_change])
+            if num_lane_changes == 0:
+                colors.append("blue")
+            elif num_lane_changes == 1:
+                colors.append("orange")
+            else:
+                colors.append("red")
 
         except KeyboardInterrupt:
             # Keyboard interrupt sent, quit
@@ -162,6 +182,14 @@ def main():
         except FileNotFoundError:
             # File doesn't exist, increment II and try again
             pass
+
+        except pickle.UnpicklingError:
+            # Don't know what this error is
+            pass
+
+        except IndexError:
+            print(f"INDEX ERROR. II = {II}")
+            break
 
         # Increment II
         II += 1
@@ -184,12 +212,13 @@ def main():
     explained_variance_ratio = pca.explained_variance_ratio_
     
     # Print the transformed data and other results
-    print("Original data:\n", pca_feature_mat)
-    print("\nTransformed data:\n", transformed_data)
-    print(f"\nPrincipal Components:\n{np.shape(principal_components)}\n", principal_components)
-    print("\nExplained Variance Ratio:\n", explained_variance_ratio)
+    #print("Original data:\n", pca_feature_mat)
+    print(f"Shape: {np.shape(pca_feature_mat)}")
+    #print("\nTransformed data:\n", transformed_data)
+    #print(f"\nPrincipal Components:\n{np.shape(principal_components)}\n", principal_components)
+    #print("\nExplained Variance Ratio:\n", explained_variance_ratio)
 
-    plt.scatter(transformed_data[:,0], transformed_data[:,1], s=10, color="red")
+    plt.scatter(transformed_data[:,0], transformed_data[:,1], s=10, color=colors)
     plt.show()
 
 

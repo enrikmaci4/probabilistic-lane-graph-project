@@ -68,6 +68,8 @@ SAVE_LOC = None
 SAVE_SUFF = None
 # - Counter variables
 II = None
+II_START = 325
+II_COUNTER = 0
 num_cc = None
 num_ncc = None
 
@@ -197,7 +199,8 @@ def main():
     SAVE_LOC = SET1_SAVE_LOC
     SAVE_SUFF = ""
     # - Counter variables
-    II = 0
+    II = II_START
+    II_COUNTER = 0
     num_cc = 0
     num_ncc = 0
 
@@ -210,7 +213,7 @@ def main():
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Generate and save simulations
-    while II < NUM_SIMULATIONS:
+    while II_COUNTER < NUM_SIMULATIONS:
         # Try, if fail try again with another
         try:
             # Generate the simulation
@@ -237,6 +240,7 @@ def main():
             plt.cla()
             save_animation()
             II += 1
+            II_COUNTER += 1
 
         # We're tired of this - break!
         except KeyboardInterrupt:

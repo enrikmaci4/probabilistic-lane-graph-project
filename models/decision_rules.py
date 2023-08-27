@@ -23,9 +23,9 @@ def rule_force_cc(decision_list: list, trajectory_length=None):
         trajectory_length (int): Current trajectory length. Defaults to None.
     """
     assert trajectory_length != None
-    if trajectory_length <= 100:
+    if trajectory_length <= 50:
         return rule_2(decision_list)
-    elif trajectory_length <= 150:
+    elif trajectory_length <= 75:
         return rule_3(decision_list)
     else:
         return rule_4(decision_list)
@@ -250,8 +250,8 @@ def _cost_lane_changes(decision, PLG_=None):
 ###############################################################################
 def _cost_5(decision, PLG_=None):
     # Linear combination constants
-    a_ttc = 0.2
-    a_dtc = 0.5
+    a_ttc = 0.5
+    a_dtc = 0.2
     a_acc = 0.1
     a_speed = 0.1
     a_lane_change = 0.1
