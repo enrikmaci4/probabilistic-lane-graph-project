@@ -251,10 +251,10 @@ def _cost_lane_changes(decision, PLG_=None):
 def _cost_5(decision, PLG_=None):
     # Linear combination constants
     a_ttc = 0.5
-    a_dtc = 0.2
-    a_acc = 0.1
-    a_speed = 0.1
-    a_lane_change = 0.1
+    a_dtc = 0.5
+    a_acc = 0
+    a_speed = 0
+    a_lane_change = 0
 
     # Get variables of interest
     ttc = abs(decision.ttc)

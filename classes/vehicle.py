@@ -153,7 +153,7 @@ class Vehicle:
         # Force CC - Set this to True if you want to forcefully generate a
         # collision. This option is only compatible with 5 second simulation
         # lengths right now.
-        self._force_cc = True
+        self._force_cc = False
         # Create a pre-defined path for the vehicle to follow. This should be
         # externally set to a list of nodes in order to set the pre-defined
         # path.

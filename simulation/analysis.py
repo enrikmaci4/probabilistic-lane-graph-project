@@ -90,7 +90,7 @@ def main():
     # - We extract the top feature vector at multiple time steps to get the
     #   entire feature vector for the whole PCA method. We'll do this for 1
     #   second before the crash.
-    T_feature_extraction = 0.5
+    T_feature_extraction = 1
     num_time_steps = math.floor(T_feature_extraction/dt)
     num_features = num_features_per_ii*num_time_steps
     pca_feature_mat = np.zeros((0, num_features))
@@ -100,6 +100,10 @@ def main():
     #num_simulations = NUM_SIMULATIONS
     num_simulations = 400
     colors = []
+    # Counters
+    n_no_lane = 0
+    n_one_lane = 0
+    n_mul_lane = 0
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Load simulation data and build the PCA matrix
@@ -166,14 +170,17 @@ def main():
             pca_feature_mat = np.vstack((pca_feature_mat, feature_vector_ii))
 
             # Classify
-            N_lane_change = 10
+            N_lane_change = 40
             num_lane_changes = graph.calculate_num_lane_changes(PLG_, p1[0:N_lane_change]) + graph.calculate_num_lane_changes(PLG_, p2[0:N_lane_change])
             if num_lane_changes == 0:
                 colors.append("blue")
+                n_no_lane += 1
             elif num_lane_changes == 1:
                 colors.append("orange")
+                n_one_lane += 1
             else:
                 colors.append("red")
+                n_mul_lane += 1
 
         except KeyboardInterrupt:
             # Keyboard interrupt sent, quit
@@ -218,7 +225,13 @@ def main():
     #print(f"\nPrincipal Components:\n{np.shape(principal_components)}\n", principal_components)
     #print("\nExplained Variance Ratio:\n", explained_variance_ratio)
 
-    plt.scatter(transformed_data[:,0], transformed_data[:,1], s=10, color=colors)
+    # Print stats
+    n_total = n_no_lane + n_one_lane + n_mul_lane
+    print(f"No Lane Change = {n_no_lane/n_total}")
+    print(f"One Lane Change = {n_one_lane/n_total}")
+    print(f"Multiple Lane Change = {n_mul_lane/n_total}")
+
+    plt.scatter(transformed_data[:,0], transformed_data[:,1], s=20, color=colors)
     plt.show()
 
 

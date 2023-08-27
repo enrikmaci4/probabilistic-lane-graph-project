@@ -68,7 +68,7 @@ SAVE_LOC = None
 SAVE_SUFF = None
 # - Counter variables
 II = None
-II_START = 325
+II_START = 0
 II_COUNTER = 0
 num_cc = None
 num_ncc = None
