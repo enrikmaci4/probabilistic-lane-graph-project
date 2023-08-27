@@ -103,7 +103,8 @@ def animate(ii):
             v_plot.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red", plot_heading=True))
 
             # Plot annotations
-            annot_string = rf"ttc={ttc}{NEWLINE_CHAR}dtc={dtc}{NEWLINE_CHAR}v={speed}{NEWLINE_CHAR}id={id}{NEWLINE_CHAR}"
+            #annot_string = rf"ttc={ttc}{NEWLINE_CHAR}dtc={dtc}{NEWLINE_CHAR}v={speed}{NEWLINE_CHAR}id={id}{NEWLINE_CHAR}"
+            annot_string = rf"id={id}"
             annotation_plot.append(plt.annotate(annot_string, (x+dx, y+dx), size=6.5, fontweight="bold", zorder=20, color="indigo"))
     
             # Set the axes
