@@ -153,7 +153,10 @@ class Vehicle:
         # Force CC - Set this to True if you want to forcefully generate a
         # collision. This option is only compatible with 5 second simulation
         # lengths right now.
-        self._force_cc = False
+        # - CCs produced due to lane changes i.e. side impact
+        self._force_cc_lane_changes = False
+        # - CCs produced contain no lane changes i.e. rear end
+        self._force_cc_no_lane_changes = True
         # Create a pre-defined path for the vehicle to follow. This should be
         # externally set to a list of nodes in order to set the pre-defined
         # path.
@@ -395,8 +398,10 @@ class Vehicle:
                     self.decision_list.append(decision_option)
 
                 # Now choose an action from the list of possible decisions
-                if self._force_cc:
+                if self._force_cc_lane_changes:
                     self.decision = rules.rule_force_cc(self.decision_list, trajectory_length=self.trajectory_length)
+                elif self._force_cc_no_lane_changes:
+                    self.decision = rules.rule_force_cc_no_lane_change(self.decision_list, trajectory_length=self.trajectory_length)
                 else:
                     self.decision = rules.rule_5(self.decision_list, PLG_=self.PLG)
 

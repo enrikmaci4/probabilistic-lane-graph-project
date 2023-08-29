@@ -23,6 +23,20 @@ NEWLINE_CHAR = "\n"
 EMPTY_VALUE_STR = "---"
 
 
+# Define which simulation to plot using
+# 
+#   SET = TEST_SIM_SAVE_LOC or SETi_SAVE_LOC
+#   II = None or integer. None for TEST folder and integer for SET folder
+# 
+SET = SET1_SAVE_LOC
+II = 120
+
+if II == None:
+    LOAD_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}"
+else:
+    LOAD_DATA_LOC = f"{SET}{SIM_DATA_PKL_NAME}_{II}"
+
+
 ###############################################################################
 # Generate an animation from an output dataset.                               #
 ###############################################################################
@@ -38,7 +52,13 @@ CENTRE_V_ID = 0
 # - PLG object
 PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
 # - Load vehicle data + simulation length
-v_list = g.load_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME)
+try:
+    v_list = g.load_pickled_data(f"{LOAD_DATA_LOC}{NCC_SUFF}")
+except FileNotFoundError:
+    try:
+        v_list = g.load_pickled_data(f"{LOAD_DATA_LOC}{CC_SUFF}")
+    except FileNotFoundError:
+        v_list = g.load_pickled_data(f"{LOAD_DATA_LOC}")
 len_of_sim = v_list[0].trajectory_length
 # - Store the plotted vehicles so we can delete them before we plot them
 #   again

@@ -34,7 +34,7 @@ import models.acceleration as acc_models
 #   II = None or integer. None for TEST folder and integer for SET folder
 # 
 SET = SET1_SAVE_LOC
-II = None
+II = 120
 
 if II == None:
     LOAD_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}"

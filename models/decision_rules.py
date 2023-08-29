@@ -9,6 +9,7 @@ import numpy as np
 from models.acceleration import A_MAX, A_MIN
 from inputs import *
 import functions.graph as graph
+import random
 
 
 ###############################################################################
@@ -23,6 +24,20 @@ def rule_force_cc(decision_list: list, trajectory_length=None):
         trajectory_length (int): Current trajectory length. Defaults to None.
     """
     assert trajectory_length != None
+    if trajectory_length <= 50:
+        return rule_2(decision_list)
+    elif trajectory_length <= 75:
+        return rule_3(decision_list)
+    else:
+        return rule_4(decision_list)
+    
+
+def rule_force_cc_no_lane_change(decision_list: list, trajectory_length=None):
+    """A rule to force a collision 1D collisions.
+    """
+    assert trajectory_length != None
+    for decision in decision_list:
+        decision.acc = random.uniform(0, 1)
     if trajectory_length <= 50:
         return rule_2(decision_list)
     elif trajectory_length <= 75:

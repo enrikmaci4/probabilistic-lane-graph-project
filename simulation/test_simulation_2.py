@@ -68,14 +68,16 @@ SAVE_LOC = None
 SAVE_SUFF = None
 # - Counter variables
 II = None
-II_START = 0
+II_START = 250
 II_COUNTER = 0
 num_cc = None
 num_ncc = None
 
+
 # Initializing a figure in which the graph will be plotted
 fig = plt.figure() 
 plt.gca().set_aspect("equal", adjustable="box")
+
 
 # Animation function
 def animate(ii):
