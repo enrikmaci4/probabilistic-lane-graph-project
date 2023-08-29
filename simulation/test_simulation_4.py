@@ -36,15 +36,34 @@ from animation.animation import animate
 ###############################################################################
 # Vehicle initialisation information.                                         #
 ###############################################################################
-# Vehicle 1
-INITIAL_NODE_1 = 514
-TARGET_CLUSTER_1 = 0
-PATH_1 = [None]
+red_light = True
 
-# Vehicle 2
-INITIAL_NODE_2 = 1242
-TARGET_CLUSTER_2 = 7
-PATH_2 = [1242, 40, 307, 306, 305, 304, 36, 1428, 641, 642]
+# RUNNING A RED LIGHT
+if red_light:
+    # Vehicle 1
+    INITIAL_NODE_1 = 514
+    TARGET_CLUSTER_1 = 0
+    PATH_1 = [None]
+
+    # Vehicle 2
+    INITIAL_NODE_2 = 1348
+    TARGET_CLUSTER_2 = 7
+    PATH_2 = [1348, 1329, 394, 395, 396, 38, 306, 383, 384, 386, 386, 387, 389, 390, 391, 392, 393]
+
+    # Red light and green light
+    red_light = [37, 38, 39, 40, 41, 42]
+    green_light = [1050, 31, 299, 512, 484]
+else:
+# WRONG DIRECTION
+    # Vehicle 1
+    INITIAL_NODE_1 = 780
+    TARGET_CLUSTER_1 = 0
+    PATH_1 = [None]
+
+    # Vehicle 2
+    INITIAL_NODE_2 = 1380
+    TARGET_CLUSTER_2 = 3
+    PATH_2 = [1380, 914, 787, 651, 650, 1065, 1488, 1487, 1489, 1490]
 
 ###############################################################################
 # Animation functions.                                                        #
@@ -161,10 +180,13 @@ def animate(ii):
 
 def save_animation():
     # Global variabls
-    global PLG_, v_list, len_of_sim
+    global PLG_, v_list, len_of_sim, red_light
 
     # Plot PLG
     graph.draw(PLG_)
+    if red_light:
+        plt.scatter(PLG_.nodes[red_light, :], PLG_.nodes[red_light, :], s=20, color="red", zorder=40)
+        plt.scatter(PLG_.nodes[green_light, :], PLG_.nodes[green_light, :], s=20, color="green", zorder=40)
 
     # Length of the simulation
     print(date_time.get_current_time(), "Saving animation")
@@ -261,6 +283,10 @@ def main():
         # We're tired of this - break!
         except KeyboardInterrupt:
             break
+
+        except AssertionError:
+            # Try again!
+            pass
 
         # Woops. There was an assert we were too lazy to handle. Try again :)
         #except Exception:
