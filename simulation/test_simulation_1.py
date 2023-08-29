@@ -43,7 +43,7 @@ import models.acceleration as acc_models
 #   II = 10
 # 
 LOAD_PLATOON = True
-II = None
+II = 0
 
 if II == None:
     LOAD_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}{IS_SUFF}"

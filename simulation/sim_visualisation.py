@@ -34,13 +34,15 @@ import models.acceleration as acc_models
 #   II = None or integer. None for TEST folder and integer for SET folder
 # 
 SET = SET1_SAVE_LOC
-II = 14
+II = None
 
 if II == None:
     LOAD_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}"
 else:
     LOAD_DATA_LOC = f"{SET}{SIM_DATA_PKL_NAME}_{II}"
 
+# If you want to highlight any vehicle paths, insert them into this list
+highlight_ids = []
 
 def main():
     # Time the script
@@ -58,7 +60,10 @@ def main():
     try:
         v_list = g.load_pickled_data(f"{LOAD_DATA_LOC}{NCC_SUFF}")
     except FileNotFoundError:
-        v_list = g.load_pickled_data(f"{LOAD_DATA_LOC}{CC_SUFF}")
+        try:
+            v_list = g.load_pickled_data(f"{LOAD_DATA_LOC}{CC_SUFF}")
+        except FileNotFoundError:
+            v_list = g.load_pickled_data(f"{LOAD_DATA_LOC}")
 
     # PLOTS
     # Plot PLG
@@ -82,13 +87,17 @@ def main():
             v_color = "red"
             path_color = "aqua"
             z_order = 35
+        if V.current_state.vehicle_id in highlight_ids:
+            v_color = "orange"
+            path_color = "yellow"
+            z_order = 36
         # Plot the vehicle
         g.plot_rectangle(X=V.get_rectangle(-1), color=v_color, plot_heading=True, z_order=37)
         # Plot vehicle path
         plt.plot(x_path, y_path, linewidth=2, color=path_color, linestyle="--", zorder=z_order)
         # Plot vehicle ID
         annot_string = f"id={id}"
-        plt.annotate(annot_string, (x+dx, y+dy), size=6.5, fontweight="bold", zorder=20, color="indigo")
+        plt.annotate(annot_string, (x+dx, y+dy), size=7.5, fontweight="bold", zorder=50, color="indigo")
 
 
 
