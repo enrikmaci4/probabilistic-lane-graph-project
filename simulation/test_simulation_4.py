@@ -185,8 +185,8 @@ def save_animation():
     # Plot PLG
     graph.draw(PLG_)
     if red_light:
-        plt.scatter(PLG_.nodes[red_light, :], PLG_.nodes[red_light, :], s=20, color="red", zorder=40)
-        plt.scatter(PLG_.nodes[green_light, :], PLG_.nodes[green_light, :], s=20, color="green", zorder=40)
+        plt.scatter(PLG_.nodes[red_light, 0], PLG_.nodes[red_light, 1], s=20, color="red", zorder=40)
+        plt.scatter(PLG_.nodes[green_light, 0], PLG_.nodes[green_light, 1], s=20, color="green", zorder=40)
 
     # Length of the simulation
     print(date_time.get_current_time(), "Saving animation")
