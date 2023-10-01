@@ -25,7 +25,12 @@ EMPTY_VALUE_STR = "---"
 
 ###############################################################################
 # Generate an animation from an output dataset.                               #
+#                                                                             #
+# This script loads the scenario in TEST_SIM_SAVE_LOC, create sa GIF and      #
+# saves it to the same output directory.                                      #
+#                                                                             #
 ###############################################################################
+
 # ANIMATION CONSTANTS
 START_ANIMATION = False
 # Recommended FPS for smooth animations: 10

@@ -24,18 +24,23 @@ from classes.vehicle import *
 #                                                                             #
 # - Generates a custom initial state. You provide the initial_node and        #
 #   target_cluster.                                                           #
+#   - This script is identical to test_simulation_0_0.py except it lets the   #
+#     user input the initial node and target destination for two vehicles     #
+#     manually.                                                               #
+#   - This can be used to generate simulations for more contrived/custom made #
+#     scenarios.                                                              #
 #                                                                             #
 ###############################################################################
 
 # VEHICLE INITIALISATION INFORMATION
 # Vehicle 1
-INITIAL_NODE_1 = 514
-TARGET_CLUSTER_1 = 0
+INITIAL_NODE_1 = 335
+TARGET_CLUSTER_1 = 4
 PATH_1 = None
 
 # Vehicle 2
-INITIAL_NODE_2 = 1242
-TARGET_CLUSTER_2 = 7
+INITIAL_NODE_2 = 336
+TARGET_CLUSTER_2 = 4
 PATH_2 = None
 
 def main():
@@ -70,6 +75,11 @@ def main():
     # Generate some paths
     path = graph.path_generation(PLG_, int(AV.current_state.node), AV.target_destination)
     paths = graph.fast_path_tree_generation(PLG_, AV.current_state.node, AV.target_destination, max_path_length=10, max_lane_change=2)
+    paths = {
+        0: [335, 188, 189, 190, 191, 192],
+        1: [335, 1519, 336, 434, 449, 337, 338],
+        2: [335, 81, 82, 83, 84, 85]
+    }
     print(date_time.get_current_time(), "Number of paths generated =", len(paths))
 
     # Print the index of the path with the most lane changes
@@ -84,13 +94,13 @@ def main():
     #ii_random = 382
     print(date_time.get_current_time(), f"ii_random = {ii_random}")
     for ii in paths:
-        graph.plot_node_path(PLG_, paths[ii], color="orange")
+        graph.plot_node_path(PLG_, paths[ii], color="orange", linewidth=2)
 
-    graph.plot_node_path(PLG_, path)
-    graph.plot_node_path(PLG_, paths[ii_random], color="yellow", linewidth=2)
+    #graph.plot_node_path(PLG_, path)
+    #graph.plot_node_path(PLG_, paths[ii_random], color="yellow", linewidth=2)
     graph.scatter_vehicles(v_list, color="red")
     g.plot_rectangle(AV.get_rectangle(), color="skyblue")
-    g.plot_rectangle(xc=AV.current_state.x, yc=AV.current_state.y, Rx=BV_DETECTION_RX, Ry=BV_DETECTION_RY, alpha=AV.current_state.head_ang, color="grey")    
+    #g.plot_rectangle(xc=AV.current_state.x, yc=AV.current_state.y, Rx=BV_DETECTION_RX, Ry=BV_DETECTION_RY, alpha=AV.current_state.head_ang, color="grey")    
 
     # Set the aspect ratio to be equal
     plt.xlim([AV.current_state.x-SCREEN_WIDTH/2, AV.current_state.x+SCREEN_WIDTH/2])

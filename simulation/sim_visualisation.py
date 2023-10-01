@@ -30,11 +30,11 @@ import models.acceleration as acc_models
 
 # Define which simulation to plot using
 # 
-#   SET = TEST_SIM_SAVE_LOC or SETi_SAVE_LOC
-#   II = None or integer. None for TEST folder and integer for SET folder
+#   SET = TEST_SIM_SAVE_LOC or SETi_SAVE_LOC. Define the folder to look in.
+#   II = None or integer. None for TEST folder and integer for SET folders.
 # 
-SET = SET1_SAVE_LOC
-II = 120
+SET = TEST_SIM_SAVE_LOC
+II = None
 
 if II == None:
     LOAD_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}"
@@ -69,6 +69,21 @@ def main():
     # Plot PLG
     graph.draw(PLG_)
 
+    # Plot red lights. DO NOT set this to True. This was used to generate some
+    # specific edge cases to see how vehicles would respond to other agents
+    # running a red light. It should not be set to True for mainline cases.
+    # This is because it is specific to the NGSIM dataset with R=2.5. Setting
+    # this variable to True, highlights some nodes in the first junction as
+    # red/green to indicate red/green traffic lights. It is purely for
+    # aesthetic reasons.
+    red_light = False
+    # Red light and green light
+    red_light = [37, 38, 39, 40, 41, 42]
+    green_light = [1050, 31, 299, 512, 484]
+    if red_light:
+        plt.scatter(PLG_.nodes[red_light, 0], PLG_.nodes[red_light, 1], s=20, color="red", zorder=60)
+        plt.scatter(PLG_.nodes[green_light, 0], PLG_.nodes[green_light, 1], s=20, color="green", zorder=60)
+
     # Cycle through v_list
     dx = 1
     dy = 1
@@ -98,7 +113,6 @@ def main():
         # Plot vehicle ID
         annot_string = f"id={id}"
         plt.annotate(annot_string, (x+dx, y+dy), size=7.5, fontweight="bold", zorder=50, color="indigo")
-
 
 
     X_CENTRE = v_list[0].trajectory[-1, II_X]

@@ -113,7 +113,8 @@ def rule_4(decision_list: list):
 ###############################################################################
 # Cost functions                                                              #
 #                                                                             #
-# NOTE: - All cost functions will be normalised between 0 and 1.              #
+# NOTE: - All cost functions will be normalised to output values around the   #
+#         0 - 1 range under regular operating conditions.                     #
 #       - 0 is a low cost/desirable action and 1 is a high cost/undesirable   #
 #         action.                                                             #
 #       - We use convex programming for optimisation so write down convex     #
@@ -268,7 +269,7 @@ def _cost_lane_changes(decision, PLG_=None):
 def _cost_5(decision, PLG_=None):
     # Linear combination constants
     a_ttc = 0.2
-    a_dtc = 0.4
+    a_dtc = 0.5
     a_acc = 0.1
     a_speed = 0.1
     a_lane_change = 0.1
@@ -292,14 +293,17 @@ def _cost_5(decision, PLG_=None):
 def rule_5(decision_list: list, PLG_=None):
     """Rule: Minimise the cost function
     """
-    # Initialise a list to store the TTC for each decision option
+    # Initialise a list to store the loss for each decision option
     L_ = []
 
-    # Cycle through the decision options and store the TTC
+    # Cycle through the decision options, calculate the loss and append it to
+    # the list of losses.
     for decision_option in decision_list:
         L_.append(_cost_5(decision_option, PLG_=PLG_))
 
-    # Get the path which minimises cost
-    ii = np.argmin(L_)
-
-    return decision_list[ii]
+    # Get the path which minimises loss/cost
+    if len(L_) > 0:
+        ii = np.argmin(L_)
+        return decision_list[ii]
+    else:
+        return None

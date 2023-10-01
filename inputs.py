@@ -2,10 +2,11 @@
 # This file contains all of the inputs the user may modify for the PLG        #
 # generation and visualisation code.                                          #
 #                                                                             #
-# The inputs will be split into three sections:                               #
+# The inputs will be split into four sections:                                #
 # 1. Dataset                                                                  #
 # 2. PLG generation                                                           #
 # 3. PLG visualisation                                                        #
+# 4. Simulation                                                               #
 #                                                                             #
 # All inputs are provided in the variables below. If any of the inputs are    #
 # modified, the user must ensure that the valid script is (re)run in order    #
@@ -209,6 +210,22 @@ DO_KMEANS = True
 #                                 the vehicle. "Average discrete" in this     #
 #                                 case refers to a moving average of the node #
 #                                 path of the vehicle through the PLG.        #
+#          PLOT_ARTIFICIAL_CONNECTIONS                                        #
+#                              - In connect_nodes in graph.py we can specify  #
+#                                some extra node connections if we would like #
+#                                to manually connect some nodes. In order to  #
+#                                see these node connections when running      #
+#                                plg_visualisation.py, set this bool to True. #
+#                                This is only applicable to the NGSIM dataset #
+#                                (i.e. "lankershim"). Furthermore, it only    #
+#                                applies for R=2.5. This should NOT be set to #
+#                                True for any reasons other than for testing  #
+#                                how the graph would look with extra          #
+#                                connections. These connections can be        #
+#                                specified in functions\graph.py in the       #
+#                                connect_nodes function.                      #
+#          PLOT_LEGEND         - Set to True if you would like to plot a      #
+#                                legend when running plg_visualisation.py.    #
 #                                                                             #
 # Path generation params:                                                     #
 #          PLOT_RANDOM_GENERATED_PATH                                         #
@@ -227,12 +244,6 @@ DO_KMEANS = True
 #                              - Boolean value. Set to True if you would to   #
 #                                plot all of the start and end nodes in the   #
 #                                PLG to visualise the entry and exit points.  #
-#          PLOT_ARTIFICIAL_CONNECTIONS                                        #
-#                              - In connect_nodes in graph.py we can specify  #
-#                                some extra node connections if we would like #
-#                                to manually connect some nodes. In order to  #
-#                                see these node connections when running      #
-#                                plg_visualisation.py, set this bool to True. #
 #                                                                             #
 ###############################################################################
 PLOT_PLG = True
@@ -256,35 +267,65 @@ PLOT_RANDOM_VEHICLE_PATH = False
 PLOT_CONTINUOUS_PATH = False
 PLOT_DISCRETE_PATH = False
 PLOT_AVERAGE_DISCRETE_PATH = True
+PLOT_ARTIFICIAL_CONNECTIONS = False
+PLOT_LEGEND = False
 
 PLOT_RANDOM_GENERATED_PATH = True
 PLOT_SMOOTHED_GENERATED_PATH = True
 PLOT_RANDOM_GENERATED_PATH_TREE = False
 PLOT_START_AND_TARGET_CLUSTERS = True
 
-PLOT_ARTIFICIAL_CONNECTIONS = False
-
-PLOT_LEGEND = False
-
 ###############################################################################
 # Define some constants which are relevant to the code for generating         #
 # simulations:                                                                #
 #                                                                             #
-# dt       - The time increment in the simulation.                            #     
+# dt       - The time increment in the simulation.                            #
+# SIM_LENGTH                                                                  #
+#          - The length of the simulations in seconds.                        #
+# NUM_SIMULATIONS                                                             #
+#          - When generating many simulations, this variable specifies the    #
+#            number of simulations to generate.                               #
+# NUM_BVS  - The MAX number of BVs to generate when creating the              #
+#            state.                                                           #
 # V_LENGTH - The length of the vehicles in the simulation (in metres).        #
 # V_WIDTH  - The width of the vehicles in the simulation (in metres).         #
+# SPEED_LIMIT                                                                 #
+#          - Set the speed limit for the simulations generated.               #
+# SPEED_MEAN                                                                  #
+#          - Set the mean speed for the vehicles generated in the initial     #
+#            state.                                                           #
+# SPEED_STD                                                                   #
+#          - Vehicles are generated with random speeds for the initial state. #
+#            This variable sets the standard deviation of the distribution    #
+#            for these randomly generated speeds.                             #
 # SCREEN_WIDTH                                                                #
 #          - For the simulation videos we'll zoom in on the AV and look       #
 #            SCREE_WIDTH/2 either side of the AV.                             #
 # SCREEN_HEIGHT                                                               #
 #          - For the simulation videos we'll zoom in on the AV and look       #
 #            SCREE_HEIGHT/2 above/below the AV.                               #
+# BV_DETECTION_LOOK_AHEAD                                                     #
+#          - We classify vehicles as "BVs" if they're within a given          #
+#            rectangle around the ego vehicle. This rectangle will "look" a   #
+#            distance of BV_DETECTION_LOOK_AHEAD ahead and behind the ego     #
+#            vehicle. See test_simulation_0_0.py for a visualisation of this. #
+# BV_DETECTION_LOOK_ASIDE                                                     #
+#          - We classify vehicles as "BVs" if they're within a given          #
+#            rectangle around the ego vehicle. This rectangle will "look" a   #
+#            distance of BV_DETECTION_LOOK_ASIDE either side of the ego       #
+#            vehicle. See test_simulation_0_0.py for a visualisation of this. #
+# BV_DETECTION_RX                                                             #
+#          - The entire length of the BV detection rectangle in the direction #
+#            of heading of the ego.                                           #
+# BV_DETECTION_RY                                                             #
+#          - The lateral width of the BV detection rectangle either side of   #
+#            the ego vehicle.                                                 #
 #                                                                             #
 ###############################################################################
 dt = 0.025
 SIM_LENGTH = 5
 MOV_AVG_WIN = 20
-NUM_SIMULATIONS = 25
+NUM_SIMULATIONS = 45
 NUM_BVS = 8
 V_LENGTH = 2.5
 V_WIDTH = 1.5

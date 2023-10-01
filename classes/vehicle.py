@@ -156,7 +156,7 @@ class Vehicle:
         # - CCs produced due to lane changes i.e. side impact
         self._force_cc_lane_changes = False
         # - CCs produced contain no lane changes i.e. rear end
-        self._force_cc_no_lane_changes = True
+        self._force_cc_no_lane_changes = False
         # Create a pre-defined path for the vehicle to follow. This should be
         # externally set to a list of nodes in order to set the pre-defined
         # path.
@@ -399,11 +399,27 @@ class Vehicle:
 
                 # Now choose an action from the list of possible decisions
                 if self._force_cc_lane_changes:
-                    self.decision = rules.rule_force_cc(self.decision_list, trajectory_length=self.trajectory_length)
+                    # A decision rule designed to forcefully generate
+                    # collisions. Most of the collisions generated contain
+                    # lane changes, hence, why the boolean is called
+                    # "_force_cc_lane_changes".
+                    decision = rules.rule_force_cc(self.decision_list, trajectory_length=self.trajectory_length)
                 elif self._force_cc_no_lane_changes:
-                    self.decision = rules.rule_force_cc_no_lane_change(self.decision_list, trajectory_length=self.trajectory_length)
+                    # A decision rule designed to forcefully generate
+                    # collisions. The rule is designed to generate 1D corner
+                    # cases, i.e. rear end, however I am not so sure that it's
+                    # a very efficient method.
+                    decision = rules.rule_force_cc_no_lane_change(self.decision_list, trajectory_length=self.trajectory_length)
                 else:
-                    self.decision = rules.rule_5(self.decision_list, PLG_=self.PLG)
+                    # The mainline decision rule.
+                    decision = rules.rule_5(self.decision_list, PLG_=self.PLG)
+
+                # If decision is None then terminate. This means we haven't
+                # been able to find ANY possible paths.
+                if decision == None:
+                    rc = SIGNAL_TERM_SIM
+                else:
+                    self.decision = decision 
 
             # There is a pre-defined path. We need to generate accelerations
             # and update the future nodes using this pre-defined path.

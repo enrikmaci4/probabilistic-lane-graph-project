@@ -23,16 +23,17 @@ from classes.vehicle import *
 # ABOUT THIS SCRIPT:                                                          #
 #                                                                             #
 # - Generates a random initial state for a simulation and plots this state.   #
+# - What is an "initial state" you ask...?                                    #
+#   - An initial state is a list of "Vehicle" objects with a trajectory       #
+#     matrix of length 1.                                                     #
+#   - The heading angle is also initialised correctly so that the vehicles    #
+#     oriented along their direction of travel.                               #
 #                                                                             #
 ###############################################################################
 def main():
     # Time the script
     t_start = time.time()
     print(date_time.get_current_time(), "Program started")
-
-    # Load the cleaned data
-    data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
-    print(date_time.get_current_time(), "Loaded clean data")
 
     # Create a PLG object
     PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
@@ -68,7 +69,7 @@ def main():
     graph.plot_node_path(PLG_, paths[ii_random], color="yellow", linewidth=2)
     graph.scatter_vehicles(v_list, color="red")
     g.plot_rectangle(AV.get_rectangle(), color="skyblue")
-    g.plot_rectangle(xc=AV.current_state.x, yc=AV.current_state.y, Rx=BV_DETECTION_RX, Ry=BV_DETECTION_RY, alpha=AV.current_state.head_ang, color="grey")    
+    #g.plot_rectangle(xc=AV.current_state.x, yc=AV.current_state.y, Rx=BV_DETECTION_RX, Ry=BV_DETECTION_RY, alpha=AV.current_state.head_ang, color="grey")    
 
     # Set the aspect ratio to be equal
     plt.xlim([AV.current_state.x-SCREEN_WIDTH/2, AV.current_state.x+SCREEN_WIDTH/2])

@@ -21,7 +21,6 @@ import numpy as np
 from classes.PLG import *
 from classes.vehicle import *
 import models.acceleration as acc_models
-from animation.animation import animate
 
 
 ###############################################################################
@@ -176,8 +175,8 @@ def main():
     # - PLG object
     PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
     # - Load vehicle data
-    v_list = g.load_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME)
-    len_of_sim = v_list[0].trajectory_length
+    v_list = None
+    len_of_sim = None
     # - Store the plotted vehicles so we can delete them before we plot them
     #   again
     v_plot = []
@@ -201,7 +200,7 @@ def main():
 
     # Generate and save simulations
     while II < NUM_SIMULATIONS:
-        # Keyboard interrupt was interrupting as it should
+        # Keyboard interrupt wasn't interrupting as it should
         try:
             pass
         except KeyboardInterrupt:

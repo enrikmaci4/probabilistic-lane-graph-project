@@ -27,22 +27,27 @@ from animation.animation import animate
 ###############################################################################
 # ABOUT THIS SCRIPT:                                                          #
 #                                                                             #
+# - Generates somewhat customised simulations.                                #
 # - Create your own vehicle and place it at a custom location by specifying   #
 #   an initial_node, target_cluster and (optionally) the vehicle's future     #
 #   trajectory.                                                               #
+# - A simulation is then generated using the somewhat customised initial      #
+#   state generated.                                                          #
+# - I say "somewhat customised" because we can specify the initial state but  #
+#   we the background vehicles are randomly generated.                        #
 #                                                                             #
 ###############################################################################
 
 ###############################################################################
 # Vehicle initialisation information.                                         #
 ###############################################################################
-red_light = True
+red_light = False
 
 # RUNNING A RED LIGHT
 if red_light:
     # Vehicle 1
-    INITIAL_NODE_1 = 514
-    TARGET_CLUSTER_1 = 0
+    INITIAL_NODE_1 = 481
+    TARGET_CLUSTER_1 = 4
     PATH_1 = [None]
 
     # Vehicle 2

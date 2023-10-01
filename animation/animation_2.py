@@ -23,13 +23,25 @@ NEWLINE_CHAR = "\n"
 EMPTY_VALUE_STR = "---"
 
 
-# Define which simulation to plot using
+###############################################################################
+# Generate an animation from an output dataset.                               #
+#                                                                             #
+# This script loads the scenario in TEST_SIM_SAVE_LOC, create sa GIF and      #
+# saves it to the same output directory.                                      #
+#                                                                             #
+# This is similar to animation.py except it can load an animation from any    #
+# location, i.e., TEST_SIM_SAVE_LOC or SETi_SAVE_LOC.                         #
+#                                                                             #
+###############################################################################
+
+
+# INPUT: Define which simulation to plot using
 # 
 #   SET = TEST_SIM_SAVE_LOC or SETi_SAVE_LOC
 #   II = None or integer. None for TEST folder and integer for SET folder
 # 
-SET = SET1_SAVE_LOC
-II = 120
+SET = TEST_SIM_SAVE_LOC
+II = None
 
 if II == None:
     LOAD_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}"
@@ -173,6 +185,18 @@ def main():
 
     # Plot PLG
     graph.draw(PLG_)
+
+    # If this is a special side case where a vehicle is running a red light,
+    # set to True. This variable is a special edge case I've used to generate
+    # artificial simulations and shouldn't be set to True for any mainline
+    # cases.
+    red_light = False
+    # Red light and green light
+    red_light = [37, 38, 39, 40, 41, 42]
+    green_light = [1050, 31, 299, 512, 484]
+    if red_light:
+        plt.scatter(PLG_.nodes[red_light, 0], PLG_.nodes[red_light, 1], s=20, color="red", zorder=40)
+        plt.scatter(PLG_.nodes[green_light, 0], PLG_.nodes[green_light, 1], s=20, color="green", zorder=40)
 
     # Length of the simulation
     print(date_time.get_current_time(), "Saving animation")

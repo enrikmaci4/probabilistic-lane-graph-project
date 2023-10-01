@@ -27,6 +27,7 @@ import models.acceleration as acc_models
 # - Simulate a single scenario and save the data in the output directory. The #
 #   data is saved as Python pickle. The data is a list of vehicle structures  #
 #   each with the same "trajectory" length.                                   #
+# - The simulation data will be saved in TEST_SIM_SAVE_LOC.                   #
 #                                                                             #
 ###############################################################################
 
@@ -43,12 +44,16 @@ import models.acceleration as acc_models
 #   II = 10
 # 
 LOAD_PLATOON = True
-II = 0
+II = 8
 
+# Initialise the location to load data from
 if II == None:
     LOAD_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}{IS_SUFF}"
 else:
     LOAD_DATA_LOC = f"{SET1_SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{IS_SUFF}"
+
+# Create a variable to store the save lcoation of the simulation.
+SAVE_DATA_LOC = f"{TEST_SIM_SAVE_LOC}{SIM_DATA_PKL_NAME}"
 
 
 def main():
@@ -69,14 +74,13 @@ def main():
 
     # Save platoon incase we want to re-use it
     load_platoon = LOAD_PLATOON
-    save_loc_name = LOAD_DATA_LOC
-    print(date_time.get_current_time(), f"File = {save_loc_name}")
+    print(date_time.get_current_time(), f"Save file will be: {SAVE_DATA_LOC}")
     if load_platoon:
         # Load vehicle list
-        v_list = g.load_pickled_data(save_loc_name)
+        v_list = g.load_pickled_data(LOAD_DATA_LOC)
     else:
-        # Save his initial state incase we want to use it again
-        g.save_pickled_data(save_loc_name, v_list)
+        # Save this initial state incase we want to use it again
+        g.save_pickled_data(SAVE_DATA_LOC+IS_SUFF, v_list)
     
     # Simulation params
     sim_frame_length = int(round(SIM_LENGTH/dt, 0))
@@ -126,7 +130,7 @@ def main():
     # TODO: Sometimes this script fails. Will fix...
 
     # Save data
-    g.save_pickled_data(TEST_SIM_SAVE_LOC+SIM_DATA_PKL_NAME, v_list)
+    g.save_pickled_data(SAVE_DATA_LOC, v_list)
 
 
 if __name__=="__main__":

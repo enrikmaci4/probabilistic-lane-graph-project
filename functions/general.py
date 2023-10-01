@@ -494,7 +494,7 @@ def generate_normalised_rectangle():
     return X
 
 
-def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="skyblue", plot_heading=False, z_order=15):
+def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="skyblue", plot_heading=False, z_order=15, axis=None):
     """Plots a rectangle. If X is defined, just plot the columns against each
     other. Otherwise, use the other information.
 
@@ -554,7 +554,10 @@ def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="sk
         X = np.vstack((X, [0, 0]))
 
     # Plot
-    return plt.plot(X[:,0]+xc, X[:,1]+yc, linewidth=linewidth, color=color, zorder=z_order)
+    if axis == None:
+        return plt.plot(X[:,0]+xc, X[:,1]+yc, linewidth=linewidth, color=color, zorder=z_order)
+    else:
+        return axis.plot(X[:,0]+xc, X[:,1]+yc, linewidth=linewidth, color=color, zorder=z_order)
 
 
 class LineSegment:
