@@ -41,7 +41,6 @@ from animation.animation import animate
 ###############################################################################
 # Vehicle initialisation information.                                         #
 ###############################################################################
-red_light = False
 
 # RUNNING A RED LIGHT
 if red_light:
@@ -98,6 +97,9 @@ SAVE_SUFF = None
 II = None
 num_cc = None
 num_ncc = None
+
+# This is/was only for test purposes. No need to play with this.
+red_light = False
 
 # Initializing a figure in which the graph will be plotted
 fig = plt.figure() 

@@ -43,8 +43,8 @@ import models.acceleration as acc_models
 #   LOAD_PLATOON = True
 #   II = 10
 # 
-LOAD_PLATOON = True
-II = 8
+LOAD_PLATOON = False
+II = None
 
 # Initialise the location to load data from
 if II == None:
