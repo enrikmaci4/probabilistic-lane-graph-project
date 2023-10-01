@@ -28,9 +28,9 @@ from fnames import *
 #                  - PLG             = "PLG"                                  #
 #                                                                             #
 # #############################################################################
-RAW_DATA_LOC = "data/"+DATASET+"/original/"
-CLEAN_DATA_LOC = "data/"+DATASET+"/clean/"
-PLG_SAVE_LOC = "data/"+DATASET+"/structs/"
+RAW_DATA_LOC = "data/" + DATASET + "/original/"
+CLEAN_DATA_LOC = "data/" + DATASET + "/clean/"
+PLG_SAVE_LOC = "data/" + DATASET + "/structs/"
 
 ACC_NAME = "Acceleration"
 TIME_NAME = "Frame_ID"
@@ -120,5 +120,3 @@ STATS_NAME = "stats"
 CC_SUFF = "_cc"
 NCC_SUFF = "_ncc"
 IS_SUFF = "_is"
-
-

@@ -11,7 +11,7 @@ import functions.date_time as date_time
 import functions.graph as graph
 import functions.simulation as sim
 from animation.animation import EMPTY_VALUE_STR, NEWLINE_CHAR
-from matplotlib.animation import FuncAnimation 
+from matplotlib.animation import FuncAnimation
 import time
 import matplotlib.pyplot as plt
 import random
@@ -61,8 +61,9 @@ num_cc = None
 num_ncc = None
 
 # Initializing a figure in which the graph will be plotted
-fig = plt.figure() 
+fig = plt.figure()
 plt.gca().set_aspect("equal", adjustable="box")
+
 
 # Animation function
 def animate(ii):
@@ -78,7 +79,7 @@ def animate(ii):
         for nn in range(num_plots):
             # Start indexing from the final element because we're going to
             # remove
-            jj = num_plots-1-nn
+            jj = num_plots - 1 - nn
 
             # Get the matplotlib objects
             v_plot_ = v_plot[jj]
@@ -108,40 +109,55 @@ def animate(ii):
             acc = round(V.trajectory[ii, II_ACC], num_dp)
             ttc = round(V.trajectory[ii, II_TTC], num_dp)
             dtc = round(V.trajectory[ii, II_DTC], num_dp)
-            head_ang = round(V.trajectory[ii, II_HEAD_ANG] * 180/math.pi, num_dp)
+            head_ang = round(V.trajectory[ii, II_HEAD_ANG] * 180 / math.pi, num_dp)
             if ttc == graph.INF:
                 ttc = EMPTY_VALUE_STR
             if dtc == graph.INF:
                 dtc = EMPTY_VALUE_STR
 
             # Plot this vehicle
-            v_plot.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red", plot_heading=True))
+            v_plot.append(
+                g.plot_rectangle(X=V.get_rectangle(ii), color="red", plot_heading=True)
+            )
 
             # Plot annotations
             annot_string = rf"ttc={ttc}{NEWLINE_CHAR}dtc={dtc}{NEWLINE_CHAR}v={speed}{NEWLINE_CHAR}id={id}{NEWLINE_CHAR}"
-            annotation_plot.append(plt.annotate(annot_string, (x+dx, y+dx), size=6.5, fontweight="bold", zorder=20, color="indigo"))
-    
+            annotation_plot.append(
+                plt.annotate(
+                    annot_string,
+                    (x + dx, y + dx),
+                    size=6.5,
+                    fontweight="bold",
+                    zorder=20,
+                    color="indigo",
+                )
+            )
+
             # Set the axes
             if V.current_state.vehicle_id == CENTRE_V_ID:
-                plt.xlim([x-SCREEN_WIDTH/2, x+SCREEN_WIDTH/2])
-                plt.ylim([y-SCREEN_HEIGHT/2, y+SCREEN_HEIGHT/2])
+                plt.xlim([x - SCREEN_WIDTH / 2, x + SCREEN_WIDTH / 2])
+                plt.ylim([y - SCREEN_HEIGHT / 2, y + SCREEN_HEIGHT / 2])
 
                 # Get x,y coordinates of the current time and plot it in the
                 # top right side of the screen
-                x_time = x+SCREEN_WIDTH/2
-                y_time = y+SCREEN_HEIGHT/2
-                T = round(((ii+1)/len_of_sim)*SIM_LENGTH, 1)
-                time_plot[0] = plt.annotate(f"T={T}s", (x_time, y_time), size=10, color="black")
+                x_time = x + SCREEN_WIDTH / 2
+                y_time = y + SCREEN_HEIGHT / 2
+                T = round(((ii + 1) / len_of_sim) * SIM_LENGTH, 1)
+                time_plot[0] = plt.annotate(
+                    f"T={T}s", (x_time, y_time), size=10, color="black"
+                )
 
         # Progress bar
-        progressbar_anim(len_of_sim, ii+1, prefix=f"Saving: {II} ")
-        
+        progressbar_anim(len_of_sim, ii + 1, prefix=f"Saving: {II} ")
+
     elif ii == len_of_sim:
         # Animation as finished, check if there are any collisions and
         # highlight them
         for V in v_list:
             if V.is_collision:
-                g.plot_rectangle(X=V.get_rectangle(len_of_sim-1), color="orange", plot_heading=True)
+                g.plot_rectangle(
+                    X=V.get_rectangle(len_of_sim - 1), color="orange", plot_heading=True
+                )
 
 
 def save_animation():
@@ -153,8 +169,10 @@ def save_animation():
 
     # Length of the simulation
     print(date_time.get_current_time(), "Saving animation")
-    num_freeze_frames = int(FREEZE_FOR_X_SECONDS*FPS)
-    anim = FuncAnimation(fig, animate, frames=len_of_sim+num_freeze_frames, interval=0)
+    num_freeze_frames = int(FREEZE_FOR_X_SECONDS * FPS)
+    anim = FuncAnimation(
+        fig, animate, frames=len_of_sim + num_freeze_frames, interval=0
+    )
 
     # Define some plot params
     # - Hide X and Y axes tick marks
@@ -164,7 +182,7 @@ def save_animation():
     plt.tight_layout(h_pad=0.1, w_pad=0.1)
 
     # Save the animation
-    anim.save(f"{SAVE_LOC}anim_{II}{SAVE_SUFF}.gif", writer='pillow', fps=FPS)
+    anim.save(f"{SAVE_LOC}anim_{II}{SAVE_SUFF}.gif", writer="pillow", fps=FPS)
 
 
 def main():
@@ -173,7 +191,7 @@ def main():
 
     # GLOBAL VARIABLES NEEDED FOR ANIMATION
     # - PLG object
-    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC + PLG_NAME)
     # - Load vehicle data
     v_list = None
     len_of_sim = None
@@ -195,7 +213,7 @@ def main():
     ncc_list = []
 
     # Create a PLG object
-    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC + PLG_NAME)
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Generate and save simulations
@@ -207,11 +225,15 @@ def main():
             quit()
 
         # Load vehicle file
-        v_list = g.load_pickled_data(f"{SET1_SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{IS_SUFF}")
+        v_list = g.load_pickled_data(
+            f"{SET1_SAVE_LOC}{SIM_DATA_PKL_NAME}_{II}{IS_SUFF}"
+        )
 
         # Generate the simulation
         print()
-        is_cc = sim.generate_single_simulation(PLG_, SAVE_LOC=SAVE_LOC, II=str(II), save_initial_state=False, v_list=v_list)
+        is_cc = sim.generate_single_simulation(
+            PLG_, SAVE_LOC=SAVE_LOC, II=str(II), save_initial_state=False, v_list=v_list
+        )
         if is_cc:
             SAVE_SUFF = CC_SUFF
             cc_list.append(II)
@@ -235,7 +257,7 @@ def main():
         II += 1
 
         # Write stats to text file every iteration so we can get live stats
-        with open(f"{SAVE_LOC}{STATS_NAME}", 'w+') as stats_file:
+        with open(f"{SAVE_LOC}{STATS_NAME}", "w+") as stats_file:
             # First write the corner case stats
             stats_file.write(f"Num CCs: {num_cc} out of Total: {num_cc+num_ncc}\n\n")
 
@@ -243,15 +265,14 @@ def main():
             stats_file.write(f"Corner cases:\n")
             for cc in cc_list:
                 stats_file.write(f"{cc}\n")
-            stats_file.write(f"\n")        
+            stats_file.write(f"\n")
 
             # Now write the no corner cases:
             stats_file.write(f"No corner cases:\n")
             for ncc in ncc_list:
                 stats_file.write(f"{ncc}\n")
-            stats_file.write(f"\n")   
+            stats_file.write(f"\n")
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-

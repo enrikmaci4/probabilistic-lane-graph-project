@@ -7,7 +7,7 @@ from fnames import *
 
 
 ###############################################################################
-# travel_dict_generation:                                                     # 
+# travel_dict_generation:                                                     #
 #                                                                             #
 # Purpose: Generate the probability of transitioning from one node to another #
 #          given that we know the target cluster. Therefore we will generate  #
@@ -15,10 +15,13 @@ from fnames import *
 #                                                                             #
 # Params: IN/OUT PLG - The travel dictionary will be assigned to the PLG      #
 #                      PLG.p_next_node_given_target parameter.                #
-#                                                                             # 
+#                                                                             #
 ###############################################################################
 def travel_dict_generation(PLG):
-    p_next_node_given_target = {ii:np.zeros((PLG.num_nodes, PLG.num_nodes)) for ii in range(NUM_TARGET_CLUSTERS)}
+    p_next_node_given_target = {
+        ii: np.zeros((PLG.num_nodes, PLG.num_nodes))
+        for ii in range(NUM_TARGET_CLUSTERS)
+    }
     p_next_node = np.zeros((PLG.num_nodes, PLG.num_nodes))
 
     # Cycle through each vehicle path and update the matrices in the
@@ -26,15 +29,17 @@ def travel_dict_generation(PLG):
     for ii_path in PLG.vehicle_paths:
         path = PLG.vehicle_paths[ii_path]
         num_nodes_in_path = len(path)
-        target_cluster = g.get_dict_key_given_value_list_element(PLG.target_clusters, path[-1])
+        target_cluster = g.get_dict_key_given_value_list_element(
+            PLG.target_clusters, path[-1]
+        )
 
         # Cycle through each node in the path and update the
         # p_next_node_given_target matrix with the frequency of transitions
         # from the current node to the next node given that ww know the target
         # cluster
-        for ii in range(num_nodes_in_path-1):
+        for ii in range(num_nodes_in_path - 1):
             current_node = path[ii]
-            next_node = path[ii+1]
+            next_node = path[ii + 1]
             p_next_node_given_target[target_cluster][current_node, next_node] += 1
 
     # Create p_next_node by summing every matrix in p_next_node_given_target
@@ -46,7 +51,9 @@ def travel_dict_generation(PLG):
     # each row sums to 1
     for ii in p_next_node_given_target:
         # Normalise this matrix
-        p_next_node_given_target[ii] = g.normalise_matrix_rows(p_next_node_given_target[ii])
+        p_next_node_given_target[ii] = g.normalise_matrix_rows(
+            p_next_node_given_target[ii]
+        )
 
     # Normalise p_next_node
     p_next_node = g.normalise_matrix_rows(p_next_node)
@@ -56,5 +63,3 @@ def travel_dict_generation(PLG):
     PLG.p_next_node = p_next_node
 
     return True
-
-

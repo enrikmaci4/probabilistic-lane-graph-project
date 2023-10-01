@@ -1,6 +1,6 @@
 ###############################################################################
 # This file contains the PLG class, which is used to store the PLG data.      #
-#                                                                             #   
+#                                                                             #
 # Params:                                                                     #
 #                                                                             #
 # num_nodes                - Number of nodes in the PLG.                      #
@@ -9,7 +9,7 @@
 #                            i.                                               #
 # vehicle_paths            - A dictionary of {vehicle ID : node path}         #
 # adjmat                   - A 2D numpy adjacency matrix populated with the   #
-#                            connection probability.                          # 
+#                            connection probability.                          #
 # start_cluster_centres    - A 2D numpy matrix of [x,y] coordinates. The i'th #
 #                            row contains the i'th row contains the           #
 #                            coordinates for cluster i.                       #
@@ -21,7 +21,7 @@
 #                            from lowest to highest with respect to their     #
 #                            distance from the key value.                     #
 # p_next_node              - A 2D numpy adjacency matrix populated with the   #
-#                            connection probability.                          # 
+#                            connection probability.                          #
 # p_next_node_given_target - A 2D numpy adjacency matrix populated with the   #
 #                            connection probability. However, this matrix is  #
 #                            built from vehicles which all had the same       #

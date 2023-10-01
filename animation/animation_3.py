@@ -10,7 +10,7 @@ import functions.date_time as date_time
 import functions.graph as graph
 import time
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation 
+from matplotlib.animation import FuncAnimation
 from inputs import *
 from fnames import *
 import numpy as np
@@ -73,7 +73,7 @@ dy = 0.1
 CENTRE_V_ID = 0
 # GLOBAL VARIABLES NEEDED FOR ANIMATION
 # - PLG object
-PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+PLG_ = g.load_pickled_data(PLG_SAVE_LOC + PLG_NAME)
 # - Load vehicle data + simulation length
 # - - Vehicle 1
 v_list_1 = load_v_list(LOAD_DATA_LOC_1)
@@ -88,8 +88,8 @@ annotation_plot_2 = []
 # - Maximum length of simulaiton
 len_of_sim = max(len_of_sim_1, len_of_sim_2)
 T_MAX = SIM_LENGTH
-T_MAX_1 = (len_of_sim_1/len_of_sim)*T_MAX
-T_MAX_2 = (len_of_sim_2/len_of_sim)*T_MAX
+T_MAX_1 = (len_of_sim_1 / len_of_sim) * T_MAX
+T_MAX_2 = (len_of_sim_2 / len_of_sim) * T_MAX
 
 
 # Initializing a figure in which the graph will be plotted
@@ -101,6 +101,7 @@ ax1.set_yticks([])
 ax2.set_xticks([])
 ax2.set_yticks([])
 plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05)
+
 
 # Animation function
 def animate(ii):
@@ -118,7 +119,7 @@ def animate(ii):
             for nn in range(num_plots_11):
                 # Start indexing from the final element because we're going to
                 # remove
-                jj = num_plots_11-1-nn
+                jj = num_plots_11 - 1 - nn
                 # Get the matplotlib objects
                 v_plot_11 = v_plot_1[jj]
                 annotation_plot_11 = annotation_plot_1[jj]
@@ -135,7 +136,7 @@ def animate(ii):
             for nn in range(num_plots_22):
                 # Start indexing from the final element because we're going to
                 # remove
-                jj = num_plots_22-1-nn
+                jj = num_plots_22 - 1 - nn
                 # Get the matplotlib objects
                 v_plot_22 = v_plot_2[jj]
                 annotation_plot_22 = annotation_plot_2[jj]
@@ -165,25 +166,38 @@ def animate(ii):
                     dtc = EMPTY_VALUE_STR
 
                 # Plot this vehicle
-                v_plot_1.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red", plot_heading=True, axis=ax1))
+                v_plot_1.append(
+                    g.plot_rectangle(
+                        X=V.get_rectangle(ii), color="red", plot_heading=True, axis=ax1
+                    )
+                )
 
                 # Plot annotations
                 annot_color = "indigo"
                 annot_string = rf"id={id}"
                 if V.is_collision:
                     annot_color = "orange"
-                
+
                 # Plot the IDs next to the vehicles
-                annotation_plot_1.append(ax1.annotate(annot_string, (x+dx, y+dx), size=6.5, fontweight="bold", zorder=20, color=annot_color))
+                annotation_plot_1.append(
+                    ax1.annotate(
+                        annot_string,
+                        (x + dx, y + dx),
+                        size=6.5,
+                        fontweight="bold",
+                        zorder=20,
+                        color=annot_color,
+                    )
+                )
 
                 # Set the axes
                 if V.current_state.vehicle_id == CENTRE_V_ID:
-                    ax1.set_xlim([x-SCREEN_WIDTH/2, x+SCREEN_WIDTH/2])
-                    ax1.set_ylim([y-SCREEN_HEIGHT/2, y+SCREEN_HEIGHT/2])
+                    ax1.set_xlim([x - SCREEN_WIDTH / 2, x + SCREEN_WIDTH / 2])
+                    ax1.set_ylim([y - SCREEN_HEIGHT / 2, y + SCREEN_HEIGHT / 2])
 
                     # Get x,y coordinates of the current time and plot it in the
                     # top right side of the screen
-                    T = round(((ii+1)/len_of_sim_1)*T_MAX_1, 1)
+                    T = round(((ii + 1) / len_of_sim_1) * T_MAX_1, 1)
                     ax1.set_title(f"T={T}s")
 
         # V1
@@ -204,43 +218,66 @@ def animate(ii):
                     dtc = EMPTY_VALUE_STR
 
                 # Plot this vehicle
-                v_plot_2.append(g.plot_rectangle(X=V.get_rectangle(ii), color="red", plot_heading=True, axis=ax2))
+                v_plot_2.append(
+                    g.plot_rectangle(
+                        X=V.get_rectangle(ii), color="red", plot_heading=True, axis=ax2
+                    )
+                )
 
                 # Plot annotations
                 annot_color = "indigo"
                 annot_string = rf"id={id}"
                 if V.is_collision:
                     annot_color = "orange"
-                
+
                 # Plot the IDs next to the vehicles
-                annotation_plot_2.append(ax2.annotate(annot_string, (x+dx, y+dx), size=6.5, fontweight="bold", zorder=20, color=annot_color))
+                annotation_plot_2.append(
+                    ax2.annotate(
+                        annot_string,
+                        (x + dx, y + dx),
+                        size=6.5,
+                        fontweight="bold",
+                        zorder=20,
+                        color=annot_color,
+                    )
+                )
 
                 # Set the axes
                 if V.current_state.vehicle_id == CENTRE_V_ID:
-                    ax2.set_xlim([x-SCREEN_WIDTH/2, x+SCREEN_WIDTH/2])
-                    ax2.set_ylim([y-SCREEN_HEIGHT/2, y+SCREEN_HEIGHT/2])
+                    ax2.set_xlim([x - SCREEN_WIDTH / 2, x + SCREEN_WIDTH / 2])
+                    ax2.set_ylim([y - SCREEN_HEIGHT / 2, y + SCREEN_HEIGHT / 2])
 
                     # Get x,y coordinates of the current time and plot it in the
                     # top right side of the screen
-                    T = round(((ii+1)/len_of_sim_2)*T_MAX_2, 1)
+                    T = round(((ii + 1) / len_of_sim_2) * T_MAX_2, 1)
                     ax2.set_title(f"T={T}s")
 
         # Progress bar
-        progressbar_anim(len_of_sim, ii+1, prefix=f"Saving: ")
-        
+        progressbar_anim(len_of_sim, ii + 1, prefix=f"Saving: ")
+
     if ii == len_of_sim_1:
         # Animation as finished, check if there are any collisions and
         # highlight them
         for V in v_list_1:
             if V.is_collision:
-                g.plot_rectangle(X=V.get_rectangle(len_of_sim_1-1), color="orange", plot_heading=True, axis=ax1)
+                g.plot_rectangle(
+                    X=V.get_rectangle(len_of_sim_1 - 1),
+                    color="orange",
+                    plot_heading=True,
+                    axis=ax1,
+                )
 
     if ii == len_of_sim_2:
         # Animation as finished, check if there are any collisions and
         # highlight them
         for V in v_list_2:
             if V.is_collision:
-                g.plot_rectangle(X=V.get_rectangle(len_of_sim_2-1), color="orange", plot_heading=True, axis=ax2)
+                g.plot_rectangle(
+                    X=V.get_rectangle(len_of_sim_2 - 1),
+                    color="orange",
+                    plot_heading=True,
+                    axis=ax2,
+                )
 
 
 def main():
@@ -255,14 +292,16 @@ def main():
 
     # Length of the simulation
     print(date_time.get_current_time(), "Saving animation")
-    num_freeze_frames = int(FREEZE_FOR_X_SECONDS*FPS)
-    anim = FuncAnimation(fig, animate, frames=len_of_sim+num_freeze_frames, interval=0)
+    num_freeze_frames = int(FREEZE_FOR_X_SECONDS * FPS)
+    anim = FuncAnimation(
+        fig, animate, frames=len_of_sim + num_freeze_frames, interval=0
+    )
 
     # Save the animation
-    anim.save(TEST_SIM_SAVE_LOC+SIM_ANIM_NAME+".gif", writer='pillow', fps=FPS)
+    anim.save(TEST_SIM_SAVE_LOC + SIM_ANIM_NAME + ".gif", writer="pillow", fps=FPS)
 
     # TODO: Sometimes this script fails. Will fix...
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

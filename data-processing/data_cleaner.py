@@ -27,7 +27,7 @@ def clean_data(original_dataset):
     # Define constants used for this function
     cleaned_dataset = d.data()
     dr_upper_threshold = 10
-    num_vehicles = len((original_dataset.vehicle_sese)[:,0])
+    num_vehicles = len((original_dataset.vehicle_sese)[:, 0])
     new_vehicle_id = -1
 
     # Look through every vehicle and every vehicle's path and inspect change in
@@ -39,7 +39,7 @@ def clean_data(original_dataset):
             # multiple "paths" for each vehicle. In real life this corresponds
             # to the vehicle entering the map, exiting at a junction and then
             # re-entering the map at another junction. Its re-entry junction
-            # usually corresponds to the one which it exited at, i.e., I 
+            # usually corresponds to the one which it exited at, i.e., I
             # for a vehicle to be able to get from it's original entry to its
             # final target it had to leave and re-enter the map. We will
             # separate all of these cases out and assign them their own vehicle
@@ -47,21 +47,51 @@ def clean_data(original_dataset):
             new_vehicle_id += 1
 
             # Extract the data corresponding to each vehicle path
-            x = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.x, original_dataset.vehicle_sese, sub_index=ii_sub_path)
-            y = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.y, original_dataset.vehicle_sese, sub_index=ii_sub_path)
-            lane_id = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.lane_id, original_dataset.vehicle_sese, sub_index=ii_sub_path)
-            speed = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.speed, original_dataset.vehicle_sese, sub_index=ii_sub_path)
-            acc = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.acc, original_dataset.vehicle_sese, sub_index=ii_sub_path)
-            time = g.se_extraction(original_dataset.vehicle_sese[ii_path, 0], original_dataset.time, original_dataset.vehicle_sese, sub_index=ii_sub_path)
+            x = g.se_extraction(
+                original_dataset.vehicle_sese[ii_path, 0],
+                original_dataset.x,
+                original_dataset.vehicle_sese,
+                sub_index=ii_sub_path,
+            )
+            y = g.se_extraction(
+                original_dataset.vehicle_sese[ii_path, 0],
+                original_dataset.y,
+                original_dataset.vehicle_sese,
+                sub_index=ii_sub_path,
+            )
+            lane_id = g.se_extraction(
+                original_dataset.vehicle_sese[ii_path, 0],
+                original_dataset.lane_id,
+                original_dataset.vehicle_sese,
+                sub_index=ii_sub_path,
+            )
+            speed = g.se_extraction(
+                original_dataset.vehicle_sese[ii_path, 0],
+                original_dataset.speed,
+                original_dataset.vehicle_sese,
+                sub_index=ii_sub_path,
+            )
+            acc = g.se_extraction(
+                original_dataset.vehicle_sese[ii_path, 0],
+                original_dataset.acc,
+                original_dataset.vehicle_sese,
+                sub_index=ii_sub_path,
+            )
+            time = g.se_extraction(
+                original_dataset.vehicle_sese[ii_path, 0],
+                original_dataset.time,
+                original_dataset.vehicle_sese,
+                sub_index=ii_sub_path,
+            )
 
             # Intantiate variables to hold the new cleaned version of the data
             # for this path
-            x_clean = [x[0,0]]
-            y_clean = [y[0,0]]
-            lane_id_clean = [lane_id[0,0]]
-            speed_clean = [speed[0,0]]
-            acc_clean = [acc[0,0]]
-            time_clean = [time[0,0]]
+            x_clean = [x[0, 0]]
+            y_clean = [y[0, 0]]
+            lane_id_clean = [lane_id[0, 0]]
+            speed_clean = [speed[0, 0]]
+            acc_clean = [acc[0, 0]]
+            time_clean = [time[0, 0]]
             vehicle_id_clean = [new_vehicle_id]
 
             # Number of data points in this vehicle path
@@ -70,14 +100,14 @@ def clean_data(original_dataset):
             # Cycle through the data for this path
             for ii in range(1, path_length):
                 # Current x,y values
-                x_current = x[ii,0]
-                y_current = y[ii,0]
+                x_current = x[ii, 0]
+                y_current = y[ii, 0]
                 # Previous x,y values
                 x_prev = x_clean[-1]
                 y_prev = y_clean[-1]
 
                 # Euclidean distance between current and previous datum
-                dr = math.sqrt((x_current - x_prev)**2 + (y_current - y_prev)**2)
+                dr = math.sqrt((x_current - x_prev) ** 2 + (y_current - y_prev) ** 2)
 
                 # If the distance between the current data point and the
                 # previous data point is less than the threshold then append
@@ -124,11 +154,9 @@ def main():
     print(date_time.get_current_time(), "Finished cleaning data")
 
     # Save data
-    g.save_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME, cleaned_dataset)
+    g.save_pickled_data(CLEAN_DATA_LOC + CLEAN_DATA_NAME, cleaned_dataset)
     print(date_time.get_current_time(), "Saved clean data")
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-
-

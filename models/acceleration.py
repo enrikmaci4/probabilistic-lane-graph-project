@@ -3,6 +3,7 @@ import functions.graph as graph
 A_MAX = 2.5
 A_MIN = -10
 
+
 ###############################################################################
 # A linear, multi-variate acceleration model. Run two linear models in        #
 # parallel. One model for ttc and one for dtc. Then take the minimum          #
@@ -45,7 +46,7 @@ def linear(ttc: float, dtc: float, T=5, D=10):
 # => m = (0-A_min)/T                                                          #
 # => c = A_min                                                                #
 ###############################################################################
-def _linear_ttc(ttc: float, T=5): 
+def _linear_ttc(ttc: float, T=5):
     if ttc >= 0:
         return _positive_x_linear(ttc=ttc, T=T)
     else:
@@ -58,9 +59,9 @@ def _negative_x_linear(ttc: float, T=5):
 
 def _positive_x_linear(ttc: float, T=5):
     # Get gradient and intercept
-    m = -A_MIN/T
+    m = -A_MIN / T
     c = A_MIN
-    return min(m*ttc + c, A_MAX)
+    return min(m * ttc + c, A_MAX)
 
 
 ###############################################################################
@@ -80,9 +81,8 @@ def _positive_x_linear(ttc: float, T=5):
 # => m = (0-A_min)/D                                                          #
 # => c = A_min                                                                #
 ###############################################################################
-def _linear_dtc(dtc: float, D=10): 
+def _linear_dtc(dtc: float, D=10):
     if dtc >= 0:
         return _positive_x_linear(ttc=dtc, T=D)
     else:
         return _negative_x_linear(ttc=dtc, T=D)
-

@@ -28,7 +28,7 @@ import time
 def get_discrete_vehicle_paths(data, PLG):
     # Create a dictionary of {vehicle id : unique node list vehicle path}
     discrete_vehicle_paths = {}
-    num_paths = len(data.vehicle_sese[:,0])
+    num_paths = len(data.vehicle_sese[:, 0])
     nodal_data = [0 for ii in range(data.num_data_points)]
     nodes = PLG.nodes
     global_counter = 0
@@ -36,20 +36,20 @@ def get_discrete_vehicle_paths(data, PLG):
     # Cycle through each vehicle path and calculate it's discretised version
     for ii in range(num_paths):
         # Initialise the path for this vehicle
-        vehicle_id = data.vehicle_sese[ii,0]
+        vehicle_id = data.vehicle_sese[ii, 0]
         # We use a dict to store the growing vehicle path because we get O(1)
         # search speed.
         vehicle_path_dict = {}
 
-        # Get the continuous path 
+        # Get the continuous path
         x_path = g.se_extraction(vehicle_id, data.x, data.vehicle_sese)
         y_path = g.se_extraction(vehicle_id, data.y, data.vehicle_sese)
         path_length = len(x_path)
 
         # Now cycle through the vehicle path
         for jj in range(path_length):
-            x_jj = x_path[jj,0]
-            y_jj = y_path[jj,0]
+            x_jj = x_path[jj, 0]
+            y_jj = y_path[jj, 0]
             d_jj = np.array([[x_jj, y_jj]])
 
             # Get the closest node to the current position
@@ -82,5 +82,3 @@ def get_discrete_vehicle_paths(data, PLG):
     data.node = nodal_data
 
     return True
-
-

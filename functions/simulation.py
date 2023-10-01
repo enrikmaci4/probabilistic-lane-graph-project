@@ -42,7 +42,9 @@ import models.acceleration as acc_models
 #           vehicle.                                                          #
 #                                                                             #
 ###############################################################################
-def _initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, vehicle_id: int):
+def _initialise_current_state(
+    PLG_: PLG, start_node: int, target_cluster: int, vehicle_id: int
+):
     # Generate a path
     path = graph.path_generation(PLG_, start_node, target_cluster)
 
@@ -63,7 +65,7 @@ def _initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, v
     initial_state.y = output_data[initial_node_index, 1]
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
-    initial_state.speed = random.uniform(SPEED_MEAN-SPEED_STD, SPEED_MEAN+SPEED_STD)
+    initial_state.speed = random.uniform(SPEED_MEAN - SPEED_STD, SPEED_MEAN + SPEED_STD)
     initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
@@ -79,7 +81,9 @@ def _initialise_current_state(PLG_: PLG, start_node: int, target_cluster: int, v
 # Returns: av - A "Vehicle" type object with an initial state.                #
 #                                                                             #
 ###############################################################################
-def initialise_av_position(PLG_: PLG, start_node=None, target_cluster=None, initial_node=None) -> Vehicle:
+def initialise_av_position(
+    PLG_: PLG, start_node=None, target_cluster=None, initial_node=None
+) -> Vehicle:
     # First we're going to generate a single vehicle path from an entry point
     # to an exit. We will then choose a random node, somewhere in the middle
     # of the path, and choose this as the initial state of the AV. There are a
@@ -92,10 +96,12 @@ def initialise_av_position(PLG_: PLG, start_node=None, target_cluster=None, init
     start_cluster = int(np.random.choice(list(PLG_.start_clusters.keys())))
     if start_node == None:
         start_node = int(np.random.choice(PLG_.start_clusters[start_cluster]))
-    # We want kind of long paths to get a nice long simulation so choose 
+    # We want kind of long paths to get a nice long simulation so choose
     # one of the target clusters which is further away.
-    start_coords = PLG_.nodes[start_node,:]
-    distance_from_start_to_targets = np.sum(np.square(PLG_.target_cluster_centres - start_coords), axis=1)
+    start_coords = PLG_.nodes[start_node, :]
+    distance_from_start_to_targets = np.sum(
+        np.square(PLG_.target_cluster_centres - start_coords), axis=1
+    )
     # TODO: The way we select this could probable improve to get more
     # variation in target clusters. E.g. randomly choose one between the mid-
     # point and the end in a list ordered from lowest to highest (or vice
@@ -104,11 +110,11 @@ def initialise_av_position(PLG_: PLG, start_node=None, target_cluster=None, init
         target_cluster = np.argmax(distance_from_start_to_targets)
     # If you want to set your own values, uncomment the following lines and
     # define them here.
-    #start_node = 374
-    #target_cluster = 0
-    #initial_node = 341
-    print(date_time.get_current_time(), f"start_node = {start_node}") 
-    print(date_time.get_current_time(), f"target_cluster = {target_cluster}") 
+    # start_node = 374
+    # target_cluster = 0
+    # initial_node = 341
+    print(date_time.get_current_time(), f"start_node = {start_node}")
+    print(date_time.get_current_time(), f"target_cluster = {target_cluster}")
     print(date_time.get_current_time(), f"initial_node = {initial_node}")
 
     # Generate a path
@@ -126,8 +132,8 @@ def initialise_av_position(PLG_: PLG, start_node=None, target_cluster=None, init
     # bad approximation but we avoid it anyway.
     a_low = 0.25
     a_upp = 0.75
-    a_low_ind = int(a_low*len(path))
-    a_upp_ind = int(a_upp*len(path))
+    a_low_ind = int(a_low * len(path))
+    a_upp_ind = int(a_upp * len(path))
     if initial_node == None:
         initial_node = np.random.choice(path[a_low_ind:a_upp_ind])
     initial_node_index = path.index(initial_node)
@@ -135,7 +141,7 @@ def initialise_av_position(PLG_: PLG, start_node=None, target_cluster=None, init
     # If you want to set your own values, uncomment the following lines and
     # define them here. NOTE: There is a start_node above which needs to be
     # uncommented as well.
-    print(date_time.get_current_time(), f"initial_node = {initial_node}") 
+    print(date_time.get_current_time(), f"initial_node = {initial_node}")
 
     # Get an "output_data" data structure. This data structure converts a node
     # path into a 2D matrix with columns [x, y, heading angle]. We're mainly
@@ -151,12 +157,12 @@ def initialise_av_position(PLG_: PLG, start_node=None, target_cluster=None, init
     initial_state.y = output_data[initial_node_index, 1]
     initial_state.node = initial_node
     initial_state.lane_id = PLG_.node_lane_ids[initial_node]
-    initial_state.speed = random.uniform(SPEED_MEAN-SPEED_STD, SPEED_MEAN+SPEED_STD)
+    initial_state.speed = random.uniform(SPEED_MEAN - SPEED_STD, SPEED_MEAN + SPEED_STD)
     initial_state.acc = acc_models.linear(ttc=graph.INF, dtc=graph.INF)
     initial_state.head_ang = output_data[initial_node_index, 2]
 
     # Create the AV
-    AV = Vehicle(PLG_, initial_state, target_cluster) 
+    AV = Vehicle(PLG_, initial_state, target_cluster)
 
     return AV
 
@@ -175,7 +181,7 @@ def initialise_av_position(PLG_: PLG, start_node=None, target_cluster=None, init
 #                         should be the AV/ego vehicle.                       #
 #                                                                             #
 ###############################################################################
-def generate_platoon(PLG_:PLG, AV: Vehicle, v_list=None):
+def generate_platoon(PLG_: PLG, AV: Vehicle, v_list=None):
     # Initialisations
     num_bvs = NUM_BVS
     if v_list == None:
@@ -187,14 +193,15 @@ def generate_platoon(PLG_:PLG, AV: Vehicle, v_list=None):
     # detection zone of the AV.
     list_of_nodes_in_detection_zone = []
     for ii in range(AV.PLG.num_nodes):
-        if g.is_in_rectangle(AV.PLG.nodes[ii,0],
-                             AV.PLG.nodes[ii,1],
-                             AV.current_state.x,
-                             AV.current_state.y,
-                             AV.current_state.head_ang,
-                             Rx=BV_DETECTION_RX,
-                             Ry=BV_DETECTION_RY) and \
-           (ii != AV.current_state.node):
+        if g.is_in_rectangle(
+            AV.PLG.nodes[ii, 0],
+            AV.PLG.nodes[ii, 1],
+            AV.current_state.x,
+            AV.current_state.y,
+            AV.current_state.head_ang,
+            Rx=BV_DETECTION_RX,
+            Ry=BV_DETECTION_RY,
+        ) and (ii != AV.current_state.node):
             # This node is in the detection zone and it is not the AV's current
             # node so add it to the list of available nodes
             list_of_nodes_in_detection_zone.append(ii)
@@ -202,7 +209,7 @@ def generate_platoon(PLG_:PLG, AV: Vehicle, v_list=None):
     # Now create a list of start nodes for each BV
     bv_start_nodes = []
     ii = 0
-    while (ii < num_bvs) and (len(list_of_nodes_in_detection_zone) > 0): 
+    while (ii < num_bvs) and (len(list_of_nodes_in_detection_zone) > 0):
         # Randomly choose a start node
         start_node = np.random.choice(list_of_nodes_in_detection_zone)
         # Add this node to bv_start nodes and remove it from
@@ -210,7 +217,12 @@ def generate_platoon(PLG_:PLG, AV: Vehicle, v_list=None):
         list_of_nodes_in_detection_zone.remove(start_node)
 
         # Create a BV on this node
-        initial_state = _initialise_current_state(PLG_, start_node, AV.target_destination, AV.current_state.vehicle_id+ii+1)
+        initial_state = _initialise_current_state(
+            PLG_,
+            start_node,
+            AV.target_destination,
+            AV.current_state.vehicle_id + ii + 1,
+        )
         BV = Vehicle(PLG_, initial_state, AV.target_destination)
 
         # Only add this node to our list of nodes for BVs if there is no
@@ -275,7 +287,16 @@ def generate_random_initial_platoon_state(PLG_: PLG):
 #                          assert and try again.                              #
 #                                                                             #
 ###############################################################################
-def generate_single_simulation(PLG_: PLG, II="-1", MAX_WAIT_TIME=300, SAVE_LOC=None, save_initial_state=True, v_list=None, assert_on_short_sim=True, generate_only_cc=False):
+def generate_single_simulation(
+    PLG_: PLG,
+    II="-1",
+    MAX_WAIT_TIME=300,
+    SAVE_LOC=None,
+    save_initial_state=True,
+    v_list=None,
+    assert_on_short_sim=True,
+    generate_only_cc=False,
+):
     # Generate a platoon of vehicles if one has not been provided
     if v_list == None:
         v_list = generate_random_initial_platoon_state(PLG_)
@@ -284,7 +305,7 @@ def generate_single_simulation(PLG_: PLG, II="-1", MAX_WAIT_TIME=300, SAVE_LOC=N
     v_list_is = copy.deepcopy(v_list)
 
     # Simulation params
-    sim_frame_length = int(round(SIM_LENGTH/dt, 0))
+    sim_frame_length = int(round(SIM_LENGTH / dt, 0))
     num_vehicles = len(v_list)
     terminate_simulation = False
     is_cc = False
@@ -303,7 +324,7 @@ def generate_single_simulation(PLG_: PLG, II="-1", MAX_WAIT_TIME=300, SAVE_LOC=N
                 terminate_simulation = True
 
             # If this is taking too long then break
-            if time.time()-t_start > MAX_WAIT_TIME:
+            if time.time() - t_start > MAX_WAIT_TIME:
                 terminate_simulation = True
 
         # Now check for collisions and print log
@@ -325,7 +346,7 @@ def generate_single_simulation(PLG_: PLG, II="-1", MAX_WAIT_TIME=300, SAVE_LOC=N
         assert v_list[0].trajectory_length >= MOV_AVG_WIN
 
     # Store the time taken so we can return it and calculate average time taken
-    time_taken = time.time()-t_start
+    time_taken = time.time() - t_start
 
     # Smooth the x, y and heading angle columns
     for V in v_list:
@@ -333,7 +354,7 @@ def generate_single_simulation(PLG_: PLG, II="-1", MAX_WAIT_TIME=300, SAVE_LOC=N
 
     # Save data
     if is_cc:
-        g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+CC_SUFF, v_list)
+        g.save_pickled_data(SAVE_LOC + SIM_DATA_PKL_NAME + "_" + II + CC_SUFF, v_list)
     else:
         if generate_only_cc:
             # If this boolean is set to True, we only want to generate crash
@@ -341,10 +362,12 @@ def generate_single_simulation(PLG_: PLG, II="-1", MAX_WAIT_TIME=300, SAVE_LOC=N
             # save the case and because of the assertion the progream will
             # retry generating this simulation.
             assert is_cc == True
-        g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+NCC_SUFF, v_list)
+        g.save_pickled_data(SAVE_LOC + SIM_DATA_PKL_NAME + "_" + II + NCC_SUFF, v_list)
 
     # There were no errors, save the initial state too
     if save_initial_state:
-        g.save_pickled_data(SAVE_LOC+SIM_DATA_PKL_NAME+"_"+II+IS_SUFF, v_list_is)
+        g.save_pickled_data(
+            SAVE_LOC + SIM_DATA_PKL_NAME + "_" + II + IS_SUFF, v_list_is
+        )
 
     return is_cc

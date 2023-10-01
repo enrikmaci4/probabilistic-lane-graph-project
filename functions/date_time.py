@@ -1,5 +1,6 @@
 import datetime
 
+
 def get_current_date_time():
     """Return current datetime
 

@@ -37,7 +37,7 @@
 #          Global_X   - The global x coordinates of the vehicles.             #
 #          Global_Y   - The global y coordinates of the vehicles.             #
 #          Vehicle_ID - An integer which can uniquely identify different      #
-#                         vehicles.                                           #                                            
+#                         vehicles.                                           #
 #                                                                             #
 # Params:  DATASET - The dataset to use. This string should take the name of  #
 #                    the subfolder in "data" which contains the dataset. The  #
@@ -91,7 +91,7 @@ UNIT = "feet"
 #                                   out the distribution of nodes along the   #
 #                                   lanes in the PLG.                         #
 #                                   NOTE: This boolean should be set to False #
-#                                   if there are no lane IDs in the dataset.  # 
+#                                   if there are no lane IDs in the dataset.  #
 #                                   NOTE: This step generally performs better #
 #                                   when there are a large (enough) number of #
 #                                   nodes in the PLG.                         #
@@ -122,7 +122,7 @@ DO_KMEANS = True
 #          PLOT_PLG             - Set to True if you would like to show the   #
 #                                 plot of the PLG. The boolean decides        #
 #                                 whether or not to run the plt.show()        #
-#                                 command.                                    #  
+#                                 command.                                    #
 #          PLOT_BACKGROUND_DATA - Boolean value. Set to True if you would     #
 #                                 like to plot the original dataset in the    #
 #                                 background. Doing this allows us to         #
@@ -171,7 +171,7 @@ DO_KMEANS = True
 #                                                                             #
 # Node label params:                                                          #
 #          NODE_LABELS          - Value to specify whether or not to show the #
-#                                 node labels. This variable can take the     # 
+#                                 node labels. This variable can take the     #
 #                                 following values:                           #
 #                                 None       - Don't show node labels.        #
 #                                 "node_id"  - Show the node ID.              #
@@ -199,7 +199,7 @@ DO_KMEANS = True
 #                                 like to plot the continuous path of the     #
 #                                 vehicle. "Continuous" in this case refers   #
 #                                 the original path of the vehicle in the     #
-#                                 dataset.                                    #                                              
+#                                 dataset.                                    #
 #          PLOT_DISCRETE_PATH   - Boolean value. Set to True if you would     #
 #                                 like to plot the discrete path of the       #
 #                                 vehicle. "Discrete" in this case refers     #
@@ -336,5 +336,5 @@ SCREEN_WIDTH = 40
 SCREEN_HEIGHT = 60
 BV_DETECTION_LOOK_AHEAD = 10
 BV_DETECTION_LOOK_ASIDE = 3
-BV_DETECTION_RX = 2*BV_DETECTION_LOOK_AHEAD
-BV_DETECTION_RY = 2*BV_DETECTION_LOOK_ASIDE
+BV_DETECTION_RX = 2 * BV_DETECTION_LOOK_AHEAD
+BV_DETECTION_RY = 2 * BV_DETECTION_LOOK_ASIDE

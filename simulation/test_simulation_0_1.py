@@ -43,6 +43,7 @@ INITIAL_NODE_2 = 336
 TARGET_CLUSTER_2 = 4
 PATH_2 = None
 
+
 def main():
     # Initialisations
     v_list = []
@@ -52,33 +53,57 @@ def main():
     print(date_time.get_current_time(), "Program started")
 
     # Load the cleaned data
-    data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
+    data = g.load_pickled_data(CLEAN_DATA_LOC + CLEAN_DATA_NAME)
     print(date_time.get_current_time(), "Loaded clean data")
 
     # Create a PLG object
-    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC + PLG_NAME)
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Print time take
-    print(f"{date_time.get_current_time()} Time taken to load data = {round(time.time() - t_start, 3)} s")
+    print(
+        f"{date_time.get_current_time()} Time taken to load data = {round(time.time() - t_start, 3)} s"
+    )
 
     # Generate vehicle 1
-    v_list.append(sim.initialise_av_position(PLG_, start_node=INITIAL_NODE_1, target_cluster=TARGET_CLUSTER_1, initial_node=INITIAL_NODE_1))
+    v_list.append(
+        sim.initialise_av_position(
+            PLG_,
+            start_node=INITIAL_NODE_1,
+            target_cluster=TARGET_CLUSTER_1,
+            initial_node=INITIAL_NODE_1,
+        )
+    )
 
     # Generate vehicle 2
-    v_list.append(sim.initialise_av_position(PLG_, start_node=INITIAL_NODE_2, target_cluster=TARGET_CLUSTER_2, initial_node=INITIAL_NODE_2))
+    v_list.append(
+        sim.initialise_av_position(
+            PLG_,
+            start_node=INITIAL_NODE_2,
+            target_cluster=TARGET_CLUSTER_2,
+            initial_node=INITIAL_NODE_2,
+        )
+    )
 
     # Get v_list and AV
     v_list = sim.generate_platoon(PLG_, v_list[0], v_list=v_list)
     AV = v_list[0]
 
     # Generate some paths
-    path = graph.path_generation(PLG_, int(AV.current_state.node), AV.target_destination)
-    paths = graph.fast_path_tree_generation(PLG_, AV.current_state.node, AV.target_destination, max_path_length=10, max_lane_change=2)
+    path = graph.path_generation(
+        PLG_, int(AV.current_state.node), AV.target_destination
+    )
+    paths = graph.fast_path_tree_generation(
+        PLG_,
+        AV.current_state.node,
+        AV.target_destination,
+        max_path_length=10,
+        max_lane_change=2,
+    )
     paths = {
         0: [335, 188, 189, 190, 191, 192],
         1: [335, 1519, 336, 434, 449, 337, 338],
-        2: [335, 81, 82, 83, 84, 85]
+        2: [335, 81, 82, 83, 84, 85],
     }
     print(date_time.get_current_time(), "Number of paths generated =", len(paths))
 
@@ -86,30 +111,36 @@ def main():
     lane_change_list = []
     for ii in paths:
         lane_change_list.append(graph.count_num_lane_changes(PLG_, paths[ii]))
-    print(date_time.get_current_time(), f"ii_max_lane_change = {np.argmax(lane_change_list)}")
+    print(
+        date_time.get_current_time(),
+        f"ii_max_lane_change = {np.argmax(lane_change_list)}",
+    )
 
     # Do some plots
     graph.draw(PLG_)
-    ii_random = random.randint(0, len(paths)-1)
-    #ii_random = 382
+    ii_random = random.randint(0, len(paths) - 1)
+    # ii_random = 382
     print(date_time.get_current_time(), f"ii_random = {ii_random}")
     for ii in paths:
         graph.plot_node_path(PLG_, paths[ii], color="orange", linewidth=2)
 
-    #graph.plot_node_path(PLG_, path)
-    #graph.plot_node_path(PLG_, paths[ii_random], color="yellow", linewidth=2)
+    # graph.plot_node_path(PLG_, path)
+    # graph.plot_node_path(PLG_, paths[ii_random], color="yellow", linewidth=2)
     graph.scatter_vehicles(v_list, color="red")
     g.plot_rectangle(AV.get_rectangle(), color="skyblue")
-    #g.plot_rectangle(xc=AV.current_state.x, yc=AV.current_state.y, Rx=BV_DETECTION_RX, Ry=BV_DETECTION_RY, alpha=AV.current_state.head_ang, color="grey")    
+    # g.plot_rectangle(xc=AV.current_state.x, yc=AV.current_state.y, Rx=BV_DETECTION_RX, Ry=BV_DETECTION_RY, alpha=AV.current_state.head_ang, color="grey")
 
     # Set the aspect ratio to be equal
-    plt.xlim([AV.current_state.x-SCREEN_WIDTH/2, AV.current_state.x+SCREEN_WIDTH/2])
-    plt.ylim([AV.current_state.y-SCREEN_HEIGHT/2, AV.current_state.y+SCREEN_HEIGHT/2])
+    plt.xlim(
+        [AV.current_state.x - SCREEN_WIDTH / 2, AV.current_state.x + SCREEN_WIDTH / 2]
+    )
+    plt.ylim(
+        [AV.current_state.y - SCREEN_HEIGHT / 2, AV.current_state.y + SCREEN_HEIGHT / 2]
+    )
     plt.gca().set_aspect("equal", adjustable="box")
     plt.tick_params(left=False, bottom=False)
     plt.show()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-

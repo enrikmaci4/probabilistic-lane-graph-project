@@ -11,7 +11,7 @@ import functions.date_time as date_time
 import functions.graph as graph
 import functions.simulation as sim
 from animation.animation import EMPTY_VALUE_STR, NEWLINE_CHAR
-from matplotlib.animation import FuncAnimation 
+from matplotlib.animation import FuncAnimation
 import time
 import matplotlib.pyplot as plt
 import random
@@ -38,7 +38,7 @@ import pickle
 LOAD_LOC = SET1_SAVE_LOC
 
 
-def calculate_rr_lon(V1: Vehicle, V2:Vehicle, ii: int):
+def calculate_rr_lon(V1: Vehicle, V2: Vehicle, ii: int):
     """Calulcate longitudinal relative distance between V1 and V2 for the ii'th
     time step.
     """
@@ -58,7 +58,7 @@ def calculate_rr_lon(V1: Vehicle, V2:Vehicle, ii: int):
     return abs(np.dot(d_vec, u_vec))
 
 
-def calculate_rr_lat(V1: Vehicle, V2:Vehicle, ii: int):
+def calculate_rr_lat(V1: Vehicle, V2: Vehicle, ii: int):
     """Calulcate lateral relative distance between V1 and V2 for the ii'th
     time step. The lateral velocity is calculated in the exact same way as the
     longitudinal velocity, however, we rotate the unit vector by pi/2 radians
@@ -74,7 +74,7 @@ def calculate_rr_lat(V1: Vehicle, V2:Vehicle, ii: int):
     # Distance between the two vehicles as a vector
     d_vec = np.array([x1 - x2, y1 - y2])
     # Unit vector in the direction of h1
-    u_vec = np.array([math.cos(h1 + math.pi/2), math.sin(h1 + math.pi/2)])
+    u_vec = np.array([math.cos(h1 + math.pi / 2), math.sin(h1 + math.pi / 2)])
     # The lateral distance is the projection of d_vec onto u_vec. I.e.
     # the proportion of the absolute distance which is in the direction of
     # h1 + pi/2
@@ -83,7 +83,7 @@ def calculate_rr_lat(V1: Vehicle, V2:Vehicle, ii: int):
 
 def main():
     # Initialisations
-    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC + PLG_NAME)
     # - A feature vector for a single timestep will have:
     #   [rr_lon, rr_lat, rr, v_rel, h]
     num_features_per_ii = 5
@@ -91,13 +91,13 @@ def main():
     #   entire feature vector for the whole PCA method. We'll do this for 1
     #   second before the crash.
     T_feature_extraction = 1
-    num_time_steps = math.floor(T_feature_extraction/dt)
-    num_features = num_features_per_ii*num_time_steps
+    num_time_steps = math.floor(T_feature_extraction / dt)
+    num_features = num_features_per_ii * num_time_steps
     pca_feature_mat = np.zeros((0, num_features))
     # - Create a PLG object
-    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC + PLG_NAME)
     II = 0
-    #num_simulations = NUM_SIMULATIONS
+    # num_simulations = NUM_SIMULATIONS
     num_simulations = 400
     colors = []
     # Counters
@@ -115,7 +115,7 @@ def main():
 
             # Initialise a feature vector
             feature_vector_ii = np.zeros((1, num_features))
-            
+
             # Find the two vehicles involved in the crash
             ii = 0
             num_v_in_cc_found = 0
@@ -135,7 +135,7 @@ def main():
 
                 # Increment counter
                 ii += 1
-            
+
             # Extract the feature vector for each time step
             p1 = []
             p2 = []
@@ -151,7 +151,7 @@ def main():
                 h2 = V2.trajectory[jj, II_HEAD_ANG]
 
                 # Now fill the feature vector
-                ii_start = ii*num_features_per_ii
+                ii_start = ii * num_features_per_ii
                 feature_vector_ii[0, ii_start + 0] = rr_lon
                 feature_vector_ii[0, ii_start + 1] = rr_lat
                 feature_vector_ii[0, ii_start + 2] = rr_vel
@@ -171,7 +171,9 @@ def main():
 
             # Classify
             N_lane_change = 40
-            num_lane_changes = graph.calculate_num_lane_changes(PLG_, p1[0:N_lane_change]) + graph.calculate_num_lane_changes(PLG_, p2[0:N_lane_change])
+            num_lane_changes = graph.calculate_num_lane_changes(
+                PLG_, p1[0:N_lane_change]
+            ) + graph.calculate_num_lane_changes(PLG_, p2[0:N_lane_change])
             if num_lane_changes == 0:
                 colors.append("blue")
                 n_no_lane += 1
@@ -204,26 +206,26 @@ def main():
     # Initialize PCA with the number of components you want to retain
     num_components = 2
     pca = PCA(n_components=num_components)
-    
+
     # Fit the PCA model to the data
     pca.fit(pca_feature_mat)
-    
+
     # Transform the original data to the lower-dimensional representation
     transformed_data = pca.transform(pca_feature_mat)
-    
+
     # The principal components (eigenvectors) are available in pca.components_
     principal_components = pca.components_
-    
+
     # The amount of variance explained by each component can be found in
     # pca.explained_variance_ratio_
     explained_variance_ratio = pca.explained_variance_ratio_
-    
+
     # Print the transformed data and other results
-    #print("Original data:\n", pca_feature_mat)
+    # print("Original data:\n", pca_feature_mat)
     print(f"Shape: {np.shape(pca_feature_mat)}")
-    #print("\nTransformed data:\n", transformed_data)
-    #print(f"\nPrincipal Components:\n{np.shape(principal_components)}\n", principal_components)
-    #print("\nExplained Variance Ratio:\n", explained_variance_ratio)
+    # print("\nTransformed data:\n", transformed_data)
+    # print(f"\nPrincipal Components:\n{np.shape(principal_components)}\n", principal_components)
+    # print("\nExplained Variance Ratio:\n", explained_variance_ratio)
 
     # Print stats
     n_total = n_no_lane + n_one_lane + n_mul_lane
@@ -231,10 +233,9 @@ def main():
     print(f"One Lane Change = {n_one_lane/n_total}")
     print(f"Multiple Lane Change = {n_mul_lane/n_total}")
 
-    plt.scatter(transformed_data[:,0], transformed_data[:,1], s=20, color=colors)
+    plt.scatter(transformed_data[:, 0], transformed_data[:, 1], s=20, color=colors)
     plt.show()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-

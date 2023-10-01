@@ -32,17 +32,17 @@ import models.acceleration as acc_models
 ###############################################################################
 
 # If you would like to load the IS which is located in output/test then set
-# 
+#
 #   LOAD_PLATOON = True
 #   II = None
-# 
+#
 # Otherwise, if you would like to load an output from output/set1 then set this
 # variable to the index of the initial state you would like to load. I.e. if
 # you would like to load output/set1/simdata_pkl_10_is then set:
 #
 #   LOAD_PLATOON = True
 #   II = 10
-# 
+#
 LOAD_PLATOON = False
 II = None
 
@@ -62,15 +62,19 @@ def main():
     print(date_time.get_current_time(), "Program started")
 
     # Create a PLG object
-    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC + PLG_NAME)
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Print time take
-    print(f"{date_time.get_current_time()} Time taken to load data = {round(time.time() - t_start, 3)} s")
+    print(
+        f"{date_time.get_current_time()} Time taken to load data = {round(time.time() - t_start, 3)} s"
+    )
 
     # Generate a platoon of vehicles
     v_list = sim.generate_random_initial_platoon_state(PLG_)
-    print(date_time.get_current_time(), f"Generated platoon with {len(v_list)} vehicles")
+    print(
+        date_time.get_current_time(), f"Generated platoon with {len(v_list)} vehicles"
+    )
 
     # Save platoon incase we want to re-use it
     load_platoon = LOAD_PLATOON
@@ -80,10 +84,10 @@ def main():
         v_list = g.load_pickled_data(LOAD_DATA_LOC)
     else:
         # Save this initial state incase we want to use it again
-        g.save_pickled_data(SAVE_DATA_LOC+IS_SUFF, v_list)
-    
+        g.save_pickled_data(SAVE_DATA_LOC + IS_SUFF, v_list)
+
     # Simulation params
-    sim_frame_length = int(round(SIM_LENGTH/dt, 0))
+    sim_frame_length = int(round(SIM_LENGTH / dt, 0))
     num_vehicles = len(v_list)
     terminate_simulation = False
 
@@ -117,11 +121,11 @@ def main():
 
         # We need to break out of the outer loop too
         if terminate_simulation:
-            # If this is NOT a collision then it is 
+            # If this is NOT a collision then it is
             print(date_time.get_current_time(), "Terminating simulation")
             break
 
-    print(date_time.get_current_time(), "Time taken =", round(time.time()-t_, 3))
+    print(date_time.get_current_time(), "Time taken =", round(time.time() - t_, 3))
 
     # Smooth the x, y and heading angle columns
     for V in v_list:
@@ -133,6 +137,5 @@ def main():
     g.save_pickled_data(SAVE_DATA_LOC, v_list)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-

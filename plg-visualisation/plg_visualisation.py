@@ -39,7 +39,9 @@ class PLGVisualisationParams:
         self.plot_random_generated_path_tree = PLOT_RANDOM_GENERATED_PATH_TREE
         # Conditional params
         if self.colour_code_lanes_in_background_data:
-            self.colour_of_background_data = self.generate_lane_colours_for_background_data(data)
+            self.colour_of_background_data = (
+                self.generate_lane_colours_for_background_data(data)
+            )
 
     # Function to generate the colours (in RGB format) for the background data.
     def generate_lane_colours_for_background_data(self, data):
@@ -47,9 +49,13 @@ class PLGVisualisationParams:
         lane_colour_list = [0 for ii in range(data.num_data_points)]
 
         # Generate a random tuple of three value for each lane ID
-        for lane_id in data.lane_sese[:,0]:
+        for lane_id in data.lane_sese[:, 0]:
             if self.colour_code_lanes_in_background_data:
-                lane_colour_dict[lane_id] = (random.uniform(COLOUR_LOWER,COLOUR_UPPER), random.uniform(COLOUR_LOWER,COLOUR_UPPER), random.uniform(COLOUR_LOWER,COLOUR_UPPER))
+                lane_colour_dict[lane_id] = (
+                    random.uniform(COLOUR_LOWER, COLOUR_UPPER),
+                    random.uniform(COLOUR_LOWER, COLOUR_UPPER),
+                    random.uniform(COLOUR_LOWER, COLOUR_UPPER),
+                )
             else:
                 lane_colour_dict[lane_id] = (0, 0, 0)
 
@@ -58,7 +64,7 @@ class PLGVisualisationParams:
             lane_colour_list[ii] = lane_colour_dict[data.lane_id[ii]]
 
         return lane_colour_list
-            
+
 
 def main():
     # Time the script
@@ -66,11 +72,11 @@ def main():
     print(date_time.get_current_time(), "Program started")
 
     # Load the cleaned data
-    data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
+    data = g.load_pickled_data(CLEAN_DATA_LOC + CLEAN_DATA_NAME)
     print(date_time.get_current_time(), "Loaded clean data")
 
     # Create a PLG object
-    PLG = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+    PLG = g.load_pickled_data(PLG_SAVE_LOC + PLG_NAME)
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Get the visualisation parameters
@@ -86,7 +92,7 @@ def main():
             vehicle_id = vis_params.plot_random_vehicle_path
         else:
             # We want to plot a random vehicle path
-            vehicle_id = np.random.choice(data.vehicle_sese[:,0])
+            vehicle_id = np.random.choice(data.vehicle_sese[:, 0])
 
         # Print the vehicle ID so we know which one we are plotting. If we find
         # an interesting path we can remember the ID and plot it again later.
@@ -105,29 +111,57 @@ def main():
         y_avg_disc, _ = g.moving_average(y_disc, n=moving_avg_window)
 
     # Print time take
-    print(f"{date_time.get_current_time()} Time taken to load data = {round(time.time() - t_start, 3)} s")
+    print(
+        f"{date_time.get_current_time()} Time taken to load data = {round(time.time() - t_start, 3)} s"
+    )
 
     # PLOTS
     if vis_params.plot_background_data:
         # Plot the entire dataset in the background
-        plt.scatter(data.x, data.y, color=vis_params.colour_of_background_data, s=1, zorder=0)
+        plt.scatter(
+            data.x, data.y, color=vis_params.colour_of_background_data, s=1, zorder=0
+        )
 
     if vis_params.plot_plg:
-        # Plot the PLG   
+        # Plot the PLG
         graph.draw(PLG)
 
     if vis_params.plot_random_vehicle_path:
-       # Plot the discrete path
+        # Plot the discrete path
         if vis_params.plot_discrete_path:
-            plt.plot(x_disc, y_disc, color="orange", linestyle="-", linewidth=2, zorder=6, label="Discrete path")
+            plt.plot(
+                x_disc,
+                y_disc,
+                color="orange",
+                linestyle="-",
+                linewidth=2,
+                zorder=6,
+                label="Discrete path",
+            )
 
         # Plot the average discrete path
         if vis_params.plot_average_discrete_path:
-            plt.plot(x_avg_disc, y_avg_disc, color="green", linestyle="--", linewidth=1, zorder=7, label=f"{moving_avg_window} Point mov-avg discrete path")
+            plt.plot(
+                x_avg_disc,
+                y_avg_disc,
+                color="green",
+                linestyle="--",
+                linewidth=1,
+                zorder=7,
+                label=f"{moving_avg_window} Point mov-avg discrete path",
+            )
 
         # Plot the continuous path
         if vis_params.plot_continuous_path:
-            plt.plot(x_cont, y_cont, color="red", linestyle="--", linewidth=1, zorder=8, label="Continuous path")
+            plt.plot(
+                x_cont,
+                y_cont,
+                color="red",
+                linestyle="--",
+                linewidth=1,
+                zorder=8,
+                label="Continuous path",
+            )
         if PLOT_LEGEND:
             plt.legend()
 
@@ -137,25 +171,69 @@ def main():
         s_size = 7.5
         z_ord = 10
         for start_cluster in PLG.start_clusters:
-            plt.scatter(PLG.nodes[PLG.start_clusters[start_cluster],0], PLG.nodes[PLG.start_clusters[start_cluster],1], color="green", s=s_size, zorder=z_ord)
+            plt.scatter(
+                PLG.nodes[PLG.start_clusters[start_cluster], 0],
+                PLG.nodes[PLG.start_clusters[start_cluster], 1],
+                color="green",
+                s=s_size,
+                zorder=z_ord,
+            )
 
         for target_cluster in PLG.target_clusters:
-            plt.scatter(PLG.nodes[PLG.target_clusters[target_cluster],0], PLG.nodes[PLG.target_clusters[target_cluster],1], color="red", s=s_size, zorder=z_ord)
+            plt.scatter(
+                PLG.nodes[PLG.target_clusters[target_cluster], 0],
+                PLG.nodes[PLG.target_clusters[target_cluster], 1],
+                color="red",
+                s=s_size,
+                zorder=z_ord,
+            )
 
         # Now plot the cluster centres
         s_size = 50
         z_ord = 11
-        plt.scatter(PLG.start_cluster_centres[:,0], PLG.start_cluster_centres[:,1], color="blue", marker="x", s=s_size, zorder=z_ord, label="Entry points")
-        plt.scatter(PLG.target_cluster_centres[:,0], PLG.target_cluster_centres[:,1], color="magenta", marker="x", s=s_size, zorder=z_ord, label="Exit points")
-        
+        plt.scatter(
+            PLG.start_cluster_centres[:, 0],
+            PLG.start_cluster_centres[:, 1],
+            color="blue",
+            marker="x",
+            s=s_size,
+            zorder=z_ord,
+            label="Entry points",
+        )
+        plt.scatter(
+            PLG.target_cluster_centres[:, 0],
+            PLG.target_cluster_centres[:, 1],
+            color="magenta",
+            marker="x",
+            s=s_size,
+            zorder=z_ord,
+            label="Exit points",
+        )
+
         # Annotate each of the clusters
         dx = 0.5
         dy = 0.5
         fontsize = 10
-        for ii in range(len(PLG.start_cluster_centres[:,0])):
-            plt.text(PLG.start_cluster_centres[ii,0] + dx, PLG.start_cluster_centres[ii,1] + dy, str(ii), color="blue", fontsize=fontsize, fontweight="bold", zorder=25)
-        for ii in range(len(PLG.target_cluster_centres[:,0])):
-            plt.text(PLG.target_cluster_centres[ii,0] + dx, PLG.target_cluster_centres[ii,1] + dy, str(ii), color="magenta", fontsize=fontsize, fontweight="bold", zorder=25)
+        for ii in range(len(PLG.start_cluster_centres[:, 0])):
+            plt.text(
+                PLG.start_cluster_centres[ii, 0] + dx,
+                PLG.start_cluster_centres[ii, 1] + dy,
+                str(ii),
+                color="blue",
+                fontsize=fontsize,
+                fontweight="bold",
+                zorder=25,
+            )
+        for ii in range(len(PLG.target_cluster_centres[:, 0])):
+            plt.text(
+                PLG.target_cluster_centres[ii, 0] + dx,
+                PLG.target_cluster_centres[ii, 1] + dy,
+                str(ii),
+                color="magenta",
+                fontsize=fontsize,
+                fontweight="bold",
+                zorder=25,
+            )
         if PLOT_LEGEND:
             plt.legend()
 
@@ -166,13 +244,13 @@ def main():
         start_cluster = np.random.choice(list(PLG.start_clusters.keys()))
         start_node = np.random.choice(PLG.start_clusters[start_cluster])
         target_cluster = np.random.choice(list(PLG.target_clusters.keys()))
-        #start_cluster = 9
-        #start_node = 1342
-        #target_cluster = 5
+        # start_cluster = 9
+        # start_node = 1342
+        # target_cluster = 5
         print(date_time.get_current_time(), "Start cluster =", start_cluster)
         print(date_time.get_current_time(), "Start node =", start_node)
         print(date_time.get_current_time(), "Target cluster =", target_cluster)
-        
+
         # Now generate the path
         path = graph.path_generation(PLG, start_node, target_cluster)
 
@@ -185,15 +263,35 @@ def main():
         y_disc = PLG.nodes[path, 1]
         # Get average discrete path
         moving_avg_window = 10
-        #x_avg_disc, _ = g.moving_average_centred(x_disc, n=moving_avg_window)
-        #y_avg_disc, _ = g.moving_average_centred(y_disc, n=moving_avg_window)
-        x_avg_disc = g.smooth_output_vector(x_disc, mov_avg_win=moving_avg_window, keep_end=True)
-        y_avg_disc = g.smooth_output_vector(y_disc, mov_avg_win=moving_avg_window, keep_end=True)
+        # x_avg_disc, _ = g.moving_average_centred(x_disc, n=moving_avg_window)
+        # y_avg_disc, _ = g.moving_average_centred(y_disc, n=moving_avg_window)
+        x_avg_disc = g.smooth_output_vector(
+            x_disc, mov_avg_win=moving_avg_window, keep_end=True
+        )
+        y_avg_disc = g.smooth_output_vector(
+            y_disc, mov_avg_win=moving_avg_window, keep_end=True
+        )
 
         # Plot the path
-        plt.plot(PLG.nodes[path,0], PLG.nodes[path,1], color="orange", linestyle="-", linewidth=1.5, zorder=12, label="Randomly generated path")
+        plt.plot(
+            PLG.nodes[path, 0],
+            PLG.nodes[path, 1],
+            color="orange",
+            linestyle="-",
+            linewidth=1.5,
+            zorder=12,
+            label="Randomly generated path",
+        )
         if PLOT_SMOOTHED_GENERATED_PATH:
-            plt.plot(x_avg_disc, y_avg_disc, color="red", linestyle="-", linewidth=1.5, zorder=12, label="Smoothed generated path")
+            plt.plot(
+                x_avg_disc,
+                y_avg_disc,
+                color="red",
+                linestyle="-",
+                linewidth=1.5,
+                zorder=12,
+                label="Smoothed generated path",
+            )
         if PLOT_LEGEND:
             plt.legend()
 
@@ -205,20 +303,26 @@ def main():
         start_cluster = int(np.random.choice(list(PLG.start_clusters.keys())))
         start_node = int(np.random.choice(PLG.start_clusters[start_cluster]))
         target_cluster = int(np.random.choice(list(PLG.target_clusters.keys())))
-        #start_cluster = 3
-        #start_node = 101
-        #target_cluster = 7
+        # start_cluster = 3
+        # start_node = 101
+        # target_cluster = 7
         print(date_time.get_current_time(), "start_cluster =", start_cluster)
         print(date_time.get_current_time(), "start_node =", start_node)
         print(date_time.get_current_time(), "target_cluster =", target_cluster)
-        
+
         # Now generate the path tree
         path = [start_node]
         paths = {}
-        #rc = graph.path_tree_generation(PLG, target_cluster, path, paths)
-        paths = graph.fast_path_tree_generation(PLG, start_node, target_cluster, min_num_paths=3)
+        # rc = graph.path_tree_generation(PLG, target_cluster, path, paths)
+        paths = graph.fast_path_tree_generation(
+            PLG, start_node, target_cluster, min_num_paths=3
+        )
         num_paths_generated = len(paths)
-        print(date_time.get_current_time(), "Number of generated paths =", num_paths_generated)
+        print(
+            date_time.get_current_time(),
+            "Number of generated paths =",
+            num_paths_generated,
+        )
 
         # Now generate the most likely path
         path_most_likely = graph.path_generation(PLG, start_node, target_cluster)
@@ -227,36 +331,63 @@ def main():
         for ii in paths:
             if paths[ii][-1] == None:
                 paths[ii].pop(-1)
-            #print(paths[ii])
+            # print(paths[ii])
 
         if path_most_likely[-1] == None:
             path_most_likely.pop(-1)
 
         # Plot the most likely path
-        plt.plot(PLG.nodes[path_most_likely,0], PLG.nodes[path_most_likely,1], color="red", linestyle="-", linewidth=1.5, zorder=12)
+        plt.plot(
+            PLG.nodes[path_most_likely, 0],
+            PLG.nodes[path_most_likely, 1],
+            color="red",
+            linestyle="-",
+            linewidth=1.5,
+            zorder=12,
+        )
 
         # Plot the path tree
         for ii in paths:
             path = paths[ii]
-            plt.plot(PLG.nodes[path,0], PLG.nodes[path,1], color="orange", linestyle="-", linewidth=1.5, zorder=12)
+            plt.plot(
+                PLG.nodes[path, 0],
+                PLG.nodes[path, 1],
+                color="orange",
+                linestyle="-",
+                linewidth=1.5,
+                zorder=12,
+            )
 
         # Select a random path and highlight it
         ii_path_plot = None
-        ii_path_plot = random.randint(0, num_paths_generated-1)
+        ii_path_plot = random.randint(0, num_paths_generated - 1)
         print(date_time.get_current_time(), "ii_path_plot =", ii_path_plot)
-        #ii_path_plot = 
+        # ii_path_plot =
         if ii_path_plot:
             path_to_highlight = paths[ii_path_plot]
-            plt.plot(PLG.nodes[path_to_highlight,0], PLG.nodes[path_to_highlight,1], color="yellow", linestyle="-", linewidth=1.5, zorder=12)
+            plt.plot(
+                PLG.nodes[path_to_highlight, 0],
+                PLG.nodes[path_to_highlight, 1],
+                color="yellow",
+                linestyle="-",
+                linewidth=1.5,
+                zorder=12,
+            )
 
         # Scatter the first node in the path
-        plt.scatter(PLG.nodes[start_node,0], PLG.nodes[start_node,1], color="skyblue", marker="x", s=25, zorder=12)
+        plt.scatter(
+            PLG.nodes[start_node, 0],
+            PLG.nodes[start_node, 1],
+            color="skyblue",
+            marker="x",
+            s=25,
+            zorder=12,
+        )
 
     # Set the aspect ratio to be equal
     plt.gca().set_aspect("equal", adjustable="box")
     plt.show()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-

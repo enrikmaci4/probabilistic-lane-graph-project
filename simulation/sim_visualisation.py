@@ -29,10 +29,10 @@ import models.acceleration as acc_models
 ###############################################################################
 
 # Define which simulation to plot using
-# 
+#
 #   SET = TEST_SIM_SAVE_LOC or SETi_SAVE_LOC. Define the folder to look in.
 #   II = None or integer. None for TEST folder and integer for SET folders.
-# 
+#
 SET = TEST_SIM_SAVE_LOC
 II = None
 
@@ -44,17 +44,20 @@ else:
 # If you want to highlight any vehicle paths, insert them into this list
 highlight_ids = []
 
+
 def main():
     # Time the script
     t_start = time.time()
     print(date_time.get_current_time(), "Program started")
 
     # Create a PLG object
-    PLG_ = g.load_pickled_data(PLG_SAVE_LOC+PLG_NAME)
+    PLG_ = g.load_pickled_data(PLG_SAVE_LOC + PLG_NAME)
     print(date_time.get_current_time(), "Loaded PLG")
 
     # Print time take
-    print(f"{date_time.get_current_time()} Time taken to load data = {round(time.time() - t_start, 3)} s")
+    print(
+        f"{date_time.get_current_time()} Time taken to load data = {round(time.time() - t_start, 3)} s"
+    )
 
     # Load scenario
     try:
@@ -81,8 +84,20 @@ def main():
     red_light = [37, 38, 39, 40, 41, 42]
     green_light = [1050, 31, 299, 512, 484]
     if red_light:
-        plt.scatter(PLG_.nodes[red_light, 0], PLG_.nodes[red_light, 1], s=20, color="red", zorder=60)
-        plt.scatter(PLG_.nodes[green_light, 0], PLG_.nodes[green_light, 1], s=20, color="green", zorder=60)
+        plt.scatter(
+            PLG_.nodes[red_light, 0],
+            PLG_.nodes[red_light, 1],
+            s=20,
+            color="red",
+            zorder=60,
+        )
+        plt.scatter(
+            PLG_.nodes[green_light, 0],
+            PLG_.nodes[green_light, 1],
+            s=20,
+            color="green",
+            zorder=60,
+        )
 
     # Cycle through v_list
     dx = 1
@@ -107,24 +122,38 @@ def main():
             path_color = "yellow"
             z_order = 36
         # Plot the vehicle
-        g.plot_rectangle(X=V.get_rectangle(-1), color=v_color, plot_heading=True, z_order=37)
+        g.plot_rectangle(
+            X=V.get_rectangle(-1), color=v_color, plot_heading=True, z_order=37
+        )
         # Plot vehicle path
-        plt.plot(x_path, y_path, linewidth=2, color=path_color, linestyle="--", zorder=z_order)
+        plt.plot(
+            x_path,
+            y_path,
+            linewidth=2,
+            color=path_color,
+            linestyle="--",
+            zorder=z_order,
+        )
         # Plot vehicle ID
         annot_string = f"id={id}"
-        plt.annotate(annot_string, (x+dx, y+dy), size=7.5, fontweight="bold", zorder=50, color="indigo")
-
+        plt.annotate(
+            annot_string,
+            (x + dx, y + dy),
+            size=7.5,
+            fontweight="bold",
+            zorder=50,
+            color="indigo",
+        )
 
     X_CENTRE = v_list[0].trajectory[-1, II_X]
     Y_CENTRE = v_list[0].trajectory[-1, II_Y]
-    plt.xlim([X_CENTRE - SCREEN_WIDTH/2, X_CENTRE + SCREEN_WIDTH/2])
-    plt.ylim([Y_CENTRE - SCREEN_HEIGHT/2, Y_CENTRE + SCREEN_HEIGHT/2])
+    plt.xlim([X_CENTRE - SCREEN_WIDTH / 2, X_CENTRE + SCREEN_WIDTH / 2])
+    plt.ylim([Y_CENTRE - SCREEN_HEIGHT / 2, Y_CENTRE + SCREEN_HEIGHT / 2])
     plt.gca().set_aspect("equal", adjustable="box")
     plt.gca().set_xticks([])
     plt.gca().set_yticks([])
     plt.show()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-

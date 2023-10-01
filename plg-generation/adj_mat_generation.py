@@ -2,17 +2,18 @@ import numpy as np
 import functions.general as g
 from classes.PLG import *
 
+
 ###############################################################################
 # adj_mat_generation:                                                         #
-#                                                                             #                             
+#                                                                             #
 # Purpose: Generate the adjacency matrix for the PLG using the discrete       #
 #          vehicle paths dictionary. We increment the [ii,jj] matrix entry if #
 #          a vehicle went from node ii to node jj in its path. Therefore, the #
 #          adjacency matrix will be directed. If the [ii,jj] entry is 0 then  #
 #          there is no edge between nodes ii and jj, otherwise there is an    #
 #          edge and the value of the entry is the number of times that edge   #
-#          was traversed by vehicles in the dataset.                          #    
-#                                                                             #                                    
+#          was traversed by vehicles in the dataset.                          #
+#                                                                             #
 # Params IN/OUT PLG  - A PLG object of type "PLG" defined in classes/PLG.py.  #
 #                      The PLG.adjmat parameter will be updated with the 2D   #
 #                      numpy array.                                           #
@@ -46,27 +47,20 @@ def adj_mat_generation(PLG: PLG):
             PLG.adjmat[current_node, next_node] += 1
 
     # Remove super long edges from the PLG
-    for ii in range(PLG.num_nodes-1):
-        for jj in range(ii+1, PLG.num_nodes):
-            if PLG.adjmat[ii,jj] > 0:
+    for ii in range(PLG.num_nodes - 1):
+        for jj in range(ii + 1, PLG.num_nodes):
+            if PLG.adjmat[ii, jj] > 0:
                 # Coords of 1st node
-                n1 = complex(PLG.nodes[ii,0], PLG.nodes[ii,1])
+                n1 = complex(PLG.nodes[ii, 0], PLG.nodes[ii, 1])
                 # Coords of 2nd node
-                n2 = complex(PLG.nodes[jj,0], PLG.nodes[jj,1])
+                n2 = complex(PLG.nodes[jj, 0], PLG.nodes[jj, 1])
                 # Distance of this edge
                 n1n2_length = abs(n1 - n2)
                 if n1n2_length > max_edge_len:
-                    PLG.adjmat[ii,jj] = 0
+                    PLG.adjmat[ii, jj] = 0
 
     # Convert the adjacency matrix to a probability matrix by cylcing through
     # each row and dividing each entry by the sum of the row
     PLG.adjmat = g.normalise_matrix_rows(PLG.adjmat)
 
     return True
-
-
-    
-
-
-
-

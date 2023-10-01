@@ -34,38 +34,50 @@ def load_pickled_data(fname):
 
 
 class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
-def progressbar(it, prefix="", size=60, out=sys.stdout): # Python3.3+
+def progressbar(it, prefix="", size=60, out=sys.stdout):  # Python3.3+
     count = len(it)
+
     def show(j):
-        x = int(size*j/count)
-        print("{}[{}{}] {}/{}".format(prefix, "#"*x, "."*(size-x), j, count), 
-                end='\r', file=out, flush=True)
+        x = int(size * j / count)
+        print(
+            "{}[{}{}] {}/{}".format(prefix, "#" * x, "." * (size - x), j, count),
+            end="\r",
+            file=out,
+            flush=True,
+        )
+
     show(0)
     for i, item in enumerate(it):
         yield item
-        show(i+1)
+        show(i + 1)
     print("\n", flush=True, file=out)
 
 
-def progressbar_anim(total_iterations, current_iteration, prefix="", size=60, out=sys.stdout):
+def progressbar_anim(
+    total_iterations, current_iteration, prefix="", size=60, out=sys.stdout
+):
     count = total_iterations
-    
+
     def show(j):
         x = int(size * j / count)
-        print("{}[{}{}] {}/{}".format(prefix, "#"*x, "."*(size-x), j, count),
-              end='\r', file=out, flush=True)
-    
+        print(
+            "{}[{}{}] {}/{}".format(prefix, "#" * x, "." * (size - x), j, count),
+            end="\r",
+            file=out,
+            flush=True,
+        )
+
     show(current_iteration)
 
     # End with a newline character
@@ -108,7 +120,7 @@ def get_se_matrix(ids, unique_ids=False, order=True):
         ids (array): A list of (integer) IDs in which data with that common ID is
             contained in the same index in another array-like structure.
         unique_ids (bool, optional): Set to true if you want to output a sese data_vec with
-            fully unique IDs. E.g, if ID "1" appears twice [S, E, S, E] then we split 
+            fully unique IDs. E.g, if ID "1" appears twice [S, E, S, E] then we split
             this into two separte IDs "1" and "2" each with a single [S, E]. Defaults to
             False.
         order (bool, optional): Re-orders data_vec with increasing IDs. Defaults to True.
@@ -129,7 +141,7 @@ def get_se_matrix(ids, unique_ids=False, order=True):
     # Initialise a dict{} to remember the frequency with which each 'id' appears
     id_freq = {}
     number_of_data_points = len(ids)
-    prev_id = 'no_id_should_have_this_name'
+    prev_id = "no_id_should_have_this_name"
 
     for k in range(number_of_data_points):
         this_id = ids[k]
@@ -146,17 +158,17 @@ def get_se_matrix(ids, unique_ids=False, order=True):
                 id_SE = np.vstack((id_SE, [this_id, id_freq[str(this_id)], k, 0]))
             else:
                 id_SE = np.vstack((id_SE, [this_id, id_freq[str(this_id)], k, 0]))
-                id_SE[-2,3] = k-1 # add 'E' of previous ID
+                id_SE[-2, 3] = k - 1  # add 'E' of previous ID
 
         # Consider final element, add 'E' for final element
-        if k == number_of_data_points-1:
-            id_SE[-1,3] = k
+        if k == number_of_data_points - 1:
+            id_SE[-1, 3] = k
 
         prev_id = this_id
 
     unique_ids = False
     if not order:
-        if len(set(id_SE[:,0])) == len(id_SE[:,0]):
+        if len(set(id_SE[:, 0])) == len(id_SE[:, 0]):
             unique_ids = True
 
     if unique_ids and not order:
@@ -165,25 +177,30 @@ def get_se_matrix(ids, unique_ids=False, order=True):
         if not order:
             print("... IDs are NOT unique for this SESE data_vec.")
         # Re order in terms of id
-        id_SE_ordered = reorder(id_SE[:,0], id_SE)
+        id_SE_ordered = reorder(id_SE[:, 0], id_SE)
 
         # Turn unordered id_SE data_vec into ordered id_SE_SE data_vec
         id_freq_list = list(id_freq.values())
         ordered_id_list = list(set(ids))
         SE_SE_rows, SE_SE_cols = len(id_freq_list), max(id_freq_list)
-        se_mat = np.zeros((SE_SE_rows, 2 + 2*SE_SE_cols))
-        n_SE = len(id_SE[:,0])
+        se_mat = np.zeros((SE_SE_rows, 2 + 2 * SE_SE_cols))
+        n_SE = len(id_SE[:, 0])
 
-        prev_id = 'no_id_should_have_this_name'
+        prev_id = "no_id_should_have_this_name"
         for k in range(n_SE):
-            this_id, this_id_instance, start, end = id_SE[k,0], id_SE[k,1], id_SE[k,2], id_SE[k,3]
+            this_id, this_id_instance, start, end = (
+                id_SE[k, 0],
+                id_SE[k, 1],
+                id_SE[k, 2],
+                id_SE[k, 3],
+            )
 
             i = ordered_id_list.index(this_id)
 
             se_mat[i, 0] = this_id
             se_mat[i, 1] += 1
 
-            i_s, i_e = int(2*se_mat[i, 1]), int(2*se_mat[i, 1]+1)
+            i_s, i_e = int(2 * se_mat[i, 1]), int(2 * se_mat[i, 1] + 1)
 
             se_mat[i, i_s], se_mat[i, i_e] = start, end
 
@@ -200,7 +217,7 @@ def se_extraction(id, data_vec, se_mat, sub_index=None, print_error=True):
     In this case, data entries [d0, d1, d2] correspond to the object with
     ID = 0, [d2, d3] and [d8, d9, d10] corresponds to ID = 1 and, [d5, d6, d7]
     corresponds to ID = 2.
-    
+
     The matrix "se_mat" knows the location of the data for each ID. In this
     function, we specify the "id" for the data we want to extract and we give
     it the "data_vec" and we return the subset of "data_vec" which corresponds
@@ -227,13 +244,15 @@ def se_extraction(id, data_vec, se_mat, sub_index=None, print_error=True):
     """
     # Check the shape of the input array. First we will check if the input
     # array is 3D. If it is we raise an error.
-    try: 
+    try:
         # Try to index 2D, if this fails then data_vec is 1D (or less)
-        data_vec[0,0]
+        data_vec[0, 0]
         # If the shape is higher than 1D then we have an error on our hands so
         # break out of the function now and let whoever called the function
         # deal with it.
-        print(f"!!! ERROR: In se_extraction expected 1D input for \"data_vec\" but got something higher.")
+        print(
+            f'!!! ERROR: In se_extraction expected 1D input for "data_vec" but got something higher.'
+        )
         error_variable = True
         assert error_variable != True
         return None
@@ -244,8 +263,8 @@ def se_extraction(id, data_vec, se_mat, sub_index=None, print_error=True):
         num_cols = ONE
 
     # Initialise the number of IDs and an index variable to store the index of
-    # the ID we're interested in if we find it    
-    num_ids = len(se_mat[:,0])
+    # the ID we're interested in if we find it
+    num_ids = len(se_mat[:, 0])
     ii = 0
 
     # Now loop through the sese data_vec looking for the ID we're interested
@@ -253,7 +272,7 @@ def se_extraction(id, data_vec, se_mat, sub_index=None, print_error=True):
     # this loop.
     while ii < num_ids:
         # Check if we've found the ID
-        if id == se_mat[ii,0]:
+        if id == se_mat[ii, 0]:
             break
         # Increment index
         ii += 1
@@ -261,46 +280,56 @@ def se_extraction(id, data_vec, se_mat, sub_index=None, print_error=True):
         # message and return from this function
         if ii == num_ids:
             if print_error:
-                print(f"!!! WARNING: ID {str(id)} not found in the sese matrix you provided")
+                print(
+                    f"!!! WARNING: ID {str(id)} not found in the sese matrix you provided"
+                )
             return None
 
     # Now that we know what row of the sese data_vec to look at, we'll use the
     # sese data_vec to extract the data we're interested.
-    # 
+    #
     # Calculate the number of rows in our output data_vec. The following loop
     # is perform twice so that we can learn the size of the output data vector
     # before hand. By doing this we can specify it's size straight away instead
     # of concatenating vectors (which is slower).
     num_rows = 0
-    for ii_sub in range(se_mat[ii,1]):
+    for ii_sub in range(se_mat[ii, 1]):
         if sub_index:
             # We want to extract a specific subset of the data corresponding
             # to this ID
             if sub_index == ii_sub:
-                num_rows += se_mat[ii, 3 + 2 * ii_sub] + ONE - se_mat[ii, 2 + 2 * ii_sub]
+                num_rows += (
+                    se_mat[ii, 3 + 2 * ii_sub] + ONE - se_mat[ii, 2 + 2 * ii_sub]
+                )
         else:
             # We want all the data for this ID
             num_rows += se_mat[ii, 3 + 2 * ii_sub] + ONE - se_mat[ii, 2 + 2 * ii_sub]
-    
+
     # Initialise a data_vec (with zero rows). As we extract data corresponding to
     # the ID we want we'll concatenate onto this data_vec.
     data_vec_id = np.zeros((num_rows, num_cols))
 
     # Extract the data
     ii_start = 0
-    for ii_sub in range(se_mat[ii,1]):
+    for ii_sub in range(se_mat[ii, 1]):
         if sub_index:
             # We want to extract a specific subset of the data corresponding
             # to this ID
             if sub_index == ii_sub:
-                len_of_data = se_mat[ii, 3 + 2 * ii_sub] + ONE - se_mat[ii, 2 + 2 * ii_sub]
-                data_vec_id[ii_start:len_of_data, 0] = data_vec[se_mat[ii, 2 + 2 * ii_sub]:se_mat[ii, 3 + 2 * ii_sub] + ONE]
+                len_of_data = (
+                    se_mat[ii, 3 + 2 * ii_sub] + ONE - se_mat[ii, 2 + 2 * ii_sub]
+                )
+                data_vec_id[ii_start:len_of_data, 0] = data_vec[
+                    se_mat[ii, 2 + 2 * ii_sub] : se_mat[ii, 3 + 2 * ii_sub] + ONE
+                ]
 
         else:
             # We want all the data for this ID so concatenate the data for each
             # sub index into one data data_vec
             len_of_data = se_mat[ii, 3 + 2 * ii_sub] + ONE - se_mat[ii, 2 + 2 * ii_sub]
-            data_vec_id[ii_start:ii_start+len_of_data, 0] = data_vec[se_mat[ii, 2 + 2 * ii_sub]:se_mat[ii, 3 + 2 * ii_sub] + ONE]
+            data_vec_id[ii_start : ii_start + len_of_data, 0] = data_vec[
+                se_mat[ii, 2 + 2 * ii_sub] : se_mat[ii, 3 + 2 * ii_sub] + ONE
+            ]
             ii_start = len_of_data
 
     return data_vec_id
@@ -330,11 +359,11 @@ def moving_average(y, x=[], n=None):
     """Check lengths of input vectors are ok"""
     assert n > 0
     assert type(n) == int
-    assert num_data_points - (n-1) > 0
+    assert num_data_points - (n - 1) > 0
     assert num_data_points == len(x)
 
     """Vectors for moving average and corresponding time"""
-    mov_avg_len = num_data_points - (n-1)
+    mov_avg_len = num_data_points - (n - 1)
     ma = np.zeros(mov_avg_len)
     ma_x = np.zeros(mov_avg_len)
 
@@ -345,7 +374,9 @@ def moving_average(y, x=[], n=None):
         jj = ii_start + ii
 
         """Moving avg and corresponding time"""
-        ma[ii] = np.mean(y[ii:jj+1]) # "+1" is because of Python indexing convention
+        ma[ii] = np.mean(
+            y[ii : jj + 1]
+        )  # "+1" is because of Python indexing convention
         ma_x[ii] = x[jj]
 
     return ma, ma_x
@@ -378,28 +409,28 @@ def moving_average_centred(y, x=[], n=None, phase=False):
     """Check lengths of input vectors are ok"""
     assert n > 0
     assert type(n) == int
-    assert num_data_points - (n-1) > 0
+    assert num_data_points - (n - 1) > 0
     assert num_data_points == len(x)
 
     """Vectors for moving average and corresponding time"""
-    mov_avg_len = num_data_points - (n-1)
+    mov_avg_len = num_data_points - (n - 1)
     ma = np.zeros(mov_avg_len)
     ma_x = np.zeros(mov_avg_len)
 
     """Initialise the amount we need to look left/right by"""
-    left_start_ii = math.ceil((n-1)/2)
-    right_end_ii = math.floor((n-1)/2)
+    left_start_ii = math.ceil((n - 1) / 2)
+    right_end_ii = math.floor((n - 1) / 2)
 
     """Calculate moving average"""
     for ii in range(mov_avg_len):
         """Index that we start reading from in input vector"""
-        jj = ii+left_start_ii
+        jj = ii + left_start_ii
 
         """Moving avg and corresponding time"""
         if phase:
-            ma[ii] = mean_phase(y[jj-left_start_ii:jj+right_end_ii])
+            ma[ii] = mean_phase(y[jj - left_start_ii : jj + right_end_ii])
         else:
-            ma[ii] = np.mean(y[jj-left_start_ii:jj+right_end_ii])
+            ma[ii] = np.mean(y[jj - left_start_ii : jj + right_end_ii])
         ma_x[ii] = x[jj]
 
     return ma, ma_x
@@ -447,9 +478,9 @@ def normalise_matrix_rows(mat):
         mat_norm (np array): Normalised matrix
     """
     for ii in range(mat.shape[0]):
-        row_sum = np.sum(mat[ii,:])
+        row_sum = np.sum(mat[ii, :])
         if row_sum > 0:
-            mat[ii,:] = mat[ii,:] / row_sum
+            mat[ii, :] = mat[ii, :] / row_sum
     return mat
 
 
@@ -458,7 +489,7 @@ def is_in_rectangle(x: float, y: float, xc: float, yc: float, alpha: float, Rx=1
                          y
                      ____|____(Rx,Ry)
                  ___|____|____|___x
-                    |____|____|  
+                    |____|____|
             (-Rx,-Ry)    |
 
     Where (xc,yc) is the centre of the rectangle and Rx,Ry is the half length
@@ -472,34 +503,42 @@ def is_in_rectangle(x: float, y: float, xc: float, yc: float, alpha: float, Rx=1
     y_centred = y - yc
     # Rotate the centred coordinates (x,y) by alpha degrees clockwise and
     # subtract (xc,yc)
-    x_normalised = x_centred*math.cos(-alpha) - y_centred*math.sin(-alpha)
-    y_normalised = x_centred*math.sin(-alpha) + y_centred*math.cos(-alpha)
+    x_normalised = x_centred * math.cos(-alpha) - y_centred * math.sin(-alpha)
+    y_normalised = x_centred * math.sin(-alpha) + y_centred * math.cos(-alpha)
     # Check if normalised (x,y) is within the rectangle we drew above
     if (abs(x_normalised) < Rx) and (abs(y_normalised) < Ry):
         return True
     else:
         return False
-    
+
 
 def generate_normalised_rectangle():
     """Generate a 2D numpy array of coordinates for a rectangle centred on the
     origin with lengths Rx,Ry in the x,y directions respectively.
     """
     # Generate a normalised set of coords
-    X = np.array([[1, 1],
-                  [-1, 1],
-                  [-1, -1],
-                  [1, -1],
-                  [1, 1]])
+    X = np.array([[1, 1], [-1, 1], [-1, -1], [1, -1], [1, 1]])
     return X
 
 
-def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="skyblue", plot_heading=False, z_order=15, axis=None):
+def plot_rectangle(
+    X=[],
+    xc=0,
+    yc=0,
+    Rx=1,
+    Ry=1,
+    alpha=0,
+    linewidth=2,
+    color="skyblue",
+    plot_heading=False,
+    z_order=15,
+    axis=None,
+):
     """Plots a rectangle. If X is defined, just plot the columns against each
     other. Otherwise, use the other information.
 
     Args:
-        X (2D numpy matrix): 
+        X (2D numpy matrix):
         xc (float): Centre x coord.
         yc (float): Centre y coord.
         Rx (float): Length along x axis.
@@ -513,12 +552,12 @@ def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="sk
         X = generate_normalised_rectangle()
 
         # Matrix to stretch X by Rx and Ry in the x and y coords
-        I_stretch = np.array([[Rx, 0],
-                              [0, Ry]])
+        I_stretch = np.array([[Rx, 0], [0, Ry]])
 
         # Get the rotation matrix
-        R = np.array([[math.cos(alpha), -math.sin(alpha)],
-                      [math.sin(alpha), math.cos(alpha)]])
+        R = np.array(
+            [[math.cos(alpha), -math.sin(alpha)], [math.sin(alpha), math.cos(alpha)]]
+        )
 
         # NOTE: X is a tall matrix with columns [x,y]. Usually we would do M*X
         #       where M is the matrix that performs the operation we're
@@ -532,21 +571,21 @@ def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="sk
 
         # Rotate the rectangle
         X = np.matmul(X, np.transpose(R))
-    
+
     else:
         # Get the centre of the rectangle
-        xc = np.average(X[0:-1,0])
-        yc = np.average(X[0:-1,1])
+        xc = np.average(X[0:-1, 0])
+        yc = np.average(X[0:-1, 1])
 
         # Centre on 0
-        X[:,0] = X[:,0] - xc
-        X[:,1] = X[:,1] - yc
+        X[:, 0] = X[:, 0] - xc
+        X[:, 1] = X[:, 1] - yc
 
     # Append a line to the rectangle so we know the heading angle
     if plot_heading:
         # - First get the coordinates of the centre of the front face
-        xc_ff = (X[-1,0]+X[-2,0])/2
-        yc_ff = (X[-1,1]+X[-2,1])/2
+        xc_ff = (X[-1, 0] + X[-2, 0]) / 2
+        yc_ff = (X[-1, 1] + X[-2, 1]) / 2
         # - Now append the following two coordinated to X [xc_ff, y_fcf] and
         #   [x_c, y_c] to get a line plotted from the centre of the rectangle
         #   to the centre of the front face.
@@ -555,9 +594,13 @@ def plot_rectangle(X=[], xc=0, yc=0, Rx=1, Ry=1, alpha=0, linewidth=2, color="sk
 
     # Plot
     if axis == None:
-        return plt.plot(X[:,0]+xc, X[:,1]+yc, linewidth=linewidth, color=color, zorder=z_order)
+        return plt.plot(
+            X[:, 0] + xc, X[:, 1] + yc, linewidth=linewidth, color=color, zorder=z_order
+        )
     else:
-        return axis.plot(X[:,0]+xc, X[:,1]+yc, linewidth=linewidth, color=color, zorder=z_order)
+        return axis.plot(
+            X[:, 0] + xc, X[:, 1] + yc, linewidth=linewidth, color=color, zorder=z_order
+        )
 
 
 class LineSegment:
@@ -567,12 +610,12 @@ class LineSegment:
         self.C2 = complex(x2, y2)
         # Get the gradient and the y intercept for this line. The gradient and
         # intercept are m and c, y = mx + c.
-        self.m = (self.C1.imag - self.C2.imag)/(self.C1.real - self.C2.real)
-        self.c = self.C1.imag - self.m*self.C1.real
+        self.m = (self.C1.imag - self.C2.imag) / (self.C1.real - self.C2.real)
+        self.c = self.C1.imag - self.m * self.C1.real
 
 
 def is_x_in_line_segment(x: float, L: LineSegment):
-    """Function to check if the value x is within the domain of the line 
+    """Function to check if the value x is within the domain of the line
     segment defined by L.
 
     Args:
@@ -594,7 +637,7 @@ def is_x_in_line_segment(x: float, L: LineSegment):
         return False
 
 
-def do_line_segments_intersect(L1: LineSegment, L2:LineSegment):
+def do_line_segments_intersect(L1: LineSegment, L2: LineSegment):
     """Check if these two line segments intersect. We check these by solving
     for the intersection coordinate, x_int, between the two lines (if it
     exists). Then if x_int lies between x coordinates of L1 and L2, these two
@@ -605,9 +648,11 @@ def do_line_segments_intersect(L1: LineSegment, L2:LineSegment):
     #   => (m1 - m2)*x = c2 - c1
     #   =>     c2 - c1
     #   => x = --------
-    #   =>     m1 - m2 
-    x_intersection = (L2.c - L1.c)/(L1.m - L2.m)
-    if is_x_in_line_segment(x_intersection, L1) and is_x_in_line_segment(x_intersection, L2):
+    #   =>     m1 - m2
+    x_intersection = (L2.c - L1.c) / (L1.m - L2.m)
+    if is_x_in_line_segment(x_intersection, L1) and is_x_in_line_segment(
+        x_intersection, L2
+    ):
         return True
     else:
         return False
@@ -639,12 +684,14 @@ def is_collision(V1: Vehicle, V2: Vehicle, x_scale=1, y_scale=1):
     # two line segments of the two rectangles intersect with each other. If two
     # line segments intersect then it means there must be a collision because
     # the two rectangles overlap at some point.
-    for ii in range(num_coords-1):
+    for ii in range(num_coords - 1):
         # Get line segment from first rectangle
-        L1 = LineSegment(x1=P1[ii,0], y1=P1[ii,1], x2=P1[ii+1,0], y2=P1[ii+1,1])
-        for jj in range(num_coords-1):
+        L1 = LineSegment(x1=P1[ii, 0], y1=P1[ii, 1], x2=P1[ii + 1, 0], y2=P1[ii + 1, 1])
+        for jj in range(num_coords - 1):
             # Get line segment from second rectangle
-            L2 = LineSegment(x1=P2[jj,0], y1=P2[jj,1], x2=P2[jj+1,0], y2=P2[jj+1,1])
+            L2 = LineSegment(
+                x1=P2[jj, 0], y1=P2[jj, 1], x2=P2[jj + 1, 0], y2=P2[jj + 1, 1]
+            )
 
             # If the two line segments intersect, return, otherwise continue
             if do_line_segments_intersect(L1, L2):
@@ -673,12 +720,12 @@ def check_for_collision(v_list: list, x_scale=1, y_scale=1, store_collision=Fals
     # vehicles
     if num_vehicles <= 1:
         return False
-    
+
     # Compare each vehicle against every other vehicle
-    for ii in range(num_vehicles-1):
+    for ii in range(num_vehicles - 1):
         # Get first vehicle
         V1 = v_list[ii]
-        for jj in range(ii+1, num_vehicles):
+        for jj in range(ii + 1, num_vehicles):
             # Get second vehicle
             V2 = v_list[jj]
 
@@ -713,7 +760,7 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
     # away because this indicates that we do not want to smooth.
     if mov_avg_win <= 1:
         return True
-    
+
     # Intialise a matrix of zeroes which will store the new data
     smoothed_len = V.trajectory_length - mov_avg_win + 1
     # If the length of the input isn't long enough - don't do any smoothing.
@@ -723,30 +770,48 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
 
     # If mov_avg_win-1 is even we're going to throw away the last and first
     # (mov_avg_win-1)/2 number of data points i.e:
-    # 
+    #
     # [x x x o o o o o o o o o x x x]
-    # 
+    #
     # If mov_avg_win/2 is off we're going to throw away the first
     # ceil((mov_avg_win-1)/2) and the last floor((mov_avg_win-1)/2), i.e:
-    # 
+    #
     # [x x x o o o o o o o o o o x x]
-    left_start_ii = math.ceil((mov_avg_win-1)/2)
-    right_end_ii = math.floor((mov_avg_win-1)/2)
-    
+    left_start_ii = math.ceil((mov_avg_win - 1) / 2)
+    right_end_ii = math.floor((mov_avg_win - 1) / 2)
+
     # Fill in the columns that we will not be smoothing
-    smoothed_trajectory[:, veh.II_VEHICLE_ID] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_VEHICLE_ID]
-    smoothed_trajectory[:, veh.II_TIME] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_TIME]
-    smoothed_trajectory[:, veh.II_NODE] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_NODE]
-    smoothed_trajectory[:, veh.II_LANE_ID] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_LANE_ID]
-    smoothed_trajectory[:, veh.II_SPEED] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_SPEED]
-    smoothed_trajectory[:, veh.II_ACC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_ACC]
-    smoothed_trajectory[:, veh.II_TTC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_TTC]
-    smoothed_trajectory[:, veh.II_DTC] = V.trajectory[left_start_ii:V.trajectory_length-right_end_ii, veh.II_DTC]
+    smoothed_trajectory[:, veh.II_VEHICLE_ID] = V.trajectory[
+        left_start_ii : V.trajectory_length - right_end_ii, veh.II_VEHICLE_ID
+    ]
+    smoothed_trajectory[:, veh.II_TIME] = V.trajectory[
+        left_start_ii : V.trajectory_length - right_end_ii, veh.II_TIME
+    ]
+    smoothed_trajectory[:, veh.II_NODE] = V.trajectory[
+        left_start_ii : V.trajectory_length - right_end_ii, veh.II_NODE
+    ]
+    smoothed_trajectory[:, veh.II_LANE_ID] = V.trajectory[
+        left_start_ii : V.trajectory_length - right_end_ii, veh.II_LANE_ID
+    ]
+    smoothed_trajectory[:, veh.II_SPEED] = V.trajectory[
+        left_start_ii : V.trajectory_length - right_end_ii, veh.II_SPEED
+    ]
+    smoothed_trajectory[:, veh.II_ACC] = V.trajectory[
+        left_start_ii : V.trajectory_length - right_end_ii, veh.II_ACC
+    ]
+    smoothed_trajectory[:, veh.II_TTC] = V.trajectory[
+        left_start_ii : V.trajectory_length - right_end_ii, veh.II_TTC
+    ]
+    smoothed_trajectory[:, veh.II_DTC] = V.trajectory[
+        left_start_ii : V.trajectory_length - right_end_ii, veh.II_DTC
+    ]
 
     # Now smooth the x,y and heading angle columns
-    x_smoothed, _ = moving_average_centred(V.trajectory[:,veh.II_X], n=mov_avg_win)
-    y_smoothed, _ = moving_average_centred(V.trajectory[:,veh.II_Y], n=mov_avg_win)
-    head_ang_smoothed, _ = moving_average_centred(V.trajectory[:,veh.II_HEAD_ANG], n=mov_avg_win, phase=True)
+    x_smoothed, _ = moving_average_centred(V.trajectory[:, veh.II_X], n=mov_avg_win)
+    y_smoothed, _ = moving_average_centred(V.trajectory[:, veh.II_Y], n=mov_avg_win)
+    head_ang_smoothed, _ = moving_average_centred(
+        V.trajectory[:, veh.II_HEAD_ANG], n=mov_avg_win, phase=True
+    )
 
     # Set the smoothed versions of the columns into the smoothed_trajectory
     # matrix
@@ -759,13 +824,13 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
     if keep_end:
         for ii in range(right_end_ii):
             # Centre index + left window
-            jj = right_end_ii-ii
-            left_start_jj = left_start_ii-ii-1
+            jj = right_end_ii - ii
+            left_start_jj = left_start_ii - ii - 1
 
             # Get lists of x,y and head ang
-            x_list = V.trajectory[-jj-left_start_jj::, veh.II_X]
-            y_list = V.trajectory[-jj-left_start_jj::, veh.II_Y]
-            head_ang_list = V.trajectory[-jj-left_start_jj::, veh.II_HEAD_ANG]
+            x_list = V.trajectory[-jj - left_start_jj : :, veh.II_X]
+            y_list = V.trajectory[-jj - left_start_jj : :, veh.II_Y]
+            head_ang_list = V.trajectory[-jj - left_start_jj : :, veh.II_HEAD_ANG]
 
             # Append an extra row
             smoothed_trajectory = np.vstack((smoothed_trajectory, V.trajectory[-jj, :]))
@@ -784,8 +849,7 @@ def smooth_output_data(V: Vehicle, mov_avg_win=10, keep_end=False):
 
 
 def smooth_output_vector(x: list, mov_avg_win=10, keep_end=False):
-    """Modified version of smooth_output_data to only work on a single list
-    """
+    """Modified version of smooth_output_data to only work on a single list"""
     # If the moving average number is 1 or 0 then just return True straigth
     # away because this indicates that we do not want to smooth.
     if mov_avg_win <= 1:
@@ -801,16 +865,16 @@ def smooth_output_vector(x: list, mov_avg_win=10, keep_end=False):
 
     # If mov_avg_win-1 is even we're going to throw away the last and first
     # (mov_avg_win-1)/2 number of data points i.e:
-    # 
+    #
     # [x x x o o o o o o o o o x x x]
-    # 
+    #
     # If mov_avg_win/2 is off we're going to throw away the first
     # ceil((mov_avg_win-1)/2) and the last floor((mov_avg_win-1)/2), i.e:
-    # 
+    #
     # [x x x o o o o o o o o o o x x]
-    left_start_ii = math.ceil((mov_avg_win-1)/2)
-    right_end_ii = math.floor((mov_avg_win-1)/2)
-    
+    left_start_ii = math.ceil((mov_avg_win - 1) / 2)
+    right_end_ii = math.floor((mov_avg_win - 1) / 2)
+
     # Now smooth the x,y and heading angle columns
     x_smoothed, _ = moving_average_centred(x, n=mov_avg_win)
 
@@ -823,15 +887,14 @@ def smooth_output_vector(x: list, mov_avg_win=10, keep_end=False):
     if keep_end:
         for ii in range(right_end_ii):
             # Centre index + left window
-            jj = right_end_ii-ii
-            left_start_jj = left_start_ii-ii-1
+            jj = right_end_ii - ii
+            left_start_jj = left_start_ii - ii - 1
 
             # Get lists of x,y and head ang
-            x_list = x[-jj-left_start_jj::]
+            x_list = x[-jj - left_start_jj : :]
 
             # Append an extra row
             smoothed_trajectory = np.vstack((smoothed_trajectory, np.mean(x_list)))
             smoothed_len += 1
 
     return smoothed_trajectory
-

@@ -27,7 +27,7 @@ def main():
     print(date_time.get_current_time(), "Program started")
 
     # Load the cleaned data
-    data = g.load_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME)
+    data = g.load_pickled_data(CLEAN_DATA_LOC + CLEAN_DATA_NAME)
     print(date_time.get_current_time(), "Loaded clean data")
 
     # Create a PLG object
@@ -53,18 +53,16 @@ def main():
     rc = travel_dict_generation(PLG)
     print(date_time.get_current_time(), "Travel dictionary generated")
 
-    # Generate some simple statistics about this dataset that might come 
+    # Generate some simple statistics about this dataset that might come
     # handy
     rc = statistics_generation(PLG, data)
     print(date_time.get_current_time(), "Got kinematics stats")
 
     # Save and print time take
-    g.save_pickled_data(CLEAN_DATA_LOC+CLEAN_DATA_NAME, data)
-    g.save_pickled_data(PLG_SAVE_LOC+PLG_NAME, PLG)
+    g.save_pickled_data(CLEAN_DATA_LOC + CLEAN_DATA_NAME, data)
+    g.save_pickled_data(PLG_SAVE_LOC + PLG_NAME, PLG)
     print(f"PLG generation time taken = {round(time.time() - t_start, 3)} s")
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-

@@ -25,16 +25,16 @@ elif UNIT == "metres":
 class load_data:
     def __init__(self) -> None:
         # Load all data
-        self.x = np.genfromtxt(RAW_DATA_LOC+X_NAME, dtype=float)*UNIT_CONVERSION
-        self.y = np.genfromtxt(RAW_DATA_LOC+Y_NAME, dtype=float)*UNIT_CONVERSION
-        self.vehicle_id = np.genfromtxt(RAW_DATA_LOC+VEHICLE_ID_NAME, dtype=int)
+        self.x = np.genfromtxt(RAW_DATA_LOC + X_NAME, dtype=float) * UNIT_CONVERSION
+        self.y = np.genfromtxt(RAW_DATA_LOC + Y_NAME, dtype=float) * UNIT_CONVERSION
+        self.vehicle_id = np.genfromtxt(RAW_DATA_LOC + VEHICLE_ID_NAME, dtype=int)
         try:
-            self.lane_id = np.genfromtxt(RAW_DATA_LOC+LANE_ID_NAME, dtype=int)
+            self.lane_id = np.genfromtxt(RAW_DATA_LOC + LANE_ID_NAME, dtype=int)
         except FileNotFoundError:
             self.lane_id = np.zeros(len(self.x), dtype=int)
-        self.time = np.genfromtxt(RAW_DATA_LOC+TIME_NAME, dtype=int)
-        self.speed = np.genfromtxt(RAW_DATA_LOC+SPEED_NAME, dtype=float)
-        self.acc = np.genfromtxt(RAW_DATA_LOC+ACC_NAME, dtype=float)
+        self.time = np.genfromtxt(RAW_DATA_LOC + TIME_NAME, dtype=int)
+        self.speed = np.genfromtxt(RAW_DATA_LOC + SPEED_NAME, dtype=float)
+        self.acc = np.genfromtxt(RAW_DATA_LOC + ACC_NAME, dtype=float)
 
         # Normalise position to start at (0,0)
         self.x = self.x - min(self.x)
@@ -56,15 +56,13 @@ class data:
     def __init__(self) -> None:
         # Instantiate the data variables
         self.num_data_points = None
-        self.x = []                 # x coordinate
-        self.y = []                 # y coordinate
-        self.node = []              # node corresponding to these x,y coords
-        self.lane_id = []           # lane ID
-        self.vehicle_id = []        # vehicle ID
-        self.time = []              # time (id)
-        self.speed = []             # speed
-        self.acc = []               # acceleration
-        self.vehicle_sese = None    # vehicle ID sese matrix
-        self.lane_sese = None       # lane ID sese matrix
-
-
+        self.x = []  # x coordinate
+        self.y = []  # y coordinate
+        self.node = []  # node corresponding to these x,y coords
+        self.lane_id = []  # lane ID
+        self.vehicle_id = []  # vehicle ID
+        self.time = []  # time (id)
+        self.speed = []  # speed
+        self.acc = []  # acceleration
+        self.vehicle_sese = None  # vehicle ID sese matrix
+        self.lane_sese = None  # lane ID sese matrix

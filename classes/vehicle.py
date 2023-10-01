@@ -28,6 +28,7 @@ SIGNAL_CONTINUE_SIM = 0
 SIGNAL_TERM_SIM = 1
 SIGNAL_COLLISION = 2
 
+
 ###############################################################################
 # Create a data structure to store the information for one row of our data    #
 # matrix. The columns of the data matrix will be as follows:                  #
@@ -114,7 +115,9 @@ class Vehicle:
     ###########################################################################
     # Initialisation.                                                         #
     ###########################################################################
-    def __init__(self, PLG: PLG, current_data: DataRow, target_destination: int) -> None:
+    def __init__(
+        self, PLG: PLG, current_data: DataRow, target_destination: int
+    ) -> None:
         # We should never generate a list of vehicles which are already in a
         # collided state so initialise this to False. If we detect a collision,
         # set this to True.
@@ -142,7 +145,7 @@ class Vehicle:
         self.bv_list = []
         # List of possible decisions
         self.decision_list = []
-        # Current decision - we'll choose from "decision_list" and assign 
+        # Current decision - we'll choose from "decision_list" and assign
         # outputs of this decision to self.current_State and self.future_nodes.
         self.decision = Decision()
         # If overshoot > 0, this means that we have arrived at a new node.
@@ -166,26 +169,33 @@ class Vehicle:
     # Initialisation functions.                                               #
     ###########################################################################
     def init_most_likely_path(self):
-        self.current_state.most_likely_path = graph.path_generation(self.PLG, self.current_state.node, self.target_destination)
+        self.current_state.most_likely_path = graph.path_generation(
+            self.PLG, self.current_state.node, self.target_destination
+        )
         return True
 
     ###########################################################################
     # Use this function to append a new row to the trajectory matrix          #
     ###########################################################################
     def append_current_data(self):
-        self.trajectory = np.vstack((self.trajectory, [
-            self.current_state.vehicle_id,      # 0 II_VEHICLE_ID
-            self.current_state.time,            # 1 II_TIME
-            self.current_state.node,            # 2 II_NODE
-            self.current_state.x,               # 3 II_X
-            self.current_state.y,               # 4 II_Y
-            self.current_state.lane_id,         # 5 II_LANE_ID
-            self.current_state.speed,           # 6 II_SPEED
-            self.current_state.acc,             # 7 II_ACC
-            self.current_state.ttc,             # 8 II_TTC
-            self.current_state.dtc,             # 9 II_DTC
-            self.current_state.head_ang         # 10 II_HEAD_ANG
-            ]))
+        self.trajectory = np.vstack(
+            (
+                self.trajectory,
+                [
+                    self.current_state.vehicle_id,  # 0 II_VEHICLE_ID
+                    self.current_state.time,  # 1 II_TIME
+                    self.current_state.node,  # 2 II_NODE
+                    self.current_state.x,  # 3 II_X
+                    self.current_state.y,  # 4 II_Y
+                    self.current_state.lane_id,  # 5 II_LANE_ID
+                    self.current_state.speed,  # 6 II_SPEED
+                    self.current_state.acc,  # 7 II_ACC
+                    self.current_state.ttc,  # 8 II_TTC
+                    self.current_state.dtc,  # 9 II_DTC
+                    self.current_state.head_ang,  # 10 II_HEAD_ANG
+                ],
+            )
+        )
 
     ###########################################################################
     # Functions to update the kinematics of the vehicle                       #
@@ -193,10 +203,10 @@ class Vehicle:
     def update_speed(self):
         # Use SUVAT over an interval dt.
         self.current_state.speed += dt * self.current_state.acc
-        #if self.current_state.speed >= 10:
+        # if self.current_state.speed >= 10:
         #    self.current_state.speed = 10 + random.uniform(-2, 2)
         return True
-    
+
     def update_position(self):
         # Get the node and next node as complex numbers so
         # that we can use 2D vector algebra with these coordinates. Note that
@@ -206,12 +216,20 @@ class Vehicle:
             # because we've entered this if-statement.
             self.current_state.speed = 0
             return True
-        node_pos = complex(self.PLG.nodes[self.future_nodes[0], 0], self.PLG.nodes[self.future_nodes[0], 1])
-        next_node_pos = complex(self.PLG.nodes[self.future_nodes[1], 0], self.PLG.nodes[self.future_nodes[1], 1])
+        node_pos = complex(
+            self.PLG.nodes[self.future_nodes[0], 0],
+            self.PLG.nodes[self.future_nodes[0], 1],
+        )
+        next_node_pos = complex(
+            self.PLG.nodes[self.future_nodes[1], 0],
+            self.PLG.nodes[self.future_nodes[1], 1],
+        )
 
         # Use SUVAT over an interval dt.
         edge_phase = cmath.phase(next_node_pos - node_pos)
-        ds = dt * self.current_state.speed + (1/2) * (dt**2) * self.current_state.acc
+        ds = (
+            dt * self.current_state.speed + (1 / 2) * (dt**2) * self.current_state.acc
+        )
         self.current_state.x += ds * math.cos(edge_phase)
         self.current_state.y += ds * math.sin(edge_phase)
 
@@ -229,7 +247,7 @@ class Vehicle:
         # Get length of edge and distance we've traversed from node
         edge_length = abs(next_node_pos - node_pos)
         edge_distance_traversed = abs(current_pos - node_pos)
-        
+
         # If we've overshot the next node, make a note of the fact that the
         # node has changed and redirect the path of the vehicle towards the new
         # next node
@@ -241,7 +259,7 @@ class Vehicle:
             self.current_state.x = self.PLG.nodes[self.future_nodes[1], 0]
             self.current_state.y = self.PLG.nodes[self.future_nodes[1], 1]
             self.overshoot = edge_distance_traversed - edge_length
-        
+
         return True
 
     def add_overshoot(self):
@@ -254,8 +272,14 @@ class Vehicle:
         # Get the node and next node as complex numbers so
         # that we can use 2D vector algebra with these coordinates. Note that
         # this vehicle is currently traversing the edge from node to next_node
-        node_pos = complex(self.PLG.nodes[self.future_nodes[0], 0], self.PLG.nodes[self.future_nodes[0], 0])
-        next_node_pos = complex(self.PLG.nodes[self.future_nodes[1], 0], self.PLG.nodes[self.future_nodes[1], 0])
+        node_pos = complex(
+            self.PLG.nodes[self.future_nodes[0], 0],
+            self.PLG.nodes[self.future_nodes[0], 0],
+        )
+        next_node_pos = complex(
+            self.PLG.nodes[self.future_nodes[1], 0],
+            self.PLG.nodes[self.future_nodes[1], 0],
+        )
 
         # Use SUVAT over an interval dt.
         edge_phase = cmath.phase(next_node_pos - node_pos)
@@ -312,7 +336,7 @@ class Vehicle:
         # Generating a trajectory is the more expentive computation therefore
         # this kind of model is helpful for us to simplify the cost of
         # simulation. If we create, say 10 second simulation, and in those 10s
-        # a vehicle traverses a total of 5 different nodes, we only need to 
+        # a vehicle traverses a total of 5 different nodes, we only need to
         # the more expensive computation 5 times instead of at every single
         # time step.
 
@@ -330,7 +354,7 @@ class Vehicle:
         # essentially an implementeation of that logic...
         rc = self.update_kinematics()
 
-        # First update the list of background vehicles kinematics of 
+        # First update the list of background vehicles kinematics of
         # vehicle.
         rc = self.bv_detection(v_list)
 
@@ -340,14 +364,14 @@ class Vehicle:
         # - If we're generating a new path, we need to calculate the TTC to
         #   every vehicle for every path and then choose a path given this
         #   information.
-        # - If we're not generating a new path, we can calculate the TTC 
+        # - If we're not generating a new path, we can calculate the TTC
         #   every vehicle given our current path and the current most likely
         #   path of each vehicle.
         if self.overshoot > 0:
             # Intialisations
             # - Remember that the node has changes so we need to set the
             #   "current node" to the previous "next node".
-            current_node  = self.future_nodes[1]
+            current_node = self.future_nodes[1]
             overshot_edge = True
 
             # Check if we've reached the target destination
@@ -358,7 +382,9 @@ class Vehicle:
             # of possible trajectories and choose one using our decision rule
             if self.predefined_path[0] == None:
                 # First generate a tree of paths
-                path_tree = graph.fast_path_tree_generation(self.PLG, current_node, self.target_destination)
+                path_tree = graph.fast_path_tree_generation(
+                    self.PLG, current_node, self.target_destination
+                )
 
                 # Create a list of possible decisions
                 self.decision_list = []
@@ -374,25 +400,39 @@ class Vehicle:
                     # have the highest risk.
                     for bv in self.bv_list:
                         # Calculate TTC to this BV
-                        ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(self.PLG, path, self.current_state.speed, self.current_state.acc, bv.most_likely_path, bv.speed, bv.acc)
+                        ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(
+                            self.PLG,
+                            path,
+                            self.current_state.speed,
+                            self.current_state.acc,
+                            bv.most_likely_path,
+                            bv.speed,
+                            bv.acc,
+                        )
 
-                        if (abs(ttc_for_this_bv) < abs(ttc)):
+                        if abs(ttc_for_this_bv) < abs(ttc):
                             ttc = ttc_for_this_bv
 
-                        if (abs(dtc_for_this_bv) < abs(dtc)):
+                        if abs(dtc_for_this_bv) < abs(dtc):
                             dtc = dtc_for_this_bv
 
                     # Now calculate/set the rest of decision data
                     decision_option.path = path
                     decision_option.ttc = ttc
                     decision_option.dtc = dtc
-                    decision_option.num_lane_changes_in_path = graph.calculate_num_lane_changes(self.PLG, path)
+                    decision_option.num_lane_changes_in_path = (
+                        graph.calculate_num_lane_changes(self.PLG, path)
+                    )
                     decision_option.prev_acc = self.current_state.acc
                     decision_option.acc = acc_models.linear(ttc=ttc, dtc=dtc)
-                    decision_option.speed = self.current_state.speed + dt*decision_option.acc
+                    decision_option.speed = (
+                        self.current_state.speed + dt * decision_option.acc
+                    )
                     decision_option.current_trajectory_length = self.trajectory_length
                     if self.trajectory_length >= decision_option.N_L:
-                        decision_option.N_L_prev_path = self.trajectory[-decision_option.N_L::, II_NODE]
+                        decision_option.N_L_prev_path = self.trajectory[
+                            -decision_option.N_L : :, II_NODE
+                        ]
 
                     # Append this decision_option to the list of possible decisions
                     self.decision_list.append(decision_option)
@@ -403,13 +443,17 @@ class Vehicle:
                     # collisions. Most of the collisions generated contain
                     # lane changes, hence, why the boolean is called
                     # "_force_cc_lane_changes".
-                    decision = rules.rule_force_cc(self.decision_list, trajectory_length=self.trajectory_length)
+                    decision = rules.rule_force_cc(
+                        self.decision_list, trajectory_length=self.trajectory_length
+                    )
                 elif self._force_cc_no_lane_changes:
                     # A decision rule designed to forcefully generate
                     # collisions. The rule is designed to generate 1D corner
                     # cases, i.e. rear end, however I am not so sure that it's
                     # a very efficient method.
-                    decision = rules.rule_force_cc_no_lane_change(self.decision_list, trajectory_length=self.trajectory_length)
+                    decision = rules.rule_force_cc_no_lane_change(
+                        self.decision_list, trajectory_length=self.trajectory_length
+                    )
                 else:
                     # The mainline decision rule.
                     decision = rules.rule_5(self.decision_list, PLG_=self.PLG)
@@ -419,7 +463,7 @@ class Vehicle:
                 if decision == None:
                     rc = SIGNAL_TERM_SIM
                 else:
-                    self.decision = decision 
+                    self.decision = decision
 
             # There is a pre-defined path. We need to generate accelerations
             # and update the future nodes using this pre-defined path.
@@ -440,22 +484,34 @@ class Vehicle:
                 # have the highest risk.
                 for bv in self.bv_list:
                     # Calculate TTC to this BV
-                    ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(self.PLG, path, self.current_state.speed, self.current_state.acc, bv.most_likely_path, bv.speed, bv.acc)
+                    ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(
+                        self.PLG,
+                        path,
+                        self.current_state.speed,
+                        self.current_state.acc,
+                        bv.most_likely_path,
+                        bv.speed,
+                        bv.acc,
+                    )
 
-                    if (abs(ttc_for_this_bv) < abs(ttc)):
+                    if abs(ttc_for_this_bv) < abs(ttc):
                         ttc = ttc_for_this_bv
 
-                    if (abs(dtc_for_this_bv) < abs(dtc)):
+                    if abs(dtc_for_this_bv) < abs(dtc):
                         dtc = dtc_for_this_bv
 
                     # Now calculate/set the rest of decision data
                     self.decision.ttc = ttc
                     self.decision.dtc = dtc
-                    self.decision.num_lane_changes_in_path = graph.calculate_num_lane_changes(self.PLG, path)
+                    self.decision.num_lane_changes_in_path = (
+                        graph.calculate_num_lane_changes(self.PLG, path)
+                    )
                     self.decision.prev_acc = self.current_state.acc
                     self.decision.acc = acc_models.linear(ttc=ttc, dtc=dtc)
-                    self.decision.speed = self.current_state.speed + dt*self.decision.acc
-                
+                    self.decision.speed = (
+                        self.current_state.speed + dt * self.decision.acc
+                    )
+
                 # Set the path - this is independent of the BVs
                 self.decision.path = self.predefined_path
 
@@ -487,12 +543,20 @@ class Vehicle:
             # Cycle through the BVs
             for bv in self.bv_list:
                 # Calculate TTC to this BV
-                ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(self.PLG, path, self.current_state.speed, self.current_state.acc, bv.most_likely_path, bv.speed, bv.acc)
+                ttc_for_this_bv, dtc_for_this_bv = graph.calculate_ttc_and_dtc(
+                    self.PLG,
+                    path,
+                    self.current_state.speed,
+                    self.current_state.acc,
+                    bv.most_likely_path,
+                    bv.speed,
+                    bv.acc,
+                )
 
-                if (abs(ttc_for_this_bv) < abs(ttc)):
+                if abs(ttc_for_this_bv) < abs(ttc):
                     ttc = ttc_for_this_bv
 
-                if (abs(dtc_for_this_bv) < abs(dtc)):
+                if abs(dtc_for_this_bv) < abs(dtc):
                     dtc = dtc_for_this_bv
 
             # Update the information in our decision - the informaiton in the
@@ -505,7 +569,7 @@ class Vehicle:
         self.current_state.ttc = self.decision.ttc
         self.current_state.dtc = self.decision.dtc
         self.current_state.acc = self.decision.acc
-        self.current_state.time = ii*dt
+        self.current_state.time = ii * dt
         self.current_state.node = current_node
 
         # Append this data row to the trajectory matrix
@@ -522,7 +586,7 @@ class Vehicle:
         #           x3    x4         If we calculate the current heading angle
         # (node) x2 o--.----.----o   as the phase of (dx,dy). Then we have the
         #          /                 following cases:
-        #     x1  .                  
+        #     x1  .
         #        /                   Case 1 - Travelling from x1->x2 OR x3->x4.
         #       /                    This results in a heading angle which is
         #      o                     perfectly aligned along the edge, this is
@@ -545,16 +609,16 @@ class Vehicle:
     ###########################################################################
     def get_rectangle(self, ii=None, x_scale=1, y_scale=1):
         # Intialisations
-        Rx = V_LENGTH/2
-        Ry = V_WIDTH/2
+        Rx = V_LENGTH / 2
+        Ry = V_WIDTH / 2
         if ii == None:
             x = self.current_state.x
             y = self.current_state.y
             alpha = self.current_state.head_ang
         else:
-            x = self.trajectory[ii,II_X]
-            y = self.trajectory[ii,II_Y]
-            alpha = self.trajectory[ii,II_HEAD_ANG]
+            x = self.trajectory[ii, II_X]
+            y = self.trajectory[ii, II_Y]
+            alpha = self.trajectory[ii, II_HEAD_ANG]
 
         # Returns a set of coordinates which describe the edges of the vehicle.
         # Note that we're modelling the vehicle as a rectangle.
@@ -562,12 +626,12 @@ class Vehicle:
         X = g.generate_normalised_rectangle()
 
         # Matrix to stretch X by Rx and Ry in the x and y coords
-        I_stretch = np.array([[x_scale*Rx, 0],
-                              [0, y_scale*Ry]])
+        I_stretch = np.array([[x_scale * Rx, 0], [0, y_scale * Ry]])
 
         # Get the rotation matrix
-        R = np.array([[math.cos(alpha), -math.sin(alpha)],
-                      [math.sin(alpha), math.cos(alpha)]])
+        R = np.array(
+            [[math.cos(alpha), -math.sin(alpha)], [math.sin(alpha), math.cos(alpha)]]
+        )
 
         # NOTE: X is a tall matrix with columns [x,y]. Usually we would do M*X
         #       where M is the matrix that performs the operation we're interested
@@ -582,16 +646,16 @@ class Vehicle:
         X = np.matmul(X, np.transpose(R))
 
         # Shift rectangle
-        X[:,0] += x
-        X[:,1] += y
+        X[:, 0] += x
+        X[:, 1] += y
 
         return X
-    
+
     def bv_detection(self, v_list: list):
         """A function which detects the number of BVs around and stores their
         current state. This state will be used to calculate the TTC with that
         vehicle.
-        
+
         Args:
             v_list (list): List of vehicle objects.
         """
@@ -630,13 +694,13 @@ class Vehicle:
         mov_avg_win = 2
 
         # Get node coords
-        node_path = self.trajectory[:,II_NODE]
+        node_path = self.trajectory[:, II_NODE]
         unique_node_path = [node_path[0]]
         path_length = len(node_path)
 
         # Unique-ify the node path
-        for ii in range(path_length-1):
-            next_node = node_path[ii+1]
+        for ii in range(path_length - 1):
+            next_node = node_path[ii + 1]
             # Only append this node if it is different to the previoud node
             if next_node != unique_node_path[-1]:
                 unique_node_path.append(next_node)
@@ -649,7 +713,7 @@ class Vehicle:
         if unique_node_path[-1] != self.current_state.most_likely_path[1]:
             unique_node_path.append(self.current_state.most_likely_path[1])
 
-        #if unique_node_path[-1] != self.current_state.most_likely_path[2]:
+        # if unique_node_path[-1] != self.current_state.most_likely_path[2]:
         #    unique_node_path.append(self.current_state.most_likely_path[2])
 
         # Phase list
@@ -660,14 +724,14 @@ class Vehicle:
         if num_nodes_in_path == 1:
             # Just return the current value
             return self.current_state.head_ang
-        
-        elif num_nodes_in_path-1 < mov_avg_win:
+
+        elif num_nodes_in_path - 1 < mov_avg_win:
             # NOTE: We use num_nodes_in_path-1 because if there are N nodes
             #       there are N-1 phases.
             # Turn the node path into a phase list
             phase_list = graph.node_list_to_edge_phase(self.PLG, unique_node_path)
             return np.average(phase_list)
-        
+
         else:
             # Turn the node path into a phase list and take the average of the
             # last mov_avg_win number of phases
@@ -679,19 +743,19 @@ class Vehicle:
         will smooth the result after the simulation is finished
         """
         # Get the current x,y coords
-        x_curr = self.trajectory[-1,II_X]
-        y_curr = self.trajectory[-1,II_Y]
+        x_curr = self.trajectory[-1, II_X]
+        y_curr = self.trajectory[-1, II_Y]
 
         # Previous x,y coords
-        x_prev = self.trajectory[-2,II_X]
-        y_prev = self.trajectory[-2,II_Y]
+        x_prev = self.trajectory[-2, II_X]
+        y_prev = self.trajectory[-2, II_Y]
 
         # dx and dy
         dx = x_curr - x_prev
         dy = y_curr - y_prev
 
         # Check the number of nodes in the path
-        if  (dx == 0) and (dy == 0):
+        if (dx == 0) and (dy == 0):
             # Just return the current value
             return self.current_state.head_ang
 
@@ -717,8 +781,7 @@ def get_min_max_dtc(V: Vehicle, min_or_max=None):
         dtc_list.append(decision.dtc)
 
     # Return either the min or max
-    if min_or_max=="max":
+    if min_or_max == "max":
         return max(dtc_list)
     elif min_or_max == "min":
         return min(dtc_list)
-

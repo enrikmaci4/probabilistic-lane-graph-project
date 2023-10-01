@@ -5,9 +5,9 @@ from classes.data import *
 
 ###############################################################################
 # statistics_generation:                                                      #
-#                                                                             #                             
-# Purpose: Generate some simple statistics for this dataset.                  #    
-#                                                                             #                                    
+#                                                                             #
+# Purpose: Generate some simple statistics for this dataset.                  #
+#                                                                             #
 # Params: IN    data - A data object of type "data" defined in                #
 #                      classes/data.py which contains the cleaned dataset.    #
 #        IN/OUT PLG  - A PLG object of type "PLG" defined in classes/PLG.py.  #
