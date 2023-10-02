@@ -14,7 +14,7 @@ I graduated with an MEng from the University of Oxford in 2022 and I have been w
 
 _Someone Who Simply Enjoys Corner Cases:_ Please enjoy this code :)
 
-_An Academic Researcher:_ Please feel free to play with this code and discover its advantages and limitations. A description of what this code can do is written below and contributions of this work are given in the paper. Please feel free to contact me with your findings if you decide to investigate this code in more detail. I am very interested in hearing possible advantages/limitations of this work and I am always looking to improve it.
+_An Academic Researcher:_ Please feel free to play with this code and discover its advantages and limitations. A description of what this code can do is written below and contributions of this work are given in the paper. Please contact me with your findings if you decide to investigate this code in more detail. I am very interested in hearing possible advantages/limitations of this work and I am always looking to improve it.
 
 _Recruiter/Hiring Manager:_ I am happy to answer any specific questions about this code, from high level design to specific implementations.
 
