@@ -1,5 +1,13 @@
 # Contents
 
+_About_ : About this code, about the author.
+
+_Results_ : Some early results to keep you interested.
+
+_How to Use_ : How to use this code to generate your own results.
+
+_Some More Results_ : As the title suggests.
+
 # About
 
 **_What is this?_**
@@ -22,67 +30,53 @@ _Recruiter/Hiring Manager:_ I am happy to answer any specific questions about th
 
 I am actively maintaining this, and other publicly available codebases on my GitHub. If you have any queries or find a bug in my code, please do not hesiteate to contact me at: _enrik1@hotmail.co.uk_.
 
-# Summary Statistics
-
 # Results
 
 This code uses _Probabilistic Lane Graphs (PLGs)_ to generate artificial traffic scenarios. The PLG is used to efficiently solve the vehicle path planning problem for large maps. Given the vehicle paths generated, a vehicle action model is then used to modify the path and kinematic state of the vehicles.
 
-The original action model is designed to generate standard traffic scenarios with no collisions. This action model is then modified in order to generate realistic crash-events. An example result of this work is shown below. The animation on the left is the generated scenario which does not contain a crash event. This scenario is then optimised in order to generate a realistic crash event which could occurr in this situation.
+The original action model is designed to generate standard traffic scenarios with no collisions. This action model is then modified in order to generate realistic crash events. An example result of this work is shown below. The animation on the left is the generated scenario which does not contain a crash event. This scenario is then optimised in order to generate a realistic crash event which could occurr in this situation.
 
 ![anim](https://github.com/enrikmaci4/probabilistic-lane-graph-project/assets/102254720/3e04f71d-2918-4925-9b35-962f93772b27)
 
-Both scenarios in the above example begin from an identical initial state.
+Both scenarios in the above example begin from an identical initial state. More details describing this process can be found in the paper.
 
 # How to Use
 
-We provide the codebase for the generation of Probabilistic Lane Graphs (PLGs) from spatio-temporal vehicle data. There are four Python scripts in this codebase which are relevant to the user. A dataset has been provded in this repository and is ready to use straight away. This is the NGSIM, Lankershem dataset which can be found at the following location: https://ops.fhwa.dot.gov/trafficanalysistools/ngsim.htm.
+**_Data required_**
 
-The Python scripts which the user is required to manually run are:
+In order for this code to work, sufficient data must be provided as input. There are 7 different columns/vectors of data required, these are: _Vehicle ID_, _Frame ID/Time_, _X Position_, _Y Position_, _Speed_, _Acceleration_, _Lane ID_. An example dataset is already provided within this codebase. This example dataset is the NGSIM, Lankershem dataset which can be found at the following location: https://ops.fhwa.dot.gov/trafficanalysistools/ngsim.htm. The example dataset is given as 7 different text files in the _data\lankershim\original_ folder. If you would like to add an additional dataset other than the one provided, you must copy the directory structure given by _data\lankershim\*_. I.e., you must create the following directories _data\NewDatasetName\*_, where the * folders should look the same as the example dataset given in the _lankershim_ folder.
 
-# inputs.py
-- This script contains all of the inputs the user can modify in order to alter the generation/visualisation of the PLG.
-- All variables defined here are explained in the Python script itself.
-- Once a change is made to the inputs.py file, the relevant scripts must be re-run in order for that change to be picked up.
+**_Codebase structure_**
 
-# data_cleaner.py
-- This is a script which is used to "clean" the original raw data.
-- The script takes the raw data, removes any anomalous data points and saves the data to a Python data structure we've defined.
-- The raw data which is read by this file must be provided in the following format: three text files where each line contains a data point. The three files are:
-  - Vehicle_ID: The vehicle ID corresponding to each data point.
-  - Global_X: The x position of the vehicle.
-  - Global_Y: The y position of the vehicle.
-- Optionally, a fourth file can be included which is used to generate more intuitive visualisations:
-  - Lane_ID: The current lane ID of the current spatial position of the vehicle.
-- Note: the readily provided dataset has already been cleaned so for this case the user may jump straight to running the plg_generation.py script.
+The code is split up into four distinct sections: _Dataset_, _PLG Generation_, _PLG Visulation/Animation Scripts_, _Simulation Scripts/Models_.
 
-# plg_generation.py
-- Once the data is cleaned and saved, the plg_generation.py script needs to be run to generate the PLG for this dataset.
-- This script saves the PLG in a data structure which we have defined in the "classes" folder.
+**_What can I change?_**
 
-# plg_visualisation.py
-- Once the PLG data structure is saved for a given dataset it can be visualised using plg_visualisation.py.
-- The parameters of the visualisation are contained in the inputs.py file.
-- All visualisations are produced using the matplotlib library.
+I like to think that the code is fairly well commented so if you feel like it then jump right in and mess around with the code to see what you can do. However, if you would just like to generate some results then you're looking for _inputs.py_. This defines and explains all variables that the user can adjust in order to modify the results generated. I.e., this file can control the length of the simulations, the max number of background vehicles in the simulation, the node spacing in the PLG, and so on.
 
-# single_agent.py
-- A script to generate data for the path of a single agent in the absence of BVs.
-- This script will save a data matrix to the same location the PLG is stored.
-- The columns of the data matrix are: x coord, y coord, heading angle.
+Note that since the PLG is saved in the _data\<DatasetName>\structs_ directory, if you make any changes which affect the PLG, i.e., the minimum node spacing, _R_, you would need to re-run _plg_generation.py_ in order to generate a new PLG which will pick up these changes.
 
-# Default parameters and outputs
-In the inputs.py file we have already configured a set of parameters which produce a PLG for the Lankershim dataset. We have included the relevant raw data in the data/lankershim folder and have already cleaned the data using the data_cleaner.py script. Running plg_generation.py will then generate and save the PLG data structure for the configuration in inputs.py. The PLG output from this configuration is shown below:
+**_What scripts should I run and in what order?_**:
 
-<img width="294" alt="image" src="https://user-images.githubusercontent.com/102254720/236274646-6055f0c3-b591-49fe-bd8f-2c060660603a.png">
+_data_cleaner.py_ : Cleans the dataset by removing super long points anomalous points.
 
-We've also provided an implementation of the path planning algorithm. If the PLOT_RANDOM_GENERATED_PATH flag is set to True then a path will be generated and plotted between a random entry point on the map to a random exit point. An example generated path is shown below:
+_plg_generation.py_ : Generates the PLG structure and saves it.
 
-<img width="267" alt="image" src="https://user-images.githubusercontent.com/102254720/236272942-bfa69f40-1e3a-4547-9523-f3cc1b498e05.png">
+_plg_visualisation.py_ [Optional] : Plots the PLG for visualisation purposes.
 
-To show the extension of this code into another dataset, we also show examples of the PLG generated for roundabouts in the rounD dataset. The images are shown below:
+_test_simulation_*.py_ : Runs simulations and saves the output as a Python pickle in the output directory.
 
-![rounD1](https://github.com/enrikmaci4/plg-generation/assets/102254720/f71ece6e-11b6-4357-bdf2-49d7ee8a539c)
-![rounD2](https://github.com/enrikmaci4/plg-generation/assets/102254720/1e42a615-2d40-48e0-954f-5e0311d176a2)
+_animation*.py_ : Takes the saved Python pickle simulation data and generates GIFs of the form shown above.
 
+# Wow! This is cool, show me some more results
 
+Here are some more interesting simulations I've generated. Please let me know what you think/provide me with any feedback on the method, results, code etc.
+
+![anim_2](https://github.com/enrikmaci4/probabilistic-lane-graph-project/assets/102254720/fa349769-8c02-4c7a-acf1-14d90f29bdcd)
+
+![anim_5](https://github.com/enrikmaci4/probabilistic-lane-graph-project/assets/102254720/7323fb97-8332-41d0-966c-cffa846b5ee0)
+
+![anim_9](https://github.com/enrikmaci4/probabilistic-lane-graph-project/assets/102254720/c2ba24bc-90ea-43c7-8d9a-3adad12f8907)
+
+For more content including an example PLG for some roundabout data please see: https://github.com/cognitive-robots/probabilistic-lane-graph-paper-resources.
 
