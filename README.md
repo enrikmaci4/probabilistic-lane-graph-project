@@ -20,11 +20,19 @@ _Recruiter/Hiring Manager:_ I am happy to answer any specific questions about th
 
 **_Notes_**
 
-I am actively mainting this, and other publicly available codebases on my GitHub. If you have any queries or find a bug in my code, please do not hesiteate to contact me at: _enrik1@hotmail.co.uk_.
+I am actively maintaining this, and other publicly available codebases on my GitHub. If you have any queries or find a bug in my code, please do not hesiteate to contact me at: _enrik1@hotmail.co.uk_.
 
 # Summary Statistics
 
 # Results
+
+This code uses _Probabilistic Lane Graphs (PLGs)_ to generate artificial traffic scenarios. The PLG is used to efficiently solve the vehicle path planning problem for large maps. Given the vehicle paths generated, a vehicle action model is then used to modify the path and kinematic state of the vehicles.
+
+The original action model is designed to generate standard traffic scenarios with no collisions. This action model is then modified in order to generate realistic crash-events. An example result of this work is shown below. The animation on the left is the generated scenario which does not contain a crash event. This scenario is then optimised in order to generate a realistic crash event which could occurr in this situation.
+
+![anim](https://github.com/enrikmaci4/probabilistic-lane-graph-project/assets/102254720/3e04f71d-2918-4925-9b35-962f93772b27)
+
+Both scenarios in the above example begin from an identical initial state.
 
 # How to Use
 
